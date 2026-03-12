@@ -894,6 +894,26 @@
   </div>
 
   <script>
+    async function callBackend(action, payload = {}) {
+  const response = await fetch(APP_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      action: action,
+      payload: payload
+    })
+  });
+
+  const result = await response.json();
+
+  if (!result.ok) {
+    throw new Error(result.error || "Backend error");
+  }
+
+  return result.data;
+}
     const SHARED_GUIDE = null;
 const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_HBMJVcnAI3HCvbx8_cIF-LCmDKGauENkkUuVMY8ZgU_vdtw/exec";
 
