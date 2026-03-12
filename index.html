@@ -1065,6 +1065,7 @@
     <div id="shareTools" style="display:none;">
       <div class="share-tools-row">
         <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share Guide</button>
+        <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
       </div>
     </div>
 
@@ -1742,6 +1743,26 @@
       }
 
       runGuideWithQuery(query, "query");
+    }
+
+    function startNewGuide() {
+      lastResults = [];
+      lastSourceType = "";
+      lastQueryOrGps = "";
+      currentSharedGuide = null;
+
+      document.getElementById("address").value = "";
+      document.getElementById("status").textContent = "";
+      document.getElementById("results").innerHTML = "";
+      document.getElementById("topStops").innerHTML = "";
+      document.getElementById("categoryJumpBar").innerHTML = "";
+      document.getElementById("shareLinkBox").style.display = "none";
+      document.getElementById("shareLinkBox").innerHTML = "";
+      document.getElementById("shareTools").style.display = "none";
+      hideFieldMatchResults();
+      renderRecentSearches();
+      document.body.classList.add("home-mode");
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     function runGuideWithQuery(query, sourceType) {
@@ -2457,5 +2478,3 @@
 </body>
 </html>
 ```
-
-Next pass, I’ll do **Option A** and add **Start New Guide** under **Share Guide** without touching backend logic.
