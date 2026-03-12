@@ -842,8 +842,8 @@
       <div class="shared-banner-title">Shared guide</div>
       <div class="muted" id="sharedBannerText"></div>
       <div class="shared-banner-actions">
-        <a id="openFullAppBtn" class="action-btn build-btn" href="<?= appUrl ?>">Create Your Own Guide</a>
-        <a class="secondary-btn" href="<?= appUrl ?>">Open Full App</a>
+        <a id="openFullAppBtn" class="action-btn build-btn" href="/">Create Your Own Guide</a>
+<a class="secondary-btn" href="/">Open Full App</a>
       </div>
     </div>
 
@@ -894,8 +894,8 @@
   </div>
 
   <script>
-    const SHARED_GUIDE = <?!= JSON.stringify(sharedGuide) ?>;
-    const APP_URL = <?!= JSON.stringify(appUrl) ?>;
+    const SHARED_GUIDE = null;
+const APP_URL = "";
 
     let selectedRadius = 5;
     let lastResults = [];
