@@ -1,15 +1,26 @@
-```html
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
+  <title>GameDayGuide (GDG)</title>
+  <meta name="description" content="Everything you need near your game." />
+  <meta property="og:title" content="GameDayGuide (GDG)" />
+  <meta property="og:description" content="Everything you need near your game." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="GameDayGuide" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="GameDayGuide (GDG)" />
+  <meta name="twitter:description" content="Everything you need near your game." />
+
+  <link rel="manifest" href="/manifest.json" />
+
   <link rel="icon" href="https://emojiapi.dev/api/v1/stadium/64.png">
   <link rel="apple-touch-icon" href="https://emojiapi.dev/api/v1/stadium/180.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="GameDayGuide">
-  <meta name="application-name" content="GameDayGuide">
+  <meta name="apple-mobile-web-app-title" content="GDG">
+  <meta name="application-name" content="GDG">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#10261d">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -1011,7 +1022,7 @@
     </div>
 
     <div id="sharedBanner" class="shared-banner" style="display:none;">
-      <div class="shared-banner-title">Shared guide</div>
+      <div class="shared-banner-title" id="sharedBannerTitle">Shared guide</div>
       <div class="muted" id="sharedBannerText"></div>
       <div class="shared-banner-actions">
         <a id="openFullAppBtn" class="action-btn build-btn" href="/">Create Your Own Guide</a>
@@ -1079,6 +1090,8 @@
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
+    const DEFAULT_PAGE_TITLE = "GameDayGuide (GDG)";
+    const DEFAULT_PAGE_DESCRIPTION = "Everything you need near your game.";
 
     const GAME_DAY_ESSENTIALS = [
       BACKEND_MEDICAL_LABEL,
@@ -1227,6 +1240,94 @@
       return "9_" + String(label || "").toLowerCase();
     }
 
+    function isTriangleGuideQuery(query) {
+      var q = normalizeForMatch(query);
+      if (!q) return false;
+
+      var triangleTerms = [
+        "triangle",
+        "cary",
+        "apex",
+        "holly springs",
+        "raleigh",
+        "durham",
+        "chapel hill",
+        "wake forest",
+        "clayton",
+        "morrisville",
+        "goldsboro",
+        "oxford"
+      ];
+
+      for (var i = 0; i < triangleTerms.length; i++) {
+        if (q.indexOf(triangleTerms[i]) !== -1) return true;
+      }
+
+      return TRIANGLE_COMPLEXES.some(function(item) {
+        return normalizeForMatch(item.label) === q || normalizeForMatch(item.query) === q;
+      });
+    }
+
+    function getGuideDisplayLabel(queryOrGps) {
+      var value = String(queryOrGps || "").trim();
+      if (!value) return "";
+
+      if (value.indexOf("GPS:") === 0) return "Nearby Guide";
+      return value;
+    }
+
+    function getGuideShareTitle(queryOrGps) {
+      var label = getGuideDisplayLabel(queryOrGps);
+
+      if (!label) return DEFAULT_PAGE_TITLE;
+      if (isTriangleGuideQuery(label)) return "Triangle Tournament Guide — GameDayGuide";
+
+      return label + " — GameDayGuide";
+    }
+
+    function getGuideShareDescription(queryOrGps, radius) {
+      var label = getGuideDisplayLabel(queryOrGps);
+
+      if (!label) return DEFAULT_PAGE_DESCRIPTION;
+
+      if (label === "Nearby Guide") {
+        return "Nearby game-day essentials built with GameDayGuide.";
+      }
+
+      var radiusText = radius ? " within " + radius + " miles" : "";
+      return "Game-day essentials for " + label + radiusText + ".";
+    }
+
+    function updatePageMetadata(title, description) {
+      var safeTitle = String(title || DEFAULT_PAGE_TITLE);
+      var safeDescription = String(description || DEFAULT_PAGE_DESCRIPTION);
+
+      document.title = safeTitle;
+
+      var descriptionMeta = document.querySelector('meta[name="description"]');
+      var ogTitleMeta = document.querySelector('meta[property="og:title"]');
+      var ogDescriptionMeta = document.querySelector('meta[property="og:description"]');
+      var twitterTitleMeta = document.querySelector('meta[name="twitter:title"]');
+      var twitterDescriptionMeta = document.querySelector('meta[name="twitter:description"]');
+
+      if (descriptionMeta) descriptionMeta.setAttribute("content", safeDescription);
+      if (ogTitleMeta) ogTitleMeta.setAttribute("content", safeTitle);
+      if (ogDescriptionMeta) ogDescriptionMeta.setAttribute("content", safeDescription);
+      if (twitterTitleMeta) twitterTitleMeta.setAttribute("content", safeTitle);
+      if (twitterDescriptionMeta) twitterDescriptionMeta.setAttribute("content", safeDescription);
+    }
+
+    function resetPageMetadata() {
+      updatePageMetadata(DEFAULT_PAGE_TITLE, DEFAULT_PAGE_DESCRIPTION);
+    }
+
+    function applyGuideMetadata(queryOrGps, radius) {
+      updatePageMetadata(
+        getGuideShareTitle(queryOrGps),
+        getGuideShareDescription(queryOrGps, radius)
+      );
+    }
+
     function setRadius(miles) {
       selectedRadius = miles;
       document.querySelectorAll(".radius-btn").forEach(function(btn) {
@@ -1266,12 +1367,12 @@
       var isiPhone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
       var isAndroid = /Android/i.test(navigator.userAgent);
 
-      var msg = "On some phones you may still be asked to confirm the home screen name. If that happens, use GameDayGuide.";
+      var msg = "On some phones you may still be asked to confirm the home screen name. If that happens, use GDG.";
 
       if (isiPhone) {
-        msg = "On iPhone: open this link in Safari, tap the Share icon, then tap Add to Home Screen. If Safari asks for a name, use GameDayGuide.";
+        msg = "On iPhone: open this link in Safari, tap the Share icon, then tap Add to Home Screen. If Safari asks for a name, use GDG.";
       } else if (isAndroid) {
-        msg = "On Android: open this link in Chrome, tap the menu, then tap Add to Home Screen. If Chrome asks for a name, use GameDayGuide.";
+        msg = "On Android: open this link in Chrome, tap the menu, then tap Add to Home Screen or Install App. If Chrome asks for a name, use GDG.";
       }
 
       alert(msg);
@@ -1287,9 +1388,9 @@
       }
 
       if (currentSharedGuide && currentSharedGuide.results && currentSharedGuide.results.length) {
-        text.textContent = "Like this guide? Add GameDayGuide to your home screen for quick access on game day.";
+        text.textContent = "Like this guide? Add GDG to your home screen for quick access on game day.";
       } else {
-        text.textContent = "Add GameDayGuide to your home screen for quick access on game day.";
+        text.textContent = "Add GDG to your home screen for quick access on game day.";
       }
 
       tip.style.display = "block";
@@ -1768,6 +1869,7 @@
           document.getElementById("status").textContent = "Done.";
           document.body.classList.remove("home-mode");
           render(lastResults);
+          applyGuideMetadata(lastQueryOrGps, radius);
         })
         .catch(function(err) {
           document.getElementById("status").textContent =
@@ -1811,6 +1913,7 @@
               document.getElementById("status").textContent = "Done.";
               document.body.classList.remove("home-mode");
               render(lastResults);
+              applyGuideMetadata(lastQueryOrGps, radius);
             })
             .catch(function(err) {
               document.getElementById("status").textContent =
@@ -1896,10 +1999,13 @@
             navigator.clipboard.writeText(url).catch(function() {});
           }
 
+          var shareTitle = getGuideShareTitle(lastQueryOrGps);
+          var shareText = getGuideShareDescription(lastQueryOrGps, selectedRadius);
+
           if (navigator.share) {
             navigator.share({
-              title: "GameDayGuide",
-              text: "Here’s the GameDayGuide",
+              title: shareTitle,
+              text: shareText,
               url: url
             }).catch(function() {});
           }
@@ -2390,8 +2496,16 @@
       document.getElementById("searchPanel").style.display = "none";
 
       var banner = document.getElementById("sharedBanner");
+      var bannerTitle = document.getElementById("sharedBannerTitle");
       var bannerText = document.getElementById("sharedBannerText");
       banner.style.display = "block";
+
+      lastResults = (sharedGuide && sharedGuide.results) ? sharedGuide.results : [];
+      lastSourceType = (sharedGuide && sharedGuide.sourceType) || "";
+      lastQueryOrGps = (sharedGuide && sharedGuide.queryOrGps) || "";
+      selectedRadius = Number((sharedGuide && sharedGuide.radius) || 5);
+
+      bannerTitle.textContent = getGuideShareTitle(lastQueryOrGps);
 
       var line = "";
       if (sharedGuide && sharedGuide.queryOrGps) {
@@ -2402,21 +2516,28 @@
       }
       bannerText.textContent = line || "Shared guide";
 
-      lastResults = (sharedGuide && sharedGuide.results) ? sharedGuide.results : [];
-      lastSourceType = (sharedGuide && sharedGuide.sourceType) || "";
-      lastQueryOrGps = (sharedGuide && sharedGuide.queryOrGps) || "";
-      selectedRadius = Number((sharedGuide && sharedGuide.radius) || 5);
       document.getElementById("status").textContent = "Shared guide";
       render(lastResults);
+      applyGuideMetadata(lastQueryOrGps, selectedRadius);
       updateInstallTipForMode();
     }
 
+    function registerServiceWorker() {
+      if (!("serviceWorker" in navigator)) return;
+
+      window.addEventListener("load", function() {
+        navigator.serviceWorker.register("/sw.js").catch(function() {});
+      });
+    }
+
     async function initializeApp() {
+      registerServiceWorker();
       renderTriangleComplexes();
       renderRecentSearches();
       updateInstallTipForMode();
       setupFieldMatchResults();
       setupAddressKeyActions();
+      resetPageMetadata();
 
       var shareId = getShareIdFromUrl();
 
@@ -2439,6 +2560,7 @@
 
       document.body.classList.add("home-mode");
       setRadius(5);
+      resetPageMetadata();
     }
 
     window.addEventListener("load", function() {
@@ -2447,4 +2569,3 @@
   </script>
 </body>
 </html>
-```
