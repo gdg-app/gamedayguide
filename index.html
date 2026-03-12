@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base target="_top">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <link rel="icon" href="https://emojiapi.dev/api/v1/baseball/64.png">
@@ -843,7 +843,7 @@
       <div class="muted" id="sharedBannerText"></div>
       <div class="shared-banner-actions">
         <a id="openFullAppBtn" class="action-btn build-btn" href="/">Create Your Own Guide</a>
-<a class="secondary-btn" href="/">Open Full App</a>
+        <a class="secondary-btn" href="/">Open Full App</a>
       </div>
     </div>
 
@@ -894,28 +894,8 @@
   </div>
 
   <script>
-    async function callBackend(action, payload = {}) {
-  const response = await fetch(APP_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      action: action,
-      payload: payload
-    })
-  });
-
-  const result = await response.json();
-
-  if (!result.ok) {
-    throw new Error(result.error || "Backend error");
-  }
-
-  return result.data;
-}
     const SHARED_GUIDE = null;
-const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_HBMJVcnAI3HCvbx8_cIF-LCmDKGauENkkUuVMY8ZgU_vdtw/exec";
+    const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_HBMJVcnAI3HCvbx8_cIF-LCmDKGauENkkUuVMY8ZgU_vdtw/exec";
 
     let selectedRadius = 5;
     let lastResults = [];
@@ -923,6 +903,7 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
     let lastQueryOrGps = "";
     let triangleExpanded = false;
     let visibleSuggestions = [];
+    let currentSharedGuide = null;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
@@ -1133,7 +1114,7 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
         return;
       }
 
-      if (SHARED_GUIDE && SHARED_GUIDE.results && SHARED_GUIDE.results.length) {
+      if (currentSharedGuide && currentSharedGuide.results && currentSharedGuide.results.length) {
         text.textContent = "Like this guide? Add GameDayGuide to your home screen for quick access on game day.";
       } else {
         text.textContent = "Add GameDayGuide to your home screen for quick access on game day.";
@@ -1344,6 +1325,68 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
       return cleaned || String(rawQuery || "").trim();
     }
 
+    async function callBackend(action, payload = {}) {
+      let response;
+
+      try {
+        response = await fetch(APP_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify({
+            action: action,
+            payload: payload
+          }),
+          redirect: "follow"
+        });
+      } catch (networkErr) {
+        throw new Error("Network request failed: " + (networkErr && networkErr.message ? networkErr.message : networkErr));
+      }
+
+      const rawText = await response.text();
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
+      }
+
+      let result;
+      try {
+        result = JSON.parse(rawText);
+      } catch (parseErr) {
+        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
+      }
+
+      if (!result.ok) {
+        throw new Error(result.error || "Backend error");
+      }
+
+      return result.data;
+    }
+
+    async function getSharedGuideFromBackend(shareId) {
+      const url = APP_URL + "?api=1&action=getSharedGuide&shareId=" + encodeURIComponent(shareId);
+      const response = await fetch(url, { method: "GET", redirect: "follow" });
+      const rawText = await response.text();
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
+      }
+
+      let result;
+      try {
+        result = JSON.parse(rawText);
+      } catch (err) {
+        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
+      }
+
+      if (!result.ok) {
+        throw new Error(result.error || "Backend error");
+      }
+
+      return result.data;
+    }
+
     function findMatchingFields() {
       var rawQuery = String(document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
@@ -1358,27 +1401,28 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
       hideFieldMatchResults();
 
       callBackend("getFieldSuggestions", { query: query })
-  .then(function(serverSuggestions) {
-    var curated = getCuratedSuggestions(query);
-    var merged = mergeSuggestions(curated, Array.isArray(serverSuggestions) ? serverSuggestions : [], query);
-    visibleSuggestions = merged.slice();
+        .then(function(serverSuggestions) {
+          var curated = getCuratedSuggestions(query);
+          var merged = mergeSuggestions(curated, Array.isArray(serverSuggestions) ? serverSuggestions : [], query);
+          visibleSuggestions = merged.slice();
 
-    if (visibleSuggestions.length === 1 && Number(visibleSuggestions[0].rankScore || 0) > AUTO_RUN_RANK_THRESHOLD) {
-      var best = visibleSuggestions[0];
-      document.getElementById("address").value = best.query || best.label || "";
-      hideFieldMatchResults();
-      runGuideWithQuery(best.query || best.label || "", "query");
-      return;
+          if (visibleSuggestions.length === 1 && Number(visibleSuggestions[0].rankScore || 0) > AUTO_RUN_RANK_THRESHOLD) {
+            var best = visibleSuggestions[0];
+            document.getElementById("address").value = best.query || best.label || "";
+            hideFieldMatchResults();
+            runGuideWithQuery(best.query || best.label || "", "query");
+            return;
+          }
+
+          renderFieldMatchResults(visibleSuggestions);
+          document.getElementById("status").textContent = visibleSuggestions.length ? "Select a field match." : "No matching facilities found.";
+        })
+        .catch(function(err) {
+          document.getElementById("status").textContent =
+            "Error finding facilities: " + (err && err.message ? err.message : JSON.stringify(err));
+          hideFieldMatchResults();
+        });
     }
-
-    renderFieldMatchResults(visibleSuggestions);
-    document.getElementById("status").textContent = visibleSuggestions.length ? "Select a field match." : "No matching facilities found.";
-  })
-  .catch(function(err) {
-    document.getElementById("status").textContent =
-      "Error finding facilities: " + (err && err.message ? err.message : JSON.stringify(err));
-    hideFieldMatchResults();
-  });
 
     function selectMatchedFieldByIndex(index) {
       var item = visibleSuggestions[index];
@@ -1465,7 +1509,7 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
 
       row.innerHTML = "";
 
-      if (!list.length || (SHARED_GUIDE && SHARED_GUIDE.results && SHARED_GUIDE.results.length)) {
+      if (!list.length || (currentSharedGuide && currentSharedGuide.results && currentSharedGuide.results.length)) {
         wrap.style.display = "none";
         return;
       }
@@ -1538,8 +1582,12 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
 
-      google.script.run
-        .withSuccessHandler(function(data) {
+      callBackend("getWeekendHub", {
+        query: query,
+        radiusMiles: radius,
+        userId: userId
+      })
+        .then(function(data) {
           lastResults = Array.isArray(data) ? data : [];
           lastSourceType = sourceType;
           lastQueryOrGps = query;
@@ -1549,11 +1597,10 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
           document.body.classList.remove("home-mode");
           render(lastResults);
         })
-        .withFailureHandler(function(err) {
+        .catch(function(err) {
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-        })
-        .getWeekendHub(query, radius, userId);
+        });
     }
 
     function useMyLocation() {
@@ -1579,8 +1626,13 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
 
           document.getElementById("status").textContent = "Searching…";
 
-          google.script.run
-            .withSuccessHandler(function(data) {
+          callBackend("getWeekendHubByLatLng", {
+            lat: lat,
+            lng: lng,
+            radiusMiles: radius,
+            userId: userId
+          })
+            .then(function(data) {
               lastResults = Array.isArray(data) ? data : [];
               lastSourceType = "gps";
               lastQueryOrGps = "GPS:" + lat + "," + lng;
@@ -1588,11 +1640,10 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
               document.body.classList.remove("home-mode");
               render(lastResults);
             })
-            .withFailureHandler(function(err) {
+            .catch(function(err) {
               document.getElementById("status").textContent =
                 "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-            })
-            .getWeekendHubByLatLng(lat, lng, radius, userId);
+            });
         },
         function(err) {
           var msg = "Location blocked. Allow location access and try again.";
@@ -1648,9 +1699,19 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
 
       document.getElementById("status").textContent = "Creating share link…";
 
-      google.script.run
-        .withSuccessHandler(function(res) {
-          var url = res && res.shareUrl ? res.shareUrl : "";
+      callBackend("createSharedGuide", {
+        sourceType: lastSourceType,
+        queryOrGps: lastQueryOrGps,
+        radius: selectedRadius,
+        results: lastResults,
+        userId: getAnonId()
+      })
+        .then(function(res) {
+          var shareId = res && res.shareId ? res.shareId : "";
+          var url = shareId
+            ? (window.location.origin + window.location.pathname + "?share=" + encodeURIComponent(shareId))
+            : "";
+
           if (!url) {
             document.getElementById("status").textContent = "Unable to create share link.";
             return;
@@ -1671,16 +1732,9 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
             }).catch(function() {});
           }
         })
-        .withFailureHandler(function(err) {
+        .catch(function(err) {
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-        })
-        .createSharedGuide({
-          sourceType: lastSourceType,
-          queryOrGps: lastQueryOrGps,
-          radius: selectedRadius,
-          results: lastResults,
-          userId: getAnonId()
         });
     }
 
@@ -2147,42 +2201,76 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
       renderSection(container, "Other", otherCategories, grouped);
     }
 
-    window.addEventListener("load", function() {
+    function getShareIdFromUrl() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        return String(params.get("share") || "").trim();
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function showSharedGuide(sharedGuide) {
+      currentSharedGuide = sharedGuide || null;
+      document.body.classList.remove("home-mode");
+      document.getElementById("pageTitle").textContent = "GameDayGuide (GDG)";
+      document.getElementById("pageSubtitle").textContent = "Everything you need near your game.";
+      document.getElementById("searchPanel").style.display = "none";
+
+      var banner = document.getElementById("sharedBanner");
+      var bannerText = document.getElementById("sharedBannerText");
+      banner.style.display = "block";
+
+      var line = "";
+      if (sharedGuide && sharedGuide.queryOrGps) {
+        line += "Built for: " + sharedGuide.queryOrGps;
+      }
+      if (sharedGuide && sharedGuide.radius) {
+        line += (line ? " • " : "") + "Radius: " + sharedGuide.radius + " mi";
+      }
+      bannerText.textContent = line || "Shared guide";
+
+      lastResults = (sharedGuide && sharedGuide.results) ? sharedGuide.results : [];
+      lastSourceType = (sharedGuide && sharedGuide.sourceType) || "";
+      lastQueryOrGps = (sharedGuide && sharedGuide.queryOrGps) || "";
+      selectedRadius = Number((sharedGuide && sharedGuide.radius) || 5);
+      document.getElementById("status").textContent = "Shared guide";
+      render(lastResults);
+      updateInstallTipForMode();
+    }
+
+    async function initializeApp() {
       renderTriangleComplexes();
       renderRecentSearches();
       updateInstallTipForMode();
       setupFieldMatchResults();
       setupAddressKeyActions();
 
-      if (SHARED_GUIDE && SHARED_GUIDE.results && SHARED_GUIDE.results.length) {
-        document.body.classList.remove("home-mode");
-        document.getElementById("pageTitle").textContent = "GameDayGuide (GDG)";
-        document.getElementById("pageSubtitle").textContent = "Everything you need near your game.";
-        document.getElementById("searchPanel").style.display = "none";
+      var shareId = getShareIdFromUrl();
 
-        var banner = document.getElementById("sharedBanner");
-        var bannerText = document.getElementById("sharedBannerText");
-        banner.style.display = "block";
+      if (shareId) {
+        try {
+          document.getElementById("status").textContent = "Loading shared guide…";
+          var sharedGuide = await getSharedGuideFromBackend(shareId);
 
-        var line = "";
-        if (SHARED_GUIDE.queryOrGps) {
-          line += "Built for: " + SHARED_GUIDE.queryOrGps;
+          if (sharedGuide && sharedGuide.results && sharedGuide.results.length) {
+            showSharedGuide(sharedGuide);
+            return;
+          }
+
+          document.getElementById("status").textContent = "Shared guide not found.";
+        } catch (err) {
+          document.getElementById("status").textContent =
+            "Error loading shared guide: " + (err && err.message ? err.message : JSON.stringify(err));
         }
-        if (SHARED_GUIDE.radius) {
-          line += (line ? " • " : "") + "Radius: " + SHARED_GUIDE.radius + " mi";
-        }
-        bannerText.textContent = line || "Shared guide";
-
-        lastResults = SHARED_GUIDE.results || [];
-        lastSourceType = SHARED_GUIDE.sourceType || "";
-        lastQueryOrGps = SHARED_GUIDE.queryOrGps || "";
-        selectedRadius = Number(SHARED_GUIDE.radius || 5);
-        document.getElementById("status").textContent = "Shared guide";
-        render(lastResults);
-      } else {
-        document.body.classList.add("home-mode");
-        setRadius(5);
       }
+
+      document.body.classList.add("home-mode");
+      setRadius(5);
+    }
+
+    window.addEventListener("load", function() {
+      initializeApp();
     });
   </script>
 </body>
