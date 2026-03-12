@@ -1357,30 +1357,28 @@ const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_H
       document.getElementById("status").textContent = "Searching for fields…";
       hideFieldMatchResults();
 
-      google.script.run
-        .withSuccessHandler(function(serverSuggestions) {
-          var curated = getCuratedSuggestions(query);
-          var merged = mergeSuggestions(curated, Array.isArray(serverSuggestions) ? serverSuggestions : [], query);
-          visibleSuggestions = merged.slice();
+      callBackend("getFieldSuggestions", { query: query })
+  .then(function(serverSuggestions) {
+    var curated = getCuratedSuggestions(query);
+    var merged = mergeSuggestions(curated, Array.isArray(serverSuggestions) ? serverSuggestions : [], query);
+    visibleSuggestions = merged.slice();
 
-          if (visibleSuggestions.length === 1 && Number(visibleSuggestions[0].rankScore || 0) > AUTO_RUN_RANK_THRESHOLD) {
-            var best = visibleSuggestions[0];
-            document.getElementById("address").value = best.query || best.label || "";
-            hideFieldMatchResults();
-            runGuideWithQuery(best.query || best.label || "", "query");
-            return;
-          }
-
-          renderFieldMatchResults(visibleSuggestions);
-          document.getElementById("status").textContent = visibleSuggestions.length ? "Select a field match." : "No matching facilities found.";
-        })
-        .withFailureHandler(function(err) {
-          document.getElementById("status").textContent =
-            "Error finding facilities: " + (err && err.message ? err.message : JSON.stringify(err));
-          hideFieldMatchResults();
-        })
-        .getFieldSuggestions(query);
+    if (visibleSuggestions.length === 1 && Number(visibleSuggestions[0].rankScore || 0) > AUTO_RUN_RANK_THRESHOLD) {
+      var best = visibleSuggestions[0];
+      document.getElementById("address").value = best.query || best.label || "";
+      hideFieldMatchResults();
+      runGuideWithQuery(best.query || best.label || "", "query");
+      return;
     }
+
+    renderFieldMatchResults(visibleSuggestions);
+    document.getElementById("status").textContent = visibleSuggestions.length ? "Select a field match." : "No matching facilities found.";
+  })
+  .catch(function(err) {
+    document.getElementById("status").textContent =
+      "Error finding facilities: " + (err && err.message ? err.message : JSON.stringify(err));
+    hideFieldMatchResults();
+  });
 
     function selectMatchedFieldByIndex(index) {
       var item = visibleSuggestions[index];
