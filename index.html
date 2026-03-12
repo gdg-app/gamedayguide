@@ -1,15 +1,2171 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>GameDayGuide (GDG)</title>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+
+  <link rel="icon" href="https://emojiapi.dev/api/v1/baseball/64.png">
+  <link rel="apple-touch-icon" href="https://emojiapi.dev/api/v1/baseball/180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="GameDayGuide">
+
+  <meta name="application-name" content="GameDayGuide">
+  <meta name="apple-mobile-web-app-title" content="GameDayGuide">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#1E88E5">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <link rel="icon" type="image/svg+xml"
+    href='data:image/svg+xml;utf8,
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+      <rect width="180" height="180" rx="36" fill="%231E88E5"/>
+      <circle cx="90" cy="90" r="48" fill="white"/>
+      <path d="M90 45 C118 45 141 68 141 96" fill="none" stroke="%231E88E5" stroke-width="12" stroke-linecap="round"/>
+      <path d="M90 45 C62 45 39 68 39 96" fill="none" stroke="%2343A047" stroke-width="12" stroke-linecap="round"/>
+      <path d="M58 118 L90 86 L122 118" fill="none" stroke="%23F57C00" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="90" y="164" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="white">GDG</text>
+    </svg>'>
+
+  <link rel="apple-touch-icon"
+    href='data:image/svg+xml;utf8,
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+      <rect width="180" height="180" rx="36" fill="%231E88E5"/>
+      <circle cx="90" cy="90" r="48" fill="white"/>
+      <path d="M90 45 C118 45 141 68 141 96" fill="none" stroke="%231E88E5" stroke-width="12" stroke-linecap="round"/>
+      <path d="M90 45 C62 45 39 68 39 96" fill="none" stroke="%2343A047" stroke-width="12" stroke-linecap="round"/>
+      <path d="M58 118 L90 86 L122 118" fill="none" stroke="%23F57C00" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="90" y="164" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="white">GDG</text>
+    </svg>'>
+
+  <style>
+    html {
+      width: 100%;
+      min-width: 100%;
+      min-height: 100%;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100%;
+      min-width: 100%;
+      min-height: 100dvh;
+      font-family: Arial, sans-serif;
+      background: #F5F5F5;
+      margin: 0;
+      padding: 0;
+      color: #222;
+      font-size: 18px;
+      line-height: 1.45;
+      overflow-x: hidden;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 100%;
+      margin: 0;
+      padding: 18px 12px 32px;
+    }
+
+    .header {
+      margin-bottom: 18px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .brand-icon {
+      font-size: 30px;
+      line-height: 1;
+    }
+
+    .title {
+      font-size: 30px;
+      font-weight: 800;
+      margin: 0;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      color: #666;
+      font-size: 16px;
+      line-height: 1.45;
+      margin-top: 2px;
+    }
+
+    .tip-banner {
+      background: #fff8e1;
+      border: 1px solid #f0d98c;
+      padding: 16px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 16px;
+    }
+
+    .tip-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+
+    .tip-text {
+      color: #555;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .tip-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .tip-link-btn,
+    .tip-dismiss-btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 11px 13px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .tip-link-btn {
+      background: #1E88E5;
+      color: white;
+    }
+
+    .tip-dismiss-btn {
+      background: #f3f3f3;
+      color: #555;
+    }
+
+    .search-panel {
+      width: 100%;
+      background: #fff;
+      padding: 20px 14px 20px;
+      border-radius: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      margin-top: 10px;
+    }
+
+    input {
+      width: 100%;
+      padding: 18px 16px;
+      font-size: 18px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      min-height: 58px;
+      background: #fff;
+    }
+
+    .helper-text {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+
+    .match-results {
+      display: none;
+      margin-top: 12px;
+      margin-bottom: 14px;
+      background: #fff;
+      border: 1px solid #d8dde4;
+      border-radius: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+    }
+
+    .match-results-header {
+      padding: 11px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #666;
+      background: #f8fafc;
+      border-bottom: 1px solid #eef2f6;
+    }
+
+    .match-result-item {
+      width: 100%;
+      border: 0;
+      border-bottom: 1px solid #eef2f6;
+      background: #fff;
+      text-align: left;
+      padding: 13px 14px;
+      cursor: pointer;
+      display: block;
+    }
+
+    .match-result-item:last-child {
+      border-bottom: 0;
+    }
+
+    .match-result-item:hover {
+      background: #f4f8fc;
+    }
+
+    .match-result-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+
+    .match-result-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #222;
+      line-height: 1.3;
+    }
+
+    .match-result-meta {
+      font-size: 13px;
+      color: #666;
+      line-height: 1.4;
+    }
+
+    .suggestion-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 999px;
+      padding: 4px 8px;
+      line-height: 1;
+    }
+
+    .suggestion-badge.curated {
+      background: #e8f1fb;
+      color: #1E88E5;
+    }
+
+    .suggestion-badge.google {
+      background: #edf7ed;
+      color: #2e7d32;
+    }
+
+    .suggestion-badge.tournament {
+      background: #fff3e0;
+      color: #ef6c00;
+    }
+
+    .suggestion-note {
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #666;
+    }
+
+    .quick-row-wrap {
+      margin-bottom: 16px;
+    }
+
+    .quick-row-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #555;
+      margin-bottom: 9px;
+    }
+
+    .quick-row {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .quick-row::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .quick-row::-webkit-scrollbar-thumb {
+      background: #c7d2de;
+      border-radius: 999px;
+    }
+
+    .chip-btn {
+      border: 0;
+      background: #e9eef3;
+      color: #1E88E5;
+      border-radius: 999px;
+      padding: 11px 15px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .chip-btn:hover {
+      background: #dfe7ef;
+    }
+
+    .chip-btn.secondary {
+      background: #f3f3f3;
+      color: #555;
+    }
+
+    .chip-btn.expand-chip {
+      background: #fff;
+      color: #555;
+      border: 1px solid #d8dde4;
+    }
+
+    .radius-section {
+      margin-top: 12px;
+      margin-bottom: 18px;
+    }
+
+    .radius-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .radius-btn {
+      background: #e9eef3;
+      color: #1E88E5;
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 15px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .radius-btn.active {
+      background: #1E88E5;
+      color: white;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+
+    .action-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 14px;
+      padding: 17px 16px;
+      min-height: 58px;
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .build-btn {
+      background: #1E88E5;
+    }
+
+    .location-btn {
+      background: #43A047;
+    }
+
+    .share-btn {
+      background: #7B1FA2;
+    }
+
+    .match-btn {
+      width: 100%;
+      margin-top: 4px;
+      background: #1565C0;
+    }
+
+    .secondary-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #e9eef3;
+      color: #1E88E5;
+      text-decoration: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      min-height: 48px;
+      width: 100%;
+    }
+
+    #status {
+      margin: 14px 0 8px;
+      color: #555;
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    #shareTools,
+    #shareLinkBox {
+      margin: 14px 0 18px;
+    }
+
+    .share-tools-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .section-heading {
+      margin-top: 28px;
+      margin-bottom: 10px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #222;
+    }
+
+    .top-stops-wrap,
+    .jump-bar-wrap {
+      margin-top: 18px;
+      margin-bottom: 18px;
+    }
+
+    .top-stops-row,
+    .jump-bar-row {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .top-stops-row::-webkit-scrollbar,
+    .jump-bar-row::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .top-stops-row::-webkit-scrollbar-thumb,
+    .jump-bar-row::-webkit-scrollbar-thumb {
+      background: #c7d2de;
+      border-radius: 999px;
+    }
+
+    .top-stop-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 16px;
+      min-width: 92%;
+      flex: 0 0 auto;
+    }
+
+    .top-stop-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #666;
+      margin-bottom: 8px;
+    }
+
+    .top-stop-name {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .top-stop-meta {
+      font-size: 14px;
+      color: #444;
+      margin-bottom: 10px;
+    }
+
+    .top-stop-address {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.45;
+      margin-bottom: 12px;
+      min-height: 36px;
+    }
+
+    .jump-chip {
+      border: 0;
+      background: #fff;
+      color: #1E88E5;
+      border-radius: 999px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .category-section {
+      margin-top: 20px;
+      scroll-margin-top: 16px;
+    }
+
+    .accordion-header {
+      width: 100%;
+      background: #fff;
+      border: 0;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: left;
+      color: #222;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .accordion-header:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    }
+
+    .accordion-header:active {
+      transform: scale(0.99);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    }
+
+    .accordion-header.medical-header {
+      border-left: 5px solid #d32f2f;
+    }
+
+    .accordion-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .accordion-count {
+      font-size: 13px;
+      font-weight: 600;
+      color: #666;
+    }
+
+    .accordion-chevron {
+      font-size: 18px;
+      color: #666;
+    }
+
+    .accordion-content {
+      display: none;
+      margin-top: 12px;
+    }
+
+    .accordion-content.open {
+      display: block;
+    }
+
+    .results-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 16px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    }
+
+    .card:active {
+      transform: scale(0.99);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+    }
+
+    .urgent-card {
+      border-left: 5px solid #d32f2f;
+    }
+
+    .card-name {
+      font-size: 21px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .card-meta {
+      color: #444;
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+
+    .card-address {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 12px;
+      line-height: 1.45;
+      word-break: break-word;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-direction: column;
+    }
+
+    .directions-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      text-decoration: none;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      border: 0;
+      cursor: pointer;
+      background: #1E88E5;
+      color: white;
+      min-height: 48px;
+    }
+
+    .toggle-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-direction: column;
+    }
+
+    .show-more-btn,
+    .show-less-btn {
+      background: #e9eef3;
+      color: #1E88E5;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      min-height: 48px;
+    }
+
+    .muted {
+      color: #666;
+    }
+
+    .shared-banner {
+      background: #fff;
+      padding: 16px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      margin-bottom: 18px;
+    }
+
+    .shared-banner-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+
+    .shared-banner-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .share-action-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      flex-direction: column;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 767px) {
+      body.home-mode {
+        min-height: 100dvh;
+      }
+
+      body.home-mode .app {
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      body.home-mode .search-panel {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100dvh - 110px);
+        padding: 22px 14px 24px;
+      }
+
+      body.home-mode #shareTools,
+      body.home-mode #shareLinkBox,
+      body.home-mode #topStops,
+      body.home-mode #categoryJumpBar,
+      body.home-mode #results {
+        display: none !important;
+      }
+
+      body.home-mode .helper-text,
+      body.home-mode .quick-row-wrap {
+        margin-bottom: 18px;
+      }
+
+      body.home-mode .radius-section {
+        margin-bottom: 0;
+      }
+
+      body.home-mode .button-row {
+        margin-top: auto;
+        padding-top: 28px;
+      }
+
+      body.home-mode .action-btn {
+        min-height: 60px;
+        font-size: 18px;
+      }
+
+      body.home-mode input {
+        min-height: 60px;
+        font-size: 18px;
+      }
+
+      body.home-mode .title {
+        font-size: 30px;
+      }
+
+      body.home-mode .subtitle {
+        font-size: 16px;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .app {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 24px 18px 44px;
+      }
+
+      .button-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .shared-banner-actions {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .secondary-btn,
+      .directions-btn,
+      .action-btn {
+        width: auto;
+      }
+
+      .card-actions,
+      .share-action-row,
+      .toggle-row {
+        flex-direction: row;
+      }
+
+      .top-stop-card {
+        min-width: 250px;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="app">
+    <div class="header">
+      <div class="brand-row">
+        <div class="brand-icon">🏟</div>
+        <div class="title" id="pageTitle">GameDayGuide (GDG)</div>
+      </div>
+      <div class="subtitle" id="pageSubtitle">Everything you need near your game.</div>
+    </div>
 
-<h1>GameDayGuide (GDG)</h1>
-<p>Vercel migration setup in progress.</p>
+    <div id="homeScreenTip" class="tip-banner" style="display:none;">
+      <div class="tip-title">Quick access on game day</div>
+      <div class="tip-text" id="homeScreenTipText">Add this to your home screen for quick access on game day.</div>
+      <div class="tip-actions">
+        <button type="button" class="tip-link-btn" onclick="showInstallHelp()">How to add it</button>
+        <button type="button" class="tip-dismiss-btn" onclick="dismissInstallTip()">Dismiss</button>
+      </div>
+    </div>
 
+    <div id="sharedBanner" class="shared-banner" style="display:none;">
+      <div class="shared-banner-title">Shared guide</div>
+      <div class="muted" id="sharedBannerText"></div>
+      <div class="shared-banner-actions">
+        <a id="openFullAppBtn" class="action-btn build-btn" href="<?= appUrl ?>">Create Your Own Guide</a>
+        <a class="secondary-btn" href="<?= appUrl ?>">Open Full App</a>
+      </div>
+    </div>
+
+    <div class="search-panel" id="searchPanel">
+      <label>Field Address or Field/Facility Name</label>
+      <input id="address" placeholder="Enter field address or facility name" value="" />
+      <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
+      <div id="fieldMatchResults" class="match-results"></div>
+      <div class="helper-text">Paste a field name, field number, court number, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
+
+      <div class="quick-row-wrap" id="triangleComplexWrap">
+        <div class="quick-row-label">Triangle Baseball Complexes</div>
+        <div class="quick-row" id="triangleComplexRow"></div>
+      </div>
+
+      <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
+        <div class="quick-row-label">Recent searches</div>
+        <div class="quick-row" id="recentSearchRow"></div>
+      </div>
+
+      <div class="radius-section">
+        <label>Radius</label>
+        <div class="radius-buttons">
+          <button type="button" class="radius-btn" data-radius="2" onclick="setRadius(2)">2 mi</button>
+          <button type="button" class="radius-btn active" data-radius="5" onclick="setRadius(5)">5 mi</button>
+          <button type="button" class="radius-btn" data-radius="10" onclick="setRadius(10)">10 mi</button>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button type="button" class="action-btn build-btn" onclick="runGuide()">Build Guide</button>
+        <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
+      </div>
+    </div>
+
+    <div id="status"></div>
+
+    <div id="shareTools" style="display:none;">
+      <div class="share-tools-row">
+        <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share Guide</button>
+      </div>
+    </div>
+
+    <div id="shareLinkBox" style="display:none;"></div>
+    <div id="topStops"></div>
+    <div id="categoryJumpBar"></div>
+    <div id="results"></div>
+  </div>
+
+  <script>
+    const SHARED_GUIDE = <?!= JSON.stringify(sharedGuide) ?>;
+    const APP_URL = <?!= JSON.stringify(appUrl) ?>;
+
+    let selectedRadius = 5;
+    let lastResults = [];
+    let lastSourceType = "";
+    let lastQueryOrGps = "";
+    let triangleExpanded = false;
+    let visibleSuggestions = [];
+
+    const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
+    const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
+
+    const GAME_DAY_ESSENTIALS = [
+      BACKEND_MEDICAL_LABEL,
+      "💊 Pharmacy",
+      "⚾ Sporting Goods"
+    ];
+
+    const FOOD_AND_DRINK = [
+      "🍜 Asian",
+      "🥞 Breakfast",
+      "🍔 Burgers",
+      "☕ Coffee",
+      "🍦 Ice Cream",
+      "🍝 Italian",
+      "🌮 Mexican",
+      "🍕 Pizza",
+      "🥪 Sandwiches"
+    ];
+
+    const BREWERIES_AND_BARS = [
+      "🍺 Breweries/Bars"
+    ];
+
+    const DEFAULT_VISIBLE_COUNT = 3;
+    const RECENT_SEARCH_KEY = "gamedayguide_recent_searches_v1";
+    const CURATED_SUGGESTION_LIMIT = 6;
+    const AUTO_RUN_RANK_THRESHOLD = 800;
+
+    const TRIANGLE_COMPLEXES = [
+      { label: "USA Baseball Complex", query: "USA Baseball National Training Complex, Cary NC" },
+      { label: "Thomas Brooks Park", query: "Thomas Brooks Park Baseball Complex, Cary NC" },
+      { label: "Ting Stadium", query: "Ting Stadium, Holly Springs NC" },
+      { label: "Walnut Creek Athletic Complex", query: "Walnut Creek Athletic Complex, Raleigh NC" },
+      { label: "Middle Creek Athletic Complex", query: "Middle Creek Athletic Complex, Apex NC" },
+      { label: "Optimist Park", query: "Optimist Park, Holly Springs NC" },
+      { label: "Hunter Street Park", query: "Hunter Street Park, Apex NC" },
+      { label: "Green Hope High School", query: "Green Hope High School Baseball Field, Cary NC" },
+      { label: "Cary High School", query: "Cary High School Baseball Field, Cary NC" },
+      { label: "Athens Drive High School", query: "Athens Drive High School Baseball Field, Raleigh NC" },
+      { label: "Eastern Carolina Athletic Park", query: "Eastern Carolina Athletic Park, 871 Buck Swamp Rd, Goldsboro NC" },
+      { label: "Clayton Civitan Club", query: "Clayton Civitan Club, 340 McCullers Dr, Clayton NC" },
+      { label: "Granville Athletic Park", query: "Granville Athletic Park, 4615 Belltown Rd, Oxford NC" },
+      { label: "The Factory", query: "The Factory, 1845 Grandmark St, Wake Forest NC" },
+      { label: "DPC Baseball", query: "DPC Baseball, 3901 E Garner Rd, Clayton NC" }
+    ];
+
+    const TRIANGLE_COMPLEXES_VISIBLE_COUNT = 8;
+
+    const TOP_STOP_CONFIG = [
+      { label: "🏥 Closest Medical", category: BACKEND_MEDICAL_LABEL },
+      { label: "⛽ Closest Gas", category: "⛽ Gas" },
+      { label: "☕ Closest Coffee", category: "☕ Coffee" },
+      { label: "💊 Closest Pharmacy", category: "💊 Pharmacy" }
+    ];
+
+    function esc(s) {
+      return String(s || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function normalizeForMatch(value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function cleanFacilitySearchText_(value) {
+      var s = String(value || "").trim();
+      if (!s) return "";
+
+      s = s.replace(/[–—]/g, "-");
+      s = s.replace(/\s+/g, " ").trim();
+      s = s.replace(/\b(field|diamond|court|rink|sheet|pitch|mat|arena)\s*#?\d+\b/gi, " ");
+      s = s.replace(/\b#\s*\d+\b/g, " ");
+      s = s.replace(/\b(field|diamond|court|rink|sheet|pitch|mat)\b/gi, " ");
+      s = s.replace(/\s+-\s+/g, " ");
+      s = s.replace(/\s+/g, " ").trim();
+
+      return s;
+    }
+
+    function displayCategoryLabel(cat) {
+      return cat === BACKEND_MEDICAL_LABEL ? DISPLAY_MEDICAL_LABEL : cat;
+    }
+
+    function isMedicalCategory(cat) {
+      return cat === BACKEND_MEDICAL_LABEL;
+    }
+
+    function slugifyCategory(cat) {
+      return String(displayCategoryLabel(cat) || "")
+        .toLowerCase()
+        .replace(/[^\w]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    function getAnonId() {
+      try {
+        var key = "gamedayguide_anon_id";
+        var existing = localStorage.getItem(key);
+        if (existing) return existing;
+        var id = "u_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem(key, id);
+        return id;
+      } catch (e) {
+        return "u_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      }
+    }
+
+    function categorySortKey(label) {
+      var foodOrder = [
+        "🍜 Asian",
+        "🥞 Breakfast",
+        "🍔 Burgers",
+        "☕ Coffee",
+        "🍦 Ice Cream",
+        "🍝 Italian",
+        "🌮 Mexican",
+        "🍕 Pizza",
+        "🥪 Sandwiches"
+      ];
+
+      var nonFoodOrder = [
+        "🏧 ATM",
+        "🍺 Breweries/Bars",
+        "⛽ Gas",
+        "🛒 Grocery",
+        "🏨 Hotels",
+        "💊 Pharmacy",
+        "⚾ Sporting Goods",
+        BACKEND_MEDICAL_LABEL
+      ];
+
+      var foodIndex = foodOrder.indexOf(label);
+      if (foodIndex !== -1) return "0_" + String(foodIndex).padStart(2, "0");
+
+      var nonFoodIndex = nonFoodOrder.indexOf(label);
+      if (nonFoodIndex !== -1) return "1_" + String(nonFoodIndex).padStart(2, "0");
+
+      return "9_" + String(label || "").toLowerCase();
+    }
+
+    function setRadius(miles) {
+      selectedRadius = miles;
+      document.querySelectorAll(".radius-btn").forEach(function(btn) {
+        btn.classList.remove("active");
+      });
+      var target = document.querySelector('.radius-btn[data-radius="' + miles + '"]');
+      if (target) target.classList.add("active");
+    }
+
+    function getRadiusMiles() {
+      return selectedRadius || 5;
+    }
+
+    function dismissInstallTip() {
+      try {
+        localStorage.setItem("gamedayguide_hide_install_tip", "1");
+      } catch (e) {}
+      document.getElementById("homeScreenTip").style.display = "none";
+    }
+
+    function shouldShowInstallTip() {
+      try {
+        if (localStorage.getItem("gamedayguide_hide_install_tip") === "1") return false;
+      } catch (e) {}
+
+      var isStandalone = false;
+      try {
+        isStandalone =
+          window.matchMedia("(display-mode: standalone)").matches ||
+          window.navigator.standalone === true;
+      } catch (e) {}
+
+      return !isStandalone;
+    }
+
+    function showInstallHelp() {
+      var isiPhone = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      var isAndroid = /Android/i.test(navigator.userAgent);
+
+      var msg = "On some phones you may still be asked to confirm the home screen name. If that happens, use GameDayGuide.";
+
+      if (isiPhone) {
+        msg = "On iPhone: open this link in Safari, tap the Share icon, then tap Add to Home Screen. If Safari asks for a name, use GameDayGuide.";
+      } else if (isAndroid) {
+        msg = "On Android: open this link in Chrome, tap the menu, then tap Add to Home Screen. If Chrome asks for a name, use GameDayGuide.";
+      }
+
+      alert(msg);
+    }
+
+    function updateInstallTipForMode() {
+      var tip = document.getElementById("homeScreenTip");
+      var text = document.getElementById("homeScreenTipText");
+
+      if (!shouldShowInstallTip()) {
+        tip.style.display = "none";
+        return;
+      }
+
+      if (SHARED_GUIDE && SHARED_GUIDE.results && SHARED_GUIDE.results.length) {
+        text.textContent = "Like this guide? Add GameDayGuide to your home screen for quick access on game day.";
+      } else {
+        text.textContent = "Add GameDayGuide to your home screen for quick access on game day.";
+      }
+
+      tip.style.display = "block";
+    }
+
+    function getRecentSearches() {
+      try {
+        var raw = localStorage.getItem(RECENT_SEARCH_KEY);
+        var list = raw ? JSON.parse(raw) : [];
+        return Array.isArray(list) ? list : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveRecentSearch(query) {
+      query = String(query || "").trim();
+      if (!query) return;
+
+      try {
+        var list = getRecentSearches().filter(function(item) {
+          return String(item || "").toLowerCase() !== query.toLowerCase();
+        });
+
+        list.unshift(query);
+        list = list.slice(0, 6);
+        localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(list));
+      } catch (e) {}
+    }
+
+    function scoreCuratedSuggestion(item, searchText) {
+      var q = normalizeForMatch(searchText);
+      var labelNorm = normalizeForMatch(item.label);
+      var queryNorm = normalizeForMatch(item.query);
+      var terms = q.split(" ").filter(Boolean);
+      var score = 0;
+
+      if (!q) return 0;
+
+      if (labelNorm === q) score += 300;
+      if (labelNorm.indexOf(q) === 0) score += 180;
+      if (labelNorm.indexOf(q) !== -1) score += 120;
+      if (queryNorm.indexOf(q) !== -1) score += 60;
+
+      terms.forEach(function(term) {
+        if (labelNorm.indexOf(term) !== -1) score += 18;
+        if (queryNorm.indexOf(term) !== -1) score += 8;
+      });
+
+      if (labelNorm.indexOf("baseball") !== -1) score += 12;
+      if (labelNorm.indexOf("athletic") !== -1) score += 8;
+      if (labelNorm.indexOf("stadium") !== -1) score += 8;
+      if (labelNorm.indexOf("park") !== -1) score += 5;
+      if (labelNorm.indexOf("field") !== -1) score += 5;
+
+      return score;
+    }
+
+    function getCuratedSuggestions(searchText) {
+      var q = normalizeForMatch(searchText);
+      if (!q) return [];
+
+      return TRIANGLE_COMPLEXES
+        .map(function(item) {
+          var score = scoreCuratedSuggestion(item, q);
+          if (score <= 0) return null;
+
+          return {
+            source: "curated",
+            subtype: "curated",
+            label: item.label,
+            secondaryText: item.query,
+            query: item.query,
+            displayValue: item.label,
+            score: score
+          };
+        })
+        .filter(function(item) {
+          return !!item;
+        })
+        .sort(function(a, b) {
+          if (b.score !== a.score) return b.score - a.score;
+          return a.label.localeCompare(b.label);
+        })
+        .slice(0, CURATED_SUGGESTION_LIMIT);
+    }
+
+    function scoreMergedSuggestion_(item, searchText) {
+      var q = normalizeForMatch(searchText);
+      var labelNorm = normalizeForMatch(item.label);
+      var secondaryNorm = normalizeForMatch(item.secondaryText || "");
+      var queryNorm = normalizeForMatch(item.query);
+      var terms = q.split(" ").filter(Boolean);
+      var score = Number(item.score || 0);
+
+      if (!q) return score;
+
+      if (labelNorm === q) score += 1000;
+      else if (queryNorm === q) score += 900;
+      else if (labelNorm.indexOf(q) === 0) score += 700;
+      else if (queryNorm.indexOf(q) === 0) score += 600;
+      else if (labelNorm.indexOf(q) !== -1) score += 450;
+      else if (queryNorm.indexOf(q) !== -1) score += 350;
+      else if (secondaryNorm.indexOf(q) !== -1) score += 200;
+
+      terms.forEach(function(term) {
+        if (labelNorm.indexOf(term) !== -1) score += 40;
+        if (queryNorm.indexOf(term) !== -1) score += 25;
+        if (secondaryNorm.indexOf(term) !== -1) score += 12;
+      });
+
+      if (item.source === "google") score += 120;
+      if (item.subtype === "tournament") score += 90;
+      if (item.source === "curated") score += 40;
+
+      return score;
+    }
+
+    function dedupeMergedSuggestions(items) {
+      var seen = {};
+      var out = [];
+
+      items.forEach(function(item) {
+        var key = normalizeForMatch(item.query || item.label);
+        if (!key || seen[key]) return;
+        seen[key] = true;
+        out.push(item);
+      });
+
+      return out;
+    }
+
+    function mergeSuggestions(curated, googleList, searchText) {
+      var normalizedGoogle = (googleList || []).map(function(item) {
+        return {
+          source: item.source || "google",
+          subtype: item.type || "autocomplete",
+          label: item.label || item.query || "",
+          secondaryText: item.secondaryText || "",
+          query: item.query || item.label || "",
+          displayValue: item.label || item.query || "",
+          score: Number(item.score || 0)
+        };
+      });
+
+      var merged = dedupeMergedSuggestions(curated.concat(normalizedGoogle));
+
+      merged.forEach(function(item) {
+        item.rankScore = scoreMergedSuggestion_(item, searchText);
+      });
+
+      merged.sort(function(a, b) {
+        if (b.rankScore !== a.rankScore) return b.rankScore - a.rankScore;
+        if (b.score !== a.score) return b.score - a.score;
+        return a.label.localeCompare(b.label);
+      });
+
+      return merged.slice(0, 8);
+    }
+
+    function badgeHtmlForSuggestion(item) {
+      if (item.source === "curated") {
+        return "<span class='suggestion-badge curated'>Saved Complex</span>";
+      }
+      if (item.subtype === "tournament") {
+        return "<span class='suggestion-badge tournament'>Tournament Parks</span>";
+      }
+      return "<span class='suggestion-badge google'>Google Field Search</span>";
+    }
+
+    function hideFieldMatchResults() {
+      visibleSuggestions = [];
+      var box = document.getElementById("fieldMatchResults");
+      box.innerHTML = "";
+      box.style.display = "none";
+    }
+
+    function renderFieldMatchResults(items) {
+      var box = document.getElementById("fieldMatchResults");
+      var html = "";
+
+      if (items && items.length) {
+        html += "<div class='match-results-header'>Matching Fields</div>";
+
+        items.forEach(function(item, index) {
+          html +=
+            "<button type='button' class='match-result-item' data-match-index='" + index + "'>" +
+              "<div class='match-result-top'>" +
+                "<div class='match-result-title'>" + esc(item.label) + "</div>" +
+                badgeHtmlForSuggestion(item) +
+              "</div>" +
+              "<div class='match-result-meta'>" + esc(item.secondaryText || item.query || "") + "</div>" +
+            "</button>";
+        });
+      } else {
+        html += "<div class='suggestion-note'>No matching facilities found.</div>";
+      }
+
+      box.innerHTML = html;
+      box.style.display = "block";
+    }
+
+    function getPreparedFacilityQuery_(rawQuery) {
+      var cleaned = cleanFacilitySearchText_(rawQuery);
+      return cleaned || String(rawQuery || "").trim();
+    }
+
+    function findMatchingFields() {
+      var rawQuery = String(document.getElementById("address").value || "").trim();
+      var query = getPreparedFacilityQuery_(rawQuery);
+
+      if (!query) {
+        document.getElementById("status").textContent = "Enter a facility name first.";
+        hideFieldMatchResults();
+        return;
+      }
+
+      document.getElementById("status").textContent = "Searching for fields…";
+      hideFieldMatchResults();
+
+      google.script.run
+        .withSuccessHandler(function(serverSuggestions) {
+          var curated = getCuratedSuggestions(query);
+          var merged = mergeSuggestions(curated, Array.isArray(serverSuggestions) ? serverSuggestions : [], query);
+          visibleSuggestions = merged.slice();
+
+          if (visibleSuggestions.length === 1 && Number(visibleSuggestions[0].rankScore || 0) > AUTO_RUN_RANK_THRESHOLD) {
+            var best = visibleSuggestions[0];
+            document.getElementById("address").value = best.query || best.label || "";
+            hideFieldMatchResults();
+            runGuideWithQuery(best.query || best.label || "", "query");
+            return;
+          }
+
+          renderFieldMatchResults(visibleSuggestions);
+          document.getElementById("status").textContent = visibleSuggestions.length ? "Select a field match." : "No matching facilities found.";
+        })
+        .withFailureHandler(function(err) {
+          document.getElementById("status").textContent =
+            "Error finding facilities: " + (err && err.message ? err.message : JSON.stringify(err));
+          hideFieldMatchResults();
+        })
+        .getFieldSuggestions(query);
+    }
+
+    function selectMatchedFieldByIndex(index) {
+      var item = visibleSuggestions[index];
+      if (!item) return;
+
+      document.getElementById("address").value = item.query || item.label || "";
+      hideFieldMatchResults();
+      runGuideWithQuery(item.query || item.label || "", "query");
+    }
+
+    function setupFieldMatchResults() {
+      var box = document.getElementById("fieldMatchResults");
+      if (!box) return;
+
+      box.addEventListener("click", function(e) {
+        var btn = e.target.closest(".match-result-item");
+        if (!btn) return;
+        var index = Number(btn.getAttribute("data-match-index"));
+        if (isNaN(index)) return;
+        selectMatchedFieldByIndex(index);
+      });
+    }
+
+    function setupAddressKeyActions() {
+      var input = document.getElementById("address");
+      if (!input) return;
+
+      input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          findMatchingFields();
+        }
+      });
+    }
+
+    function renderTriangleComplexes() {
+      var row = document.getElementById("triangleComplexRow");
+      row.innerHTML = "";
+
+      var visible = triangleExpanded
+        ? TRIANGLE_COMPLEXES
+        : TRIANGLE_COMPLEXES.slice(0, TRIANGLE_COMPLEXES_VISIBLE_COUNT);
+
+      visible.forEach(function(item) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip-btn";
+        btn.textContent = item.label;
+        btn.onclick = function() {
+          runPresetFacilityGuide(item.query, item.label);
+        };
+        row.appendChild(btn);
+      });
+
+      if (!triangleExpanded && TRIANGLE_COMPLEXES.length > TRIANGLE_COMPLEXES_VISIBLE_COUNT) {
+        var moreBtn = document.createElement("button");
+        moreBtn.type = "button";
+        moreBtn.className = "chip-btn expand-chip";
+        moreBtn.textContent = "More Triangle Fields";
+        moreBtn.onclick = function() {
+          triangleExpanded = true;
+          renderTriangleComplexes();
+        };
+        row.appendChild(moreBtn);
+      }
+
+      if (triangleExpanded && TRIANGLE_COMPLEXES.length > TRIANGLE_COMPLEXES_VISIBLE_COUNT) {
+        var lessBtn = document.createElement("button");
+        lessBtn.type = "button";
+        lessBtn.className = "chip-btn expand-chip";
+        lessBtn.textContent = "Show Less";
+        lessBtn.onclick = function() {
+          triangleExpanded = false;
+          renderTriangleComplexes();
+        };
+        row.appendChild(lessBtn);
+      }
+    }
+
+    function renderRecentSearches() {
+      var wrap = document.getElementById("recentSearchWrap");
+      var row = document.getElementById("recentSearchRow");
+      var list = getRecentSearches();
+
+      row.innerHTML = "";
+
+      if (!list.length || (SHARED_GUIDE && SHARED_GUIDE.results && SHARED_GUIDE.results.length)) {
+        wrap.style.display = "none";
+        return;
+      }
+
+      list.forEach(function(searchText) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip-btn secondary";
+        btn.textContent = searchText;
+        btn.onclick = function() {
+          document.getElementById("address").value = searchText;
+          runGuide();
+        };
+        row.appendChild(btn);
+      });
+
+      wrap.style.display = "block";
+    }
+
+    function runPresetFacilityGuide(query, displayLabel) {
+      setRadius(5);
+      document.getElementById("address").value = displayLabel || query || "";
+      hideFieldMatchResults();
+      runGuideWithQuery(query, "query");
+    }
+
+    function findExactCuratedMatch(query) {
+      var q = String(query || "").trim().toLowerCase();
+      return TRIANGLE_COMPLEXES.find(function(item) {
+        return item.label.toLowerCase() === q || item.query.toLowerCase() === q;
+      }) || null;
+    }
+
+    function runGuide() {
+      var rawQuery = (document.getElementById("address").value || "").trim();
+      var query = getPreparedFacilityQuery_(rawQuery);
+
+      if (!query) {
+        document.getElementById("status").textContent = "Please enter an address or facility name.";
+        return;
+      }
+
+      hideFieldMatchResults();
+
+      var exactMatch = findExactCuratedMatch(query);
+      if (exactMatch) {
+        runGuideWithQuery(exactMatch.query, "query");
+        return;
+      }
+
+      runGuideWithQuery(query, "query");
+    }
+
+    function runGuideWithQuery(query, sourceType) {
+      query = String(query || "").trim();
+      sourceType = sourceType || "query";
+
+      if (!query) {
+        document.getElementById("status").textContent = "Please enter an address or facility name.";
+        return;
+      }
+
+      var radius = getRadiusMiles();
+      var userId = getAnonId();
+
+      document.getElementById("status").textContent = "Searching…";
+      document.getElementById("results").innerHTML = "";
+      document.getElementById("topStops").innerHTML = "";
+      document.getElementById("categoryJumpBar").innerHTML = "";
+      document.getElementById("shareLinkBox").style.display = "none";
+      document.getElementById("shareLinkBox").innerHTML = "";
+
+      google.script.run
+        .withSuccessHandler(function(data) {
+          lastResults = Array.isArray(data) ? data : [];
+          lastSourceType = sourceType;
+          lastQueryOrGps = query;
+          saveRecentSearch(query);
+          renderRecentSearches();
+          document.getElementById("status").textContent = "Done.";
+          document.body.classList.remove("home-mode");
+          render(lastResults);
+        })
+        .withFailureHandler(function(err) {
+          document.getElementById("status").textContent =
+            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+        })
+        .getWeekendHub(query, radius, userId);
+    }
+
+    function useMyLocation() {
+      document.getElementById("status").textContent = "Getting your location…";
+      document.getElementById("results").innerHTML = "";
+      document.getElementById("topStops").innerHTML = "";
+      document.getElementById("categoryJumpBar").innerHTML = "";
+      document.getElementById("shareLinkBox").style.display = "none";
+      document.getElementById("shareLinkBox").innerHTML = "";
+      hideFieldMatchResults();
+
+      if (!navigator.geolocation) {
+        document.getElementById("status").textContent = "This device/browser doesn't support location.";
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          var lat = pos.coords.latitude;
+          var lng = pos.coords.longitude;
+          var radius = getRadiusMiles();
+          var userId = getAnonId();
+
+          document.getElementById("status").textContent = "Searching…";
+
+          google.script.run
+            .withSuccessHandler(function(data) {
+              lastResults = Array.isArray(data) ? data : [];
+              lastSourceType = "gps";
+              lastQueryOrGps = "GPS:" + lat + "," + lng;
+              document.getElementById("status").textContent = "Done.";
+              document.body.classList.remove("home-mode");
+              render(lastResults);
+            })
+            .withFailureHandler(function(err) {
+              document.getElementById("status").textContent =
+                "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+            })
+            .getWeekendHubByLatLng(lat, lng, radius, userId);
+        },
+        function(err) {
+          var msg = "Location blocked. Allow location access and try again.";
+          if (err && err.code === 1) msg = "Location permission denied. Allow it in browser settings.";
+          if (err && err.code === 2) msg = "Location unavailable. Try again outside or with better signal.";
+          if (err && err.code === 3) msg = "Location timed out. Try again.";
+          document.getElementById("status").textContent = msg;
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
+    }
+
+    function copyShareLink(url) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url)
+          .then(function() {
+            document.getElementById("status").textContent = "Share link copied.";
+          })
+          .catch(function() {
+            document.getElementById("status").textContent = "Could not copy link automatically.";
+          });
+      } else {
+        document.getElementById("status").textContent = "Copy not supported on this device/browser.";
+      }
+    }
+
+    function showShareLink(url) {
+      var box = document.getElementById("shareLinkBox");
+      box.style.display = "block";
+      box.innerHTML =
+        "<div class='card'>" +
+          "<div class='card-name'>Guide ready to share</div>" +
+          "<div class='card-meta'>Link copied to clipboard</div>" +
+          "<div class='share-action-row'>" +
+            "<a class='directions-btn' href='" + esc(url) + "' target='_blank' rel='noopener'>Open Shared Guide</a>" +
+            "<button type='button' class='secondary-btn' id='copyShareAgainBtn'>Copy Link Again</button>" +
+          "</div>" +
+        "</div>";
+
+      var copyBtn = document.getElementById("copyShareAgainBtn");
+      if (copyBtn) {
+        copyBtn.onclick = function() {
+          copyShareLink(url);
+        };
+      }
+    }
+
+    function shareGuide() {
+      if (!lastResults || !lastResults.length) {
+        document.getElementById("status").textContent = "No results available to share.";
+        return;
+      }
+
+      document.getElementById("status").textContent = "Creating share link…";
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          var url = res && res.shareUrl ? res.shareUrl : "";
+          if (!url) {
+            document.getElementById("status").textContent = "Unable to create share link.";
+            return;
+          }
+
+          showShareLink(url);
+          document.getElementById("status").textContent = "Share link ready.";
+
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).catch(function() {});
+          }
+
+          if (navigator.share) {
+            navigator.share({
+              title: "GameDayGuide",
+              text: "Here’s the GameDayGuide",
+              url: url
+            }).catch(function() {});
+          }
+        })
+        .withFailureHandler(function(err) {
+          document.getElementById("status").textContent =
+            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+        })
+        .createSharedGuide({
+          sourceType: lastSourceType,
+          queryOrGps: lastQueryOrGps,
+          radius: selectedRadius,
+          results: lastResults,
+          userId: getAnonId()
+        });
+    }
+
+    function createSectionHeading(title) {
+      var heading = document.createElement("div");
+      heading.className = "section-heading";
+      heading.textContent = title;
+      return heading;
+    }
+
+    function getClosestByCategory(grouped, category) {
+      var items = (grouped[category] || []).slice();
+      if (!items.length) return null;
+
+      items.sort(function(a, b) {
+        var da = (typeof a[6] === "number") ? a[6] : 9999;
+        var db = (typeof b[6] === "number") ? b[6] : 9999;
+        if (da < db) return -1;
+        if (da > db) return 1;
+
+        var na = String(a[1] || "").toLowerCase();
+        var nb = String(b[1] || "").toLowerCase();
+        return na < nb ? -1 : na > nb ? 1 : 0;
+      });
+
+      return items[0];
+    }
+
+    function isPreferredCoffeeName_(name) {
+      var n = String(name || "").toLowerCase();
+
+      var preferredTerms = [
+        "coffee",
+        "cafe",
+        "café",
+        "coffeehouse",
+        "coffee house",
+        "espresso",
+        "roastery",
+        "roast",
+        "starbucks",
+        "dunkin",
+        "krispy kreme",
+        "krispy creme"
+      ];
+
+      for (var i = 0; i < preferredTerms.length; i++) {
+        if (n.indexOf(preferredTerms[i]) !== -1) return true;
+      }
+
+      return false;
+    }
+
+    function isBadCoffeeMatch_(name, address) {
+      var hay = (String(name || "") + " " + String(address || "")).toLowerCase();
+
+      var badTerms = [
+        "wine",
+        "paint",
+        "painting",
+        "paint and sip",
+        "paint & sip",
+        "sip and paint",
+        "sip & paint",
+        "art studio",
+        "studio",
+        "pottery",
+        "ceramic",
+        "bar",
+        "brewery",
+        "lounge",
+        "night club",
+        "nightclub",
+        "yoga",
+        "martial arts",
+        "spa",
+        "salon"
+      ];
+
+      for (var i = 0; i < badTerms.length; i++) {
+        if (hay.indexOf(badTerms[i]) !== -1) return true;
+      }
+
+      return false;
+    }
+
+    function isFallbackCoffeeOnly_(name, address) {
+      var hay = (String(name || "") + " " + String(address || "")).toLowerCase();
+
+      var fallbackTerms = [
+        "gas",
+        "gas station",
+        "fuel",
+        "shell",
+        "bp",
+        "exxon",
+        "mobil",
+        "chevron",
+        "citgo",
+        "marathon",
+        "sunoco",
+        "valero",
+        "phillips 66",
+        "convenience",
+        "convenience store",
+        "7-eleven",
+        "7 eleven",
+        "circle k",
+        "sheetz",
+        "wawa",
+        "speedway",
+        "quicktrip",
+        "quiktrip",
+        "kwik trip",
+        "racetrac",
+        "pilot",
+        "flying j",
+        "love's",
+        "loves",
+        "travel center",
+        "travel centre"
+      ];
+
+      for (var i = 0; i < fallbackTerms.length; i++) {
+        if (hay.indexOf(fallbackTerms[i]) !== -1) return true;
+      }
+
+      return false;
+    }
+
+    function getPreferredCoffeeTopStop_(grouped) {
+      var items = (grouped["☕ Coffee"] || []).slice();
+      if (!items.length) return null;
+
+      items.sort(function(a, b) {
+        var da = (typeof a[6] === "number") ? a[6] : 9999;
+        var db = (typeof b[6] === "number") ? b[6] : 9999;
+        if (da < db) return -1;
+        if (da > db) return 1;
+
+        var na = String(a[1] || "").toLowerCase();
+        var nb = String(b[1] || "").toLowerCase();
+        return na < nb ? -1 : na > nb ? 1 : 0;
+      });
+
+      var preferred = items.filter(function(item) {
+        var name = item[1] || "";
+        var address = item[3] || "";
+
+        if (isBadCoffeeMatch_(name, address)) return false;
+        if (isFallbackCoffeeOnly_(name, address)) return false;
+        if (isPreferredCoffeeName_(name)) return true;
+
+        return true;
+      });
+
+      if (preferred.length) return preferred[0];
+
+      var fallback = items.filter(function(item) {
+        var name = item[1] || "";
+        var address = item[3] || "";
+        return !isBadCoffeeMatch_(name, address);
+      });
+
+      if (fallback.length) return fallback[0];
+      return items[0];
+    }
+
+    function renderTopStops(grouped) {
+      var container = document.getElementById("topStops");
+      container.innerHTML = "";
+
+      var topItems = [];
+      TOP_STOP_CONFIG.forEach(function(cfg) {
+        var item = null;
+
+        if (cfg.category === "☕ Coffee") {
+          item = getPreferredCoffeeTopStop_(grouped);
+        } else {
+          item = getClosestByCategory(grouped, cfg.category);
+        }
+
+        if (item) {
+          topItems.push({
+            label: cfg.label,
+            row: item
+          });
+        }
+      });
+
+      if (!topItems.length) return;
+
+      var wrap = document.createElement("div");
+      wrap.className = "top-stops-wrap";
+      wrap.appendChild(createSectionHeading("Closest Stops"));
+
+      var row = document.createElement("div");
+      row.className = "top-stops-row";
+
+      topItems.forEach(function(item) {
+        var r = item.row;
+        var name = r[1], rating = r[2], addr = r[3], openNow = r[4], link = r[5], dist = r[6];
+        var distText = (typeof dist === "number") ? dist.toFixed(1) + " mi" : "";
+        var metaParts = [];
+        if (rating) metaParts.push("⭐ " + esc(rating));
+        if (distText) metaParts.push(esc(distText));
+        if (openNow) metaParts.push(esc(openNow));
+
+        var card = document.createElement("div");
+        card.className = "top-stop-card";
+        card.innerHTML =
+          "<div class='top-stop-label'>" + esc(item.label) + "</div>" +
+          "<div class='top-stop-name'>" + esc(name) + "</div>" +
+          "<div class='top-stop-meta'>" + metaParts.join(" • ") + "</div>" +
+          "<div class='top-stop-address'>" + esc(addr || "") + "</div>" +
+          (link ? "<a class='directions-btn' href='" + esc(link) + "' target='_blank' rel='noopener'>Directions</a>" : "");
+
+        row.appendChild(card);
+      });
+
+      wrap.appendChild(row);
+      container.appendChild(wrap);
+    }
+
+    function renderCategoryJumpBar(grouped) {
+      var container = document.getElementById("categoryJumpBar");
+      container.innerHTML = "";
+
+      var allCategories = Object.keys(grouped).sort(function(a, b) {
+        var ka = categorySortKey(a);
+        var kb = categorySortKey(b);
+        return ka < kb ? -1 : ka > kb ? 1 : 0;
+      });
+
+      if (!allCategories.length) return;
+
+      var wrap = document.createElement("div");
+      wrap.className = "jump-bar-wrap";
+      wrap.appendChild(createSectionHeading("Jump to Category"));
+
+      var row = document.createElement("div");
+      row.className = "jump-bar-row";
+
+      allCategories.forEach(function(cat) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "jump-chip";
+        btn.textContent = displayCategoryLabel(cat);
+
+        btn.onclick = function() {
+          var section = document.getElementById("section-" + slugifyCategory(cat));
+          if (!section) return;
+
+          var content = section.querySelector(".accordion-content");
+          var chevron = section.querySelector(".accordion-chevron");
+          if (content && !content.classList.contains("open")) {
+            content.classList.add("open");
+            if (chevron) chevron.textContent = "▼";
+          }
+
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+        };
+
+        row.appendChild(btn);
+      });
+
+      wrap.appendChild(row);
+      container.appendChild(wrap);
+    }
+
+    function renderCategoryBlock(container, cat, items) {
+      var section = document.createElement("div");
+      section.className = "category-section";
+      section.id = "section-" + slugifyCategory(cat);
+
+      var closest = "";
+      if (items.length && typeof items[0][6] === "number") {
+        closest = " • closest " + items[0][6].toFixed(1) + " mi";
+      }
+
+      var displayCat = displayCategoryLabel(cat);
+
+      var header = document.createElement("button");
+      header.type = "button";
+      header.className = "accordion-header" + (isMedicalCategory(cat) ? " medical-header" : "");
+      header.innerHTML =
+        "<div class='accordion-left'>" +
+          "<div>" + esc(displayCat) + "</div>" +
+          "<div class='accordion-count'>" + items.length + " results" + esc(closest) + "</div>" +
+        "</div>" +
+        "<div class='accordion-chevron'>▶</div>";
+
+      var content = document.createElement("div");
+      content.className = "accordion-content";
+
+      var grid = document.createElement("div");
+      grid.className = "results-grid";
+      content.appendChild(grid);
+
+      var shownCount = Math.min(DEFAULT_VISIBLE_COUNT, items.length);
+
+      var toggleRow = document.createElement("div");
+      toggleRow.className = "toggle-row";
+
+      var showMoreBtn = document.createElement("button");
+      showMoreBtn.type = "button";
+      showMoreBtn.className = "show-more-btn";
+      showMoreBtn.textContent = "Show More";
+
+      var showLessBtn = document.createElement("button");
+      showLessBtn.type = "button";
+      showLessBtn.className = "show-less-btn";
+      showLessBtn.textContent = "Show Less";
+      showLessBtn.style.display = "none";
+
+      function redrawCards() {
+        grid.innerHTML = "";
+
+        for (var i = 0; i < shownCount; i++) {
+          var r = items[i];
+          var name = r[1], rating = r[2], addr = r[3], openNow = r[4], link = r[5], dist = r[6];
+          var distText = (typeof dist === "number") ? dist.toFixed(1) + " mi" : "";
+          var metaParts = [];
+          if (rating) metaParts.push("⭐ " + esc(rating));
+          if (distText) metaParts.push(esc(distText));
+          if (openNow) metaParts.push(esc(openNow));
+
+          var displayName = esc(name);
+          var cardClass = "card";
+
+          if (isMedicalCategory(cat)) {
+            displayName = "🚑 " + displayName;
+            cardClass += " urgent-card";
+          }
+
+          var actions =
+            "<div class='card-actions'>" +
+              (link ? "<a class='directions-btn' href='" + esc(link) + "' target='_blank' rel='noopener'>Directions</a>" : "") +
+            "</div>";
+
+          var card = document.createElement("div");
+          card.className = cardClass;
+          card.innerHTML =
+            "<div class='card-name'>" + displayName + "</div>" +
+            "<div class='card-meta'>" + metaParts.join(" • ") + "</div>" +
+            "<div class='card-address'>" + esc(addr || "") + "</div>" +
+            actions;
+
+          grid.appendChild(card);
+        }
+
+        showMoreBtn.style.display = items.length > shownCount ? "block" : "none";
+        showLessBtn.style.display = shownCount > DEFAULT_VISIBLE_COUNT ? "block" : "none";
+      }
+
+      showMoreBtn.onclick = function() {
+        shownCount = Math.min(shownCount + 5, items.length);
+        redrawCards();
+      };
+
+      showLessBtn.onclick = function() {
+        shownCount = DEFAULT_VISIBLE_COUNT;
+        redrawCards();
+      };
+
+      toggleRow.appendChild(showMoreBtn);
+      toggleRow.appendChild(showLessBtn);
+      content.appendChild(toggleRow);
+
+      header.onclick = function() {
+        var isOpen = content.classList.contains("open");
+        if (isOpen) {
+          content.classList.remove("open");
+          header.querySelector(".accordion-chevron").textContent = "▶";
+        } else {
+          content.classList.add("open");
+          header.querySelector(".accordion-chevron").textContent = "▼";
+        }
+      };
+
+      section.appendChild(header);
+      section.appendChild(content);
+      container.appendChild(section);
+
+      redrawCards();
+    }
+
+    function renderSection(container, title, categories, grouped) {
+      var sectionCategories = categories.filter(function(cat) {
+        return grouped[cat] && grouped[cat].length;
+      });
+
+      if (!sectionCategories.length) return;
+
+      container.appendChild(createSectionHeading(title));
+
+      sectionCategories.forEach(function(cat) {
+        var items = grouped[cat].slice().sort(function(a, b) {
+          var da = (typeof a[6] === "number") ? a[6] : 9999;
+          var db = (typeof b[6] === "number") ? b[6] : 9999;
+          if (da < db) return -1;
+          if (da > db) return 1;
+
+          var na = String(a[1] || "").toLowerCase();
+          var nb = String(b[1] || "").toLowerCase();
+          return na < nb ? -1 : na > nb ? 1 : 0;
+        });
+
+        renderCategoryBlock(container, cat, items);
+      });
+    }
+
+    function render(data) {
+      var container = document.getElementById("results");
+      var shareTools = document.getElementById("shareTools");
+      var topStopsContainer = document.getElementById("topStops");
+      var jumpBarContainer = document.getElementById("categoryJumpBar");
+
+      container.innerHTML = "";
+      topStopsContainer.innerHTML = "";
+      jumpBarContainer.innerHTML = "";
+
+      lastResults = Array.isArray(data) ? data : [];
+      shareTools.style.display = lastResults.length ? "block" : "none";
+
+      if (!lastResults.length) {
+        container.innerHTML =
+          "<div class='card'>" +
+            "<div class='card-name'>No results found</div>" +
+            "<div class='card-address'>Try a full street address, include city and state with the facility name, or increase the search radius.</div>" +
+          "</div>";
+        return;
+      }
+
+      var grouped = {};
+      lastResults.forEach(function(row) {
+        var cat = row[0] || "Other";
+        if (!grouped[cat]) grouped[cat] = [];
+        grouped[cat].push(row);
+      });
+
+      renderTopStops(grouped);
+      renderCategoryJumpBar(grouped);
+
+      var allCategories = Object.keys(grouped);
+
+      var otherCategories = allCategories
+        .filter(function(cat) {
+          return (
+            GAME_DAY_ESSENTIALS.indexOf(cat) === -1 &&
+            FOOD_AND_DRINK.indexOf(cat) === -1 &&
+            BREWERIES_AND_BARS.indexOf(cat) === -1
+          );
+        })
+        .sort(function(a, b) {
+          var ka = categorySortKey(a);
+          var kb = categorySortKey(b);
+          return ka < kb ? -1 : ka > kb ? 1 : 0;
+        });
+
+      renderSection(container, "Game Day Essentials", GAME_DAY_ESSENTIALS, grouped);
+      renderSection(container, "Food & Drink", FOOD_AND_DRINK, grouped);
+      renderSection(container, "Breweries/Bars", BREWERIES_AND_BARS, grouped);
+      renderSection(container, "Other", otherCategories, grouped);
+    }
+
+    window.addEventListener("load", function() {
+      renderTriangleComplexes();
+      renderRecentSearches();
+      updateInstallTipForMode();
+      setupFieldMatchResults();
+      setupAddressKeyActions();
+
+      if (SHARED_GUIDE && SHARED_GUIDE.results && SHARED_GUIDE.results.length) {
+        document.body.classList.remove("home-mode");
+        document.getElementById("pageTitle").textContent = "GameDayGuide (GDG)";
+        document.getElementById("pageSubtitle").textContent = "Everything you need near your game.";
+        document.getElementById("searchPanel").style.display = "none";
+
+        var banner = document.getElementById("sharedBanner");
+        var bannerText = document.getElementById("sharedBannerText");
+        banner.style.display = "block";
+
+        var line = "";
+        if (SHARED_GUIDE.queryOrGps) {
+          line += "Built for: " + SHARED_GUIDE.queryOrGps;
+        }
+        if (SHARED_GUIDE.radius) {
+          line += (line ? " • " : "") + "Radius: " + SHARED_GUIDE.radius + " mi";
+        }
+        bannerText.textContent = line || "Shared guide";
+
+        lastResults = SHARED_GUIDE.results || [];
+        lastSourceType = SHARED_GUIDE.sourceType || "";
+        lastQueryOrGps = SHARED_GUIDE.queryOrGps || "";
+        selectedRadius = Number(SHARED_GUIDE.radius || 5);
+        document.getElementById("status").textContent = "Shared guide";
+        render(lastResults);
+      } else {
+        document.body.classList.add("home-mode");
+        setRadius(5);
+      }
+    });
+  </script>
 </body>
 </html>
