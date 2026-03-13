@@ -4,21 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
-  <title>GameDayGuide (GDG)</title>
+  <title>GameDayGuide</title>
   <meta name="description" content="Game Day, Made Easier." />
-  <meta property="og:title" content="GameDayGuide (GDG)" />
+  <meta property="og:title" content="GameDayGuide" />
   <meta property="og:description" content="Game Day, Made Easier." />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="GameDayGuide" />
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="GameDayGuide (GDG)" />
+  <meta name="twitter:title" content="GameDayGuide" />
   <meta name="twitter:description" content="Game Day, Made Easier." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <link rel="icon" href="https://emojiapi.dev/api/v1/stadium/64.png">
   <link rel="apple-touch-icon" href="https://emojiapi.dev/api/v1/stadium/180.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="GDG">
-  <meta name="application-name" content="GDG">
+  <meta name="apple-mobile-web-app-title" content="GameDayGuide">
+  <meta name="application-name" content="GameDayGuide">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#10261d">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -60,6 +64,7 @@
       --shadow: 0 16px 40px rgba(0,0,0,0.24);
       --shadow-soft: 0 8px 24px rgba(0,0,0,0.14);
       --shadow-card: 0 10px 26px rgba(0,0,0,0.12);
+      --shadow-app: 0 26px 60px rgba(0,0,0,0.2);
       --radius-xxl: 30px;
       --radius-xl: 24px;
       --radius-lg: 18px;
@@ -92,7 +97,7 @@
       width: 100%;
       min-width: 100%;
       min-height: 100dvh;
-      font-family: Arial, sans-serif;
+      font-family: "Inter", Arial, sans-serif;
       margin: 0;
       padding: 0;
       color: var(--text);
@@ -138,18 +143,26 @@
     }
 
     .app {
-      width: 100%;
-      max-width: 100%;
-      margin: 0;
-      padding: calc(env(safe-area-inset-top, 0px) + 16px) 12px calc(env(safe-area-inset-bottom, 0px) + 28px);
+      width: min(100%, 980px);
+      margin: 0 auto;
+      padding: calc(env(safe-area-inset-top, 0px) + 14px) 12px calc(env(safe-area-inset-bottom, 0px) + 28px);
       position: relative;
       z-index: 1;
+    }
+
+    .app-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 34px;
+      padding: 14px 12px 18px;
+      box-shadow: var(--shadow-app);
+      backdrop-filter: blur(14px);
     }
 
     .header {
       margin-bottom: 18px;
       color: white;
-      padding: 8px 4px 2px;
+      padding: 8px 6px 4px;
     }
 
     .brand-row {
@@ -179,41 +192,26 @@
     .brand-text {
       display: flex;
       flex-direction: column;
-      gap: 3px;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      width: fit-content;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.12);
-      border: 1px solid rgba(255,255,255,0.14);
-      color: rgba(255,255,255,0.88);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      backdrop-filter: blur(8px);
+      gap: 4px;
     }
 
     .title {
-      font-size: 32px;
+      font-size: 31px;
       font-weight: 800;
       margin: 0;
       line-height: 1.03;
-      letter-spacing: -0.035em;
+      letter-spacing: -0.04em;
       text-shadow: 0 2px 12px rgba(0,0,0,0.24);
     }
 
     .subtitle {
       color: rgba(255,255,255,0.9);
-      font-size: 16px;
+      font-size: 15px;
       line-height: 1.45;
-      margin-top: 2px;
+      margin-top: 1px;
       text-shadow: 0 1px 8px rgba(0,0,0,0.2);
       max-width: 38ch;
+      font-weight: 500;
     }
 
     .tip-banner {
@@ -297,12 +295,12 @@
 
     label {
       display: block;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 800;
       margin-bottom: 8px;
       margin-top: 10px;
       color: #30404f;
-      letter-spacing: 0.01em;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
     }
 
@@ -927,6 +925,15 @@
     }
 
     @media (max-width: 767px) {
+      .app {
+        padding: calc(env(safe-area-inset-top, 0px) + 10px) 10px calc(env(safe-area-inset-bottom, 0px) + 20px);
+      }
+
+      .app-card {
+        border-radius: 28px;
+        padding: 12px 10px 16px;
+      }
+
       body.home-mode {
         min-height: 100dvh;
       }
@@ -937,11 +944,17 @@
         flex-direction: column;
       }
 
+      body.home-mode .app-card {
+        flex: 1 1 auto;
+        display: flex;
+        flex-direction: column;
+      }
+
       body.home-mode .search-panel {
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
-        min-height: calc(100dvh - 126px);
+        min-height: calc(100dvh - 154px);
         padding: 22px 14px 24px;
       }
 
@@ -978,19 +991,21 @@
       }
 
       body.home-mode .title {
-        font-size: 30px;
+        font-size: 29px;
       }
 
       body.home-mode .subtitle {
-        font-size: 16px;
+        font-size: 15px;
       }
     }
 
     @media (min-width: 768px) {
       .app {
-        max-width: 920px;
-        margin: 0 auto;
-        padding: calc(env(safe-area-inset-top, 0px) + 24px) 18px calc(env(safe-area-inset-bottom, 0px) + 44px);
+        padding: calc(env(safe-area-inset-top, 0px) + 22px) 18px calc(env(safe-area-inset-bottom, 0px) + 44px);
+      }
+
+      .app-card {
+        padding: 18px 16px 22px;
       }
 
       .button-row {
@@ -1021,80 +1036,81 @@
 </head>
 <body>
   <div class="app">
-    <div class="header">
-      <div class="brand-row">
-        <div class="brand-icon">🏟</div>
-        <div class="brand-text">
-          <div class="eyebrow">Game Day Companion</div>
-          <div class="title" id="pageTitle">GameDayGuide (GDG)</div>
+    <div class="app-card">
+      <div class="header">
+        <div class="brand-row">
+          <div class="brand-icon">🏟</div>
+          <div class="brand-text">
+            <div class="title" id="pageTitle">GameDayGuide</div>
+          </div>
         </div>
-      </div>
-      <div class="subtitle" id="pageSubtitle">Game Day, Made Easier.</div>
-    </div>
-
-    <div id="homeScreenTip" class="tip-banner" style="display:none;">
-      <div class="tip-title">Quick access on game day</div>
-      <div class="tip-text" id="homeScreenTipText">Add this to your home screen for quick access on game day.</div>
-      <div class="tip-actions">
-        <button type="button" class="tip-link-btn" onclick="showInstallHelp()">How to add it</button>
-        <button type="button" class="tip-dismiss-btn" onclick="dismissInstallTip()">Dismiss</button>
-      </div>
-    </div>
-
-    <div id="sharedBanner" class="shared-banner" style="display:none;">
-      <div class="shared-banner-title">Shared guide</div>
-      <div class="muted" id="sharedBannerText"></div>
-      <div class="shared-banner-actions">
-        <a id="openFullAppBtn" class="action-btn build-btn" href="/">Create Your Own Guide</a>
-        <a class="secondary-btn" href="/">Open Full App</a>
-      </div>
-    </div>
-
-    <div class="search-panel" id="searchPanel">
-      <label>Field Address or Field/Facility Name</label>
-      <input id="address" placeholder="Enter field address or facility name" value="" />
-      <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
-      <div id="fieldMatchResults" class="match-results"></div>
-      <div class="helper-text">Paste a field name, field number, court number, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
-
-      <div class="quick-row-wrap" id="triangleComplexWrap">
-        <div class="quick-row-label">Triangle Baseball Complexes</div>
-        <div class="quick-row" id="triangleComplexRow"></div>
+        <div class="subtitle" id="pageSubtitle">Game Day, Made Easier.</div>
       </div>
 
-      <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
-        <div class="quick-row-label">Recent searches</div>
-        <div class="quick-row" id="recentSearchRow"></div>
-      </div>
-
-      <div class="radius-section">
-        <label>Radius</label>
-        <div class="radius-buttons">
-          <button type="button" class="radius-btn" data-radius="2" onclick="setRadius(2)">2 mi</button>
-          <button type="button" class="radius-btn active" data-radius="5" onclick="setRadius(5)">5 mi</button>
-          <button type="button" class="radius-btn" data-radius="10" onclick="setRadius(10)">10 mi</button>
+      <div id="homeScreenTip" class="tip-banner" style="display:none;">
+        <div class="tip-title">Quick access on game day</div>
+        <div class="tip-text" id="homeScreenTipText">Add this to your home screen for quick access on game day.</div>
+        <div class="tip-actions">
+          <button type="button" class="tip-link-btn" onclick="showInstallHelp()">How to add it</button>
+          <button type="button" class="tip-dismiss-btn" onclick="dismissInstallTip()">Dismiss</button>
         </div>
       </div>
 
-      <div class="button-row">
-        <button type="button" class="action-btn build-btn" onclick="runGuide()">Build Guide</button>
-        <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
+      <div id="sharedBanner" class="shared-banner" style="display:none;">
+        <div class="shared-banner-title">Shared guide</div>
+        <div class="muted" id="sharedBannerText"></div>
+        <div class="shared-banner-actions">
+          <a id="openFullAppBtn" class="action-btn build-btn" href="/">Create Your Own Guide</a>
+          <a class="secondary-btn" href="/">Open Full App</a>
+        </div>
       </div>
-    </div>
 
-    <div id="status"></div>
+      <div class="search-panel" id="searchPanel">
+        <label>Field Address or Field/Facility Name</label>
+        <input id="address" placeholder="Enter field address or facility name" value="" />
+        <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
+        <div id="fieldMatchResults" class="match-results"></div>
+        <div class="helper-text">Paste a field name, field number, court number, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
 
-    <div id="shareTools" style="display:none;">
-      <div class="share-tools-row">
-        <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share Guide</button>
-        <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
+        <div class="quick-row-wrap" id="triangleComplexWrap">
+          <div class="quick-row-label">Triangle Baseball Complexes</div>
+          <div class="quick-row" id="triangleComplexRow"></div>
+        </div>
+
+        <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
+          <div class="quick-row-label">Recent searches</div>
+          <div class="quick-row" id="recentSearchRow"></div>
+        </div>
+
+        <div class="radius-section">
+          <label>Radius</label>
+          <div class="radius-buttons">
+            <button type="button" class="radius-btn" data-radius="2" onclick="setRadius(2)">2 mi</button>
+            <button type="button" class="radius-btn active" data-radius="5" onclick="setRadius(5)">5 mi</button>
+            <button type="button" class="radius-btn" data-radius="10" onclick="setRadius(10)">10 mi</button>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button type="button" class="action-btn build-btn" onclick="runGuide()">Build Guide</button>
+          <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
+        </div>
       </div>
-    </div>
 
-    <div id="shareLinkBox" style="display:none;"></div>
-    <div id="topStops"></div>
-    <div id="categoryJumpBar"></div>
-    <div id="results"></div>
+      <div id="status"></div>
+
+      <div id="shareTools" style="display:none;">
+        <div class="share-tools-row">
+          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share Guide</button>
+          <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
+        </div>
+      </div>
+
+      <div id="shareLinkBox" style="display:none;"></div>
+      <div id="topStops"></div>
+      <div id="categoryJumpBar"></div>
+      <div id="results"></div>
+    </div>
   </div>
 
   <script>
@@ -1661,6 +1677,51 @@
           findMatchingFields();
         }
       });
+
+      input.addEventListener("input", function() {
+        var value = String(input.value || "").trim();
+
+        if (!value) {
+          hideFieldMatchResults();
+          document.getElementById("status").textContent = "";
+          return;
+        }
+
+        hideFieldMatchResults();
+      });
+
+      input.addEventListener("focus", function() {
+        if (!String(input.value || "").trim()) {
+          hideFieldMatchResults();
+        }
+      });
+
+      document.addEventListener("click", function(e) {
+        if (
+          e.target.closest("#address") ||
+          e.target.closest("#fieldMatchResults") ||
+          e.target.closest(".match-btn")
+        ) {
+          return;
+        }
+        hideFieldMatchResults();
+      });
+    }
+
+    function focusAddressField() {
+      var input = document.getElementById("address");
+      if (!input) return;
+      if (currentSharedGuide && currentSharedGuide.results && currentSharedGuide.results.length) return;
+
+      setTimeout(function() {
+        try {
+          input.focus({ preventScroll: true });
+        } catch (e) {
+          try {
+            input.focus();
+          } catch (err) {}
+        }
+      }, 150);
     }
 
     function renderTriangleComplexes() {
@@ -1787,6 +1848,7 @@
       renderRecentSearches();
       document.body.classList.add("home-mode");
       window.scrollTo({ top: 0, behavior: "smooth" });
+      focusAddressField();
     }
 
     function runGuideWithQuery(query, sourceType) {
@@ -2495,7 +2557,7 @@
     function showSharedGuide(sharedGuide) {
       currentSharedGuide = sharedGuide || null;
       document.body.classList.remove("home-mode");
-      document.getElementById("pageTitle").textContent = "GameDayGuide (GDG)";
+      document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
       document.getElementById("searchPanel").style.display = "none";
 
@@ -2549,6 +2611,7 @@
 
       document.body.classList.add("home-mode");
       setRadius(5);
+      focusAddressField();
     }
 
     window.addEventListener("load", function() {
