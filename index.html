@@ -173,7 +173,11 @@
       box-shadow: 0 10px 22px rgba(0,0,0,0.22);
       backdrop-filter: blur(12px);
     }
-
+.brand-icon img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
     .brand-text {
       display: flex;
       flex-direction: column;
@@ -1024,7 +1028,9 @@
     <div class="app-card">
       <div class="header">
         <div class="brand-row">
-          <div class="brand-icon">🏟</div>
+          <div class="brand-icon">
+  <img src="gdg-icon.png" alt="GameDayGuide Logo">
+</div>
           <div class="brand-text">
             <div class="title" id="pageTitle">GameDayGuide</div>
           </div>
