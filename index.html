@@ -579,12 +579,78 @@
 
     #status {
       margin: 14px 0 8px;
+      min-height: 20px;
+      padding: 0 4px;
+    }
+
+    .status-text {
       color: rgba(255,255,255,0.96);
       font-size: 14px;
-      min-height: 20px;
       text-shadow: 0 1px 5px rgba(0,0,0,0.22);
-      padding: 0 4px;
       font-weight: 600;
+    }
+
+    .gdg-loading {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.15), rgba(255,255,255,0.08));
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+      backdrop-filter: blur(10px);
+      max-width: 100%;
+    }
+
+    .gdg-loading-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.12));
+      border: 1px solid rgba(255,255,255,0.2);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+      flex: 0 0 auto;
+      animation: loadingPulse 1.8s ease-in-out infinite;
+    }
+
+    .gdg-loading-icon img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
+    .gdg-loading-text {
+      min-width: 0;
+    }
+
+    .gdg-loading-title {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.22);
+      margin-bottom: 3px;
+    }
+
+    .gdg-loading-subtext {
+      color: rgba(255,255,255,0.88);
+      font-size: 13px;
+      line-height: 1.35;
+      font-weight: 600;
+      text-shadow: 0 1px 5px rgba(0,0,0,0.18);
+      min-height: 18px;
+    }
+
+    @keyframes loadingPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+      100% { transform: scale(1); }
     }
 
     #shareTools,
@@ -992,6 +1058,11 @@
       body.home-mode .subtitle {
         font-size: 15px;
       }
+
+      .gdg-loading {
+        width: 100%;
+        align-items: flex-start;
+      }
     }
 
     @media (min-width: 768px) {
@@ -1123,6 +1194,8 @@
     let visibleSuggestions = [];
     let currentSharedGuide = null;
     let latestShareUrl = "";
+    let loadingSubtextTimer = null;
+    let loadingSubtextIndex = 0;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
@@ -1148,6 +1221,14 @@
     const RECENT_SEARCH_KEY = "gamedayguide_recent_searches_v1";
     const CURATED_SUGGESTION_LIMIT = 6;
     const AUTO_RUN_RANK_THRESHOLD = 800;
+
+    const LOADING_SUBTEXTS = [
+      "Finding the best spots near your field...",
+      "Checking nearby food, coffee, gas, and more...",
+      "Building your game day guide...",
+      "Looking for quick stops parents actually need...",
+      "Pulling together your closest essentials..."
+    ];
 
     const TRIANGLE_COMPLEXES = [
       { label: "USA Baseball Complex", query: "USA Baseball National Training Complex, Cary NC" },
@@ -1355,6 +1436,49 @@
         list = list.slice(0, 6);
         localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(list));
       } catch (e) {}
+    }
+
+    function showPlainStatus(message) {
+      stopLoadingStatus();
+      var status = document.getElementById("status");
+      status.innerHTML = "<div class='status-text'>" + esc(message || "") + "</div>";
+    }
+
+    function startLoadingStatus(title, subtexts) {
+      stopLoadingStatus();
+
+      var status = document.getElementById("status");
+      var safeTitle = esc(title || "GDG Loading...");
+      var lines = Array.isArray(subtexts) && subtexts.length ? subtexts.slice() : LOADING_SUBTEXTS.slice();
+
+      status.innerHTML =
+        "<div class='gdg-loading'>" +
+          "<div class='gdg-loading-icon'>" +
+            "<img src='gdg-icon.png' alt='GameDayGuide Logo'>" +
+          "</div>" +
+          "<div class='gdg-loading-text'>" +
+            "<div class='gdg-loading-title'>" + safeTitle + "</div>" +
+            "<div class='gdg-loading-subtext' id='gdgLoadingSubtext'>" + esc(lines[0]) + "</div>" +
+          "</div>" +
+        "</div>";
+
+      loadingSubtextIndex = 0;
+
+      if (lines.length > 1) {
+        loadingSubtextTimer = setInterval(function() {
+          var sub = document.getElementById("gdgLoadingSubtext");
+          if (!sub) return;
+          loadingSubtextIndex = (loadingSubtextIndex + 1) % lines.length;
+          sub.textContent = lines[loadingSubtextIndex];
+        }, 1400);
+      }
+    }
+
+    function stopLoadingStatus() {
+      if (loadingSubtextTimer) {
+        clearInterval(loadingSubtextTimer);
+        loadingSubtextTimer = null;
+      }
     }
 
     function scoreCuratedSuggestion(item, searchText) {
@@ -1601,12 +1725,12 @@
       var query = getPreparedFacilityQuery_(rawQuery);
 
       if (!query) {
-        document.getElementById("status").textContent = "Enter a facility name first.";
+        showPlainStatus("Enter a facility name first.");
         hideFieldMatchResults();
         return;
       }
 
-      document.getElementById("status").textContent = "Searching for fields…";
+      showPlainStatus("Searching for fields…");
       hideFieldMatchResults();
 
       callBackend("getFieldSuggestions", { query: query })
@@ -1624,11 +1748,10 @@
           }
 
           renderFieldMatchResults(visibleSuggestions);
-          document.getElementById("status").textContent = visibleSuggestions.length ? "Select a field match." : "No matching facilities found.";
+          showPlainStatus(visibleSuggestions.length ? "Select a field match." : "No matching facilities found.");
         })
         .catch(function(err) {
-          document.getElementById("status").textContent =
-            "Error finding facilities: " + (err && err.message ? err.message : JSON.stringify(err));
+          showPlainStatus("Error finding facilities: " + (err && err.message ? err.message : JSON.stringify(err)));
           hideFieldMatchResults();
         });
     }
@@ -1671,7 +1794,7 @@
 
         if (!value) {
           hideFieldMatchResults();
-          document.getElementById("status").textContent = "";
+          showPlainStatus("");
           return;
         }
 
@@ -1802,7 +1925,7 @@
       var query = getPreparedFacilityQuery_(rawQuery);
 
       if (!query) {
-        document.getElementById("status").textContent = "Please enter an address or facility name.";
+        showPlainStatus("Please enter an address or facility name.");
         return;
       }
 
@@ -1818,6 +1941,8 @@
     }
 
     function startNewGuide() {
+      stopLoadingStatus();
+
       lastResults = [];
       lastSourceType = "";
       lastQueryOrGps = "";
@@ -1825,7 +1950,7 @@
       latestShareUrl = "";
 
       document.getElementById("address").value = "";
-      document.getElementById("status").textContent = "";
+      showPlainStatus("");
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
@@ -1844,14 +1969,14 @@
       sourceType = sourceType || "query";
 
       if (!query) {
-        document.getElementById("status").textContent = "Please enter an address or facility name.";
+        showPlainStatus("Please enter an address or facility name.");
         return;
       }
 
       var radius = getRadiusMiles();
       var userId = getAnonId();
 
-      document.getElementById("status").textContent = "Searching…";
+      startLoadingStatus("GDG Loading...", LOADING_SUBTEXTS);
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
@@ -1870,18 +1995,21 @@
           lastQueryOrGps = query;
           saveRecentSearch(query);
           renderRecentSearches();
-          document.getElementById("status").textContent = "Done.";
+          showPlainStatus("Done.");
           document.body.classList.remove("home-mode");
           render(lastResults);
         })
         .catch(function(err) {
-          document.getElementById("status").textContent =
-            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+          showPlainStatus("Error: " + (err && err.message ? err.message : JSON.stringify(err)));
         });
     }
 
     function useMyLocation() {
-      document.getElementById("status").textContent = "Getting your location…";
+      startLoadingStatus("GDG Loading...", [
+        "Getting your location...",
+        "Checking nearby spots around you...",
+        "Building your game day guide..."
+      ]);
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
@@ -1891,7 +2019,7 @@
       hideFieldMatchResults();
 
       if (!navigator.geolocation) {
-        document.getElementById("status").textContent = "This device/browser doesn't support location.";
+        showPlainStatus("This device/browser doesn't support location.");
         return;
       }
 
@@ -1902,7 +2030,7 @@
           var radius = getRadiusMiles();
           var userId = getAnonId();
 
-          document.getElementById("status").textContent = "Searching…";
+          startLoadingStatus("GDG Loading...", LOADING_SUBTEXTS);
 
           callBackend("getWeekendHubByLatLng", {
             lat: lat,
@@ -1914,13 +2042,12 @@
               lastResults = Array.isArray(data) ? data : [];
               lastSourceType = "gps";
               lastQueryOrGps = "GPS:" + lat + "," + lng;
-              document.getElementById("status").textContent = "Done.";
+              showPlainStatus("Done.");
               document.body.classList.remove("home-mode");
               render(lastResults);
             })
             .catch(function(err) {
-              document.getElementById("status").textContent =
-                "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+              showPlainStatus("Error: " + (err && err.message ? err.message : JSON.stringify(err)));
             });
         },
         function(err) {
@@ -1928,7 +2055,7 @@
           if (err && err.code === 1) msg = "Location permission denied. Allow it in browser settings.";
           if (err && err.code === 2) msg = "Location unavailable. Try again outside or with better signal.";
           if (err && err.code === 3) msg = "Location timed out. Try again.";
-          document.getElementById("status").textContent = msg;
+          showPlainStatus(msg);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
       );
@@ -1936,14 +2063,14 @@
 
     function copyShareLink(url) {
       if (!url) {
-        document.getElementById("status").textContent = "No share link available.";
+        showPlainStatus("No share link available.");
         return;
       }
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url)
           .then(function() {
-            document.getElementById("status").textContent = "Share link copied.";
+            showPlainStatus("Share link copied.");
             var input = document.getElementById("shareLinkInput");
             if (input) {
               input.focus();
@@ -1951,7 +2078,7 @@
             }
           })
           .catch(function() {
-            document.getElementById("status").textContent = "Could not copy link automatically. You can still copy the link below.";
+            showPlainStatus("Could not copy link automatically. You can still copy the link below.");
           });
       } else {
         var input = document.getElementById("shareLinkInput");
@@ -1959,18 +2086,18 @@
           input.focus();
           input.select();
         }
-        document.getElementById("status").textContent = "Automatic copy is not supported here. You can copy the link shown below.";
+        showPlainStatus("Automatic copy is not supported here. You can copy the link shown below.");
       }
     }
 
     function triggerNativeShare() {
       if (!latestShareUrl) {
-        document.getElementById("status").textContent = "No share link available.";
+        showPlainStatus("No share link available.");
         return;
       }
 
       if (!navigator.share) {
-        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
+        showPlainStatus("Sharing is not supported on this device/browser. Use Copy Link instead.");
         return;
       }
 
@@ -1980,14 +2107,14 @@
         url: latestShareUrl
       })
       .then(function() {
-        document.getElementById("status").textContent = "Share sheet opened.";
+        showPlainStatus("Share sheet opened.");
       })
       .catch(function(err) {
         if (err && err.name === "AbortError") {
-          document.getElementById("status").textContent = "Share canceled.";
+          showPlainStatus("Share canceled.");
           return;
         }
-        document.getElementById("status").textContent = "Could not open share options. You can still copy the link below.";
+        showPlainStatus("Could not open share options. You can still copy the link below.");
       });
     }
 
@@ -2037,11 +2164,15 @@
 
     function shareGuide() {
       if (!lastResults || !lastResults.length) {
-        document.getElementById("status").textContent = "No results available to share.";
+        showPlainStatus("No results available to share.");
         return;
       }
 
-      document.getElementById("status").textContent = "Creating share link…";
+      startLoadingStatus("GDG Loading...", [
+        "Creating your share link...",
+        "Packaging this guide for other parents...",
+        "Almost ready to send..."
+      ]);
 
       callBackend("createSharedGuide", {
         sourceType: lastSourceType,
@@ -2057,16 +2188,15 @@
             : "";
 
           if (!url) {
-            document.getElementById("status").textContent = "Unable to create share link.";
+            showPlainStatus("Unable to create share link.");
             return;
           }
 
           showShareLink(url);
-          document.getElementById("status").textContent = "Share link ready.";
+          showPlainStatus("Share link ready.");
         })
         .catch(function(err) {
-          document.getElementById("status").textContent =
-            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+          showPlainStatus("Error: " + (err && err.message ? err.message : JSON.stringify(err)));
         });
     }
 
@@ -2572,7 +2702,7 @@
       lastSourceType = (sharedGuide && sharedGuide.sourceType) || "";
       lastQueryOrGps = (sharedGuide && sharedGuide.queryOrGps) || "";
       selectedRadius = Number((sharedGuide && sharedGuide.radius) || 5);
-      document.getElementById("status").textContent = "Shared guide";
+      showPlainStatus("Shared guide");
       render(lastResults);
       updateInstallTipForMode();
     }
@@ -2588,7 +2718,11 @@
 
       if (shareId) {
         try {
-          document.getElementById("status").textContent = "Loading shared guide…";
+          startLoadingStatus("GDG Loading...", [
+            "Opening this shared guide...",
+            "Pulling together the saved results...",
+            "Almost there..."
+          ]);
           var sharedGuide = await getSharedGuideFromBackend(shareId);
 
           if (sharedGuide && sharedGuide.results && sharedGuide.results.length) {
@@ -2596,10 +2730,9 @@
             return;
           }
 
-          document.getElementById("status").textContent = "Shared guide not found.";
+          showPlainStatus("Shared guide not found.");
         } catch (err) {
-          document.getElementById("status").textContent =
-            "Error loading shared guide: " + (err && err.message ? err.message : JSON.stringify(err));
+          showPlainStatus("Error loading shared guide: " + (err && err.message ? err.message : JSON.stringify(err)));
         }
       }
 
