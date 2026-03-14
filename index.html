@@ -17,17 +17,14 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/png" href="gdg-icon.png">
-<link rel="apple-touch-icon" href="gdg-icon.png">
+  <link rel="icon" type="image/png" href="gdg-icon.png?v=2">
+  <link rel="apple-touch-icon" href="gdg-icon.png?v=2">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="GameDayGuide">
   <meta name="application-name" content="GameDayGuide">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#10261d">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
- <link rel="icon" type="image/png" href="gdg-icon.png?v=2">
-<link rel="apple-touch-icon" href="gdg-icon.png?v=2">
 
   <style>
     :root {
@@ -173,12 +170,14 @@
       box-shadow: 0 10px 22px rgba(0,0,0,0.22);
       backdrop-filter: blur(12px);
     }
-.brand-icon img {
-  width: 36px;
-  height: 36px;
-  object-fit: contain;
-  border-radius: 8px;
-}
+
+    .brand-icon img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+
     .brand-text {
       display: flex;
       flex-direction: column;
@@ -766,6 +765,12 @@
       color: #666;
     }
 
+    .accordion-helper {
+      font-size: 12px;
+      font-weight: 600;
+      color: #6b7785;
+    }
+
     .accordion-chevron {
       font-size: 18px;
       color: #666;
@@ -1030,8 +1035,8 @@
       <div class="header">
         <div class="brand-row">
           <div class="brand-icon">
-  <img src="gdg-icon.png" alt="GameDayGuide Logo">
-</div>
+            <img src="gdg-icon.png" alt="GameDayGuide Logo">
+          </div>
           <div class="brand-text">
             <div class="title" id="pageTitle">GameDayGuide</div>
           </div>
@@ -1077,11 +1082,11 @@
         <div class="radius-section">
           <label>Radius</label>
           <div class="radius-buttons">
-  <button type="button" class="radius-btn" data-radius="2" onclick="setRadius(2)">2 mi</button>
-  <button type="button" class="radius-btn active" data-radius="5" onclick="setRadius(5)">5 mi</button>
-  <button type="button" class="radius-btn" data-radius="10" onclick="setRadius(10)">10 mi</button>
-  <button type="button" class="radius-btn" data-radius="20" onclick="setRadius(20)">20 mi</button>
-</div>
+            <button type="button" class="radius-btn" data-radius="2" onclick="setRadius(2)">2 mi</button>
+            <button type="button" class="radius-btn active" data-radius="5" onclick="setRadius(5)">5 mi</button>
+            <button type="button" class="radius-btn" data-radius="10" onclick="setRadius(10)">10 mi</button>
+            <button type="button" class="radius-btn" data-radius="20" onclick="setRadius(20)">20 mi</button>
+          </div>
         </div>
 
         <div class="button-row">
@@ -1123,22 +1128,16 @@
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
 
     const GAME_DAY_ESSENTIALS = [
-  BACKEND_MEDICAL_LABEL,
-  "🦷 Emergency Dentist",
-  "💊 Pharmacy",
-  "⚾ Sporting Goods"
-];
+      BACKEND_MEDICAL_LABEL,
+      "🦷 Emergency Dentist",
+      "💊 Pharmacy",
+      "⚾ Sporting Goods"
+    ];
 
     const FOOD_AND_DRINK = [
-      "🍜 Asian",
-      "🥞 Breakfast",
-      "🍔 Burgers",
+      "🍔 Food",
       "☕ Coffee",
-      "🍦 Ice Cream",
-      "🍝 Italian",
-      "🌮 Mexican",
-      "🍕 Pizza",
-      "🥪 Sandwiches"
+      "🍦 Ice Cream"
     ];
 
     const BREWERIES_AND_BARS = [
@@ -1239,15 +1238,9 @@
 
     function categorySortKey(label) {
       var foodOrder = [
-        "🍜 Asian",
-        "🥞 Breakfast",
-        "🍔 Burgers",
+        "🍔 Food",
         "☕ Coffee",
-        "🍦 Ice Cream",
-        "🍝 Italian",
-        "🌮 Mexican",
-        "🍕 Pizza",
-        "🥪 Sandwiches"
+        "🍦 Ice Cream"
       ];
 
       var nonFoodOrder = [
@@ -1258,7 +1251,8 @@
         "🏨 Hotels",
         "💊 Pharmacy",
         "⚾ Sporting Goods",
-        BACKEND_MEDICAL_LABEL
+        BACKEND_MEDICAL_LABEL,
+        "🦷 Emergency Dentist"
       ];
 
       var foodIndex = foodOrder.indexOf(label);
@@ -2354,6 +2348,11 @@
       }
 
       var displayCat = displayCategoryLabel(cat);
+      var helperText = "";
+
+      if (cat === "🍔 Food") {
+        helperText = "Sorted by: Closest & Open";
+      }
 
       var header = document.createElement("button");
       header.type = "button";
@@ -2362,6 +2361,7 @@
         "<div class='accordion-left'>" +
           "<div>" + esc(displayCat) + "</div>" +
           "<div class='accordion-count'>" + items.length + " results" + esc(closest) + "</div>" +
+          (helperText ? "<div class='accordion-helper'>" + esc(helperText) + "</div>" : "") +
         "</div>" +
         "<div class='accordion-chevron'>▶</div>";
 
