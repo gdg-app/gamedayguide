@@ -1859,10 +1859,12 @@ function shareSpot(name, address) {
   address = String(address || "").trim();
 
   var btn = (typeof event !== "undefined" && event && event.target) ? event.target : null;
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "Creating link...";
-  }
+if (btn) {
+  btn.disabled = true;
+  btn.textContent = "Creating link...";
+}
+
+document.getElementById("status").textContent = "Creating location link… please wait.";
 
   if (!name && !address) {
     if (btn) {
