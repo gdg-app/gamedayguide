@@ -1854,17 +1854,26 @@ function startLoadingState() {
 
       return window.location.origin + window.location.pathname + "?spot=" + encodeURIComponent(spotId);
     }
+function shareSpot(name, address) {
+  name = String(name || "").trim();
+  address = String(address || "").trim();
 
-    function shareSpot(name, address) {
-      name = String(name || "").trim();
-      address = String(address || "").trim();
+  var btn = (typeof event !== "undefined" && event && event.target) ? event.target : null;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Creating link...";
+  }
 
-      if (!name && !address) {
-        document.getElementById("status").textContent = "No location available to share.";
-        return;
-      }
+  if (!name && !address) {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Share This Spot";
+    }
+    document.getElementById("status").textContent = "No location available to share.";
+    return;
+  }
 
-      document.getElementById("status").textContent = "Creating spot share link…";
+  document.getElementById("status").textContent = "Creating location link…";
 
       createSpotShareUrl(name, address)
         .then(function(shareUrl) {
@@ -1878,9 +1887,17 @@ function startLoadingState() {
               url: shareUrl
             })
             .then(function() {
+              if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Share This Spot";
+              }
               document.getElementById("status").textContent = "Spot ready to share.";
             })
             .catch(function(err) {
+              if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Share This Spot";
+              }
               if (err && err.name === "AbortError") {
                 document.getElementById("status").textContent = "Share canceled.";
                 return;
@@ -1889,13 +1906,20 @@ function startLoadingState() {
             });
           }
 
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Share This Spot";
+          }
           fallbackCopySpot_(shareText, shareUrl);
         })
         .catch(function(err) {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Share This Spot";
+          }
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
         });
-    }
 
     function fallbackCopySpot_(shareText, shareUrl) {
       var copyText = [shareText, shareUrl].filter(Boolean).join("\n");
