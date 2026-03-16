@@ -1396,12 +1396,12 @@
         </div>
       </div>
 
-      <div id="shareTools" style="display:none;">
-        <div class="share-tools-row">
-          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share Guide</button>
-          <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
-        </div>
-      </div>
+<div id="shareTools" style="display:none;">
+  <div class="share-tools-row">
+    <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share This Field With Your Team</button>
+    <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
+  </div>
+</div>
 
       <div id="shareLinkBox" style="display:none;"></div>
       <div id="topStops"></div>
@@ -2586,50 +2586,62 @@ function startLoadingState() {
     }
 
     function triggerNativeShare() {
-      if (!latestShareUrl) {
-        document.getElementById("status").textContent = "No share link available.";
-        return;
-      }
+  if (!latestShareUrl) {
+    document.getElementById("status").textContent = "No share link available.";
+    return;
+  }
 
-      if (!navigator.share) {
-        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
-        return;
-      }
+  if (!navigator.share) {
+    document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
+    return;
+  }
 
-      navigator.share({
-        title: "GameDayGuide",
-        text: "Here’s the GameDayGuide",
-        url: latestShareUrl
-      })
-      .then(function() {
-        document.getElementById("status").textContent = "Share sheet opened.";
-      })
-      .catch(function(err) {
-        if (err && err.name === "AbortError") {
-          document.getElementById("status").textContent = "Share canceled.";
-          return;
-        }
-        document.getElementById("status").textContent = "Could not open share options. You can still copy the link below.";
-      });
+  var shareText = lastQueryOrGps
+    ? "GameDayGuide for " + lastQueryOrGps
+    : "GameDayGuide for our field";
+
+  navigator.share({
+    title: "GameDayGuide",
+    text: shareText,
+    url: latestShareUrl
+  })
+  .then(function() {
+    document.getElementById("status").textContent = "Share sheet opened.";
+  })
+  .catch(function(err) {
+    if (err && err.name === "AbortError") {
+      document.getElementById("status").textContent = "Share canceled.";
+      return;
     }
+    document.getElementById("status").textContent = "Could not open share options. You can still copy the link below.";
+  });
+}
 
-    function showShareLink(url) {
-      latestShareUrl = url || "";
+function showShareLink(url) {
+  latestShareUrl = url || "";
 
-      var box = document.getElementById("shareLinkBox");
-      box.style.display = "block";
-      box.innerHTML =
-        "<div class='card'>" +
-          "<div class='card-name'>Guide ready to share</div>" +
-          "<div class='card-meta'>Use the link below to share this guide with other parents.</div>" +
-          "<input id='shareLinkInput' class='share-link-input' type='text' readonly value='" + esc(url) + "' />" +
-          "<div class='share-link-help'>You can tap Share, copy the link, or open it first to confirm it looks right.</div>" +
-          "<div class='share-action-row'>" +
-            "<button type='button' class='action-btn share-btn' id='nativeShareBtn'>Share Guide Now</button>" +
-            "<button type='button' class='secondary-btn' id='copyShareAgainBtn'>Copy Link</button>" +
-            "<a class='directions-btn' href='" + esc(url) + "' target='_blank' rel='noopener'>Open Shared Guide</a>" +
-          "</div>" +
-        "</div>";
+  var shareLabel = lastQueryOrGps
+    ? "Field guide ready for " + esc(lastQueryOrGps)
+    : "Field guide ready to share";
+
+  var shareMeta = lastQueryOrGps
+    ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
+    : "Send this to your team chat so everyone can open the same GameDayGuide.";
+
+  var box = document.getElementById("shareLinkBox");
+  box.style.display = "block";
+  box.innerHTML =
+    "<div class='card'>" +
+      "<div class='card-name'>" + shareLabel + "</div>" +
+      "<div class='card-meta'>" + shareMeta + "</div>" +
+      "<input id='shareLinkInput' class='share-link-input' type='text' readonly value='" + esc(url) + "' />" +
+      "<div class='share-link-help'>You can tap Share, copy the link, or open it first to confirm it looks right.</div>" +
+      "<div class='share-action-row'>" +
+        "<button type='button' class='action-btn share-btn' id='nativeShareBtn'>Share With Team</button>" +
+        "<button type='button' class='secondary-btn' id='copyShareAgainBtn'>Copy Link</button>" +
+        "<a class='directions-btn' href='" + esc(url) + "' target='_blank' rel='noopener'>Open Shared Guide</a>" +
+      "</div>" +
+    "</div>";
 
       var input = document.getElementById("shareLinkInput");
       if (input) {
