@@ -1859,12 +1859,10 @@ function shareSpot(name, address) {
   address = String(address || "").trim();
 
   var btn = (typeof event !== "undefined" && event && event.target) ? event.target : null;
-if (btn) {
-  btn.disabled = true;
-  btn.textContent = "Creating link...";
-}
-
-document.getElementById("status").textContent = "Creating location link… please wait.";
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Creating link...";
+  }
 
   if (!name && !address) {
     if (btn) {
@@ -1875,53 +1873,54 @@ document.getElementById("status").textContent = "Creating location link… pleas
     return;
   }
 
-  document.getElementById("status").textContent = "Creating location link…";
+  document.getElementById("status").textContent = "Creating location link… please wait.";
 
-      createSpotShareUrl(name, address)
-        .then(function(shareUrl) {
-          var shareText = [name, address].filter(Boolean).join("\n");
-          var shareTitle = name || "GameDayGuide Spot";
+  createSpotShareUrl(name, address)
+    .then(function(shareUrl) {
+      var shareText = [name, address].filter(Boolean).join("\n");
+      var shareTitle = name || "GameDayGuide Spot";
 
-          if (navigator.share) {
-            return navigator.share({
-              title: shareTitle,
-              text: shareText,
-              url: shareUrl
-            })
-            .then(function() {
-              if (btn) {
-                btn.disabled = false;
-                btn.textContent = "Share This Spot";
-              }
-              document.getElementById("status").textContent = "Spot ready to share.";
-            })
-            .catch(function(err) {
-              if (btn) {
-                btn.disabled = false;
-                btn.textContent = "Share This Spot";
-              }
-              if (err && err.name === "AbortError") {
-                document.getElementById("status").textContent = "Share canceled.";
-                return;
-              }
-              fallbackCopySpot_(shareText, shareUrl);
-            });
-          }
-
+      if (navigator.share) {
+        return navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl
+        })
+        .then(function() {
           if (btn) {
             btn.disabled = false;
             btn.textContent = "Share This Spot";
           }
-          fallbackCopySpot_(shareText, shareUrl);
+          document.getElementById("status").textContent = "Spot ready to share.";
         })
         .catch(function(err) {
           if (btn) {
             btn.disabled = false;
             btn.textContent = "Share This Spot";
           }
-          document.getElementById("status").textContent =
-            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+          if (err && err.name === "AbortError") {
+            document.getElementById("status").textContent = "Share canceled.";
+            return;
+          }
+          fallbackCopySpot_(shareText, shareUrl);
         });
+      }
+
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Share This Spot";
+      }
+      fallbackCopySpot_(shareText, shareUrl);
+    })
+    .catch(function(err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Share This Spot";
+      }
+      document.getElementById("status").textContent =
+        "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+    });
+}
 
     function fallbackCopySpot_(shareText, shareUrl) {
       var copyText = [shareText, shareUrl].filter(Boolean).join("\n");
