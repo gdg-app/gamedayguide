@@ -615,17 +615,16 @@
 
     .loading-wrap {
       display: none;
-      margin: 14px 0 18px;
+      margin: 10px 0 16px;
     }
 
     .loading-card {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
-      border-radius: 26px;
-      border: var(--border-soft);
-      box-shadow: var(--shadow);
+      background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.86));
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
       backdrop-filter: blur(12px);
-      padding: 28px 18px 24px;
+      padding: 20px 16px 18px;
       text-align: center;
       overflow: hidden;
       position: relative;
@@ -635,8 +634,8 @@
       content: "";
       position: absolute;
       inset: 0 0 auto 0;
-      height: 110px;
-      background: linear-gradient(180deg, rgba(25,118,210,0.08), rgba(25,118,210,0));
+      height: 72px;
+      background: linear-gradient(180deg, rgba(25,118,210,0.07), rgba(25,118,210,0));
       pointer-events: none;
     }
 
@@ -646,58 +645,56 @@
     }
 
     .loading-logo-shell {
-      width: 82px;
-      height: 82px;
-      border-radius: 24px;
-      margin: 0 auto 16px;
+      width: 62px;
+      height: 62px;
+      border-radius: 18px;
+      margin: 0 auto 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      background:
-        linear-gradient(180deg, rgba(25,118,210,0.14), rgba(25,118,210,0.06));
+      background: linear-gradient(180deg, rgba(25,118,210,0.12), rgba(25,118,210,0.05));
       box-shadow:
-        0 16px 30px rgba(25,118,210,0.12),
-        inset 0 1px 0 rgba(255,255,255,0.7);
-      animation: gdgPulse 1.9s ease-in-out infinite;
+        0 10px 20px rgba(25,118,210,0.1),
+        inset 0 1px 0 rgba(255,255,255,0.65);
+      animation: gdgPulse 2.2s ease-in-out infinite;
     }
 
     .loading-logo-shell img {
-      width: 52px;
-      height: 52px;
+      width: 40px;
+      height: 40px;
       object-fit: contain;
-      border-radius: 12px;
+      border-radius: 10px;
     }
 
     .loading-title {
-      font-size: 24px;
+      font-size: 21px;
       font-weight: 800;
       color: #1c2a35;
       letter-spacing: -0.03em;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
     .loading-subtext {
-      min-height: 24px;
-      font-size: 15px;
+      min-height: 22px;
+      font-size: 14px;
       font-weight: 600;
       color: #5e6b77;
       line-height: 1.45;
-      transition: opacity 0.18s ease;
+      transition: opacity 0.2s ease;
     }
 
     @keyframes gdgPulse {
-      0%,
-      100% {
+      0%, 100% {
         transform: scale(1);
         box-shadow:
-          0 16px 30px rgba(25,118,210,0.12),
-          inset 0 1px 0 rgba(255,255,255,0.7);
+          0 10px 20px rgba(25,118,210,0.1),
+          inset 0 1px 0 rgba(255,255,255,0.65);
       }
       50% {
-        transform: scale(1.04);
+        transform: scale(1.035);
         box-shadow:
-          0 22px 34px rgba(25,118,210,0.18),
-          inset 0 1px 0 rgba(255,255,255,0.8);
+          0 14px 24px rgba(25,118,210,0.14),
+          inset 0 1px 0 rgba(255,255,255,0.75);
       }
     }
 
@@ -1800,8 +1797,8 @@
         setTimeout(function() {
           subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
           subtextEl.style.opacity = "1";
-        }, 140);
-      }, 1500);
+        }, 180);
+      }, 2400);
     }
 
     function stopLoadingState() {
@@ -1833,10 +1830,21 @@
       return "https://maps.apple.com/?q=" + encodeURIComponent(query);
     }
 
-    function getPreferredShareMapLink(name, address) {
-      return getPlatformType() === "ios"
-        ? buildAppleMapsLink(name, address)
-        : buildGoogleMapsLink(name, address);
+    async function createSpotShareUrl(name, address) {
+      var googleMapsUrl = buildGoogleMapsLink(name, address);
+      var appleMapsUrl = buildAppleMapsLink(name, address);
+
+      var res = await callBackend("createSpotShare", {
+        name: name,
+        address: address,
+        googleMapsUrl: googleMapsUrl,
+        appleMapsUrl: appleMapsUrl
+      });
+
+      var spotId = res && res.spotId ? String(res.spotId) : "";
+      if (!spotId) throw new Error("Unable to create spot share link.");
+
+      return window.location.origin + window.location.pathname + "?spot=" + encodeURIComponent(spotId);
     }
 
     function shareSpot(name, address) {
@@ -1848,43 +1856,51 @@
         return;
       }
 
-      var shareUrl = getPreferredShareMapLink(name, address);
-      var shareText = [name, address, shareUrl].filter(Boolean).join("\n");
-      var shareTitle = name || "GameDayGuide Spot";
+      document.getElementById("status").textContent = "Creating spot share link…";
 
-      if (navigator.share) {
-        navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl
-        })
-        .then(function() {
-          document.getElementById("status").textContent = "Spot ready to share.";
+      createSpotShareUrl(name, address)
+        .then(function(shareUrl) {
+          var shareText = [name, address].filter(Boolean).join("\n");
+          var shareTitle = name || "GameDayGuide Spot";
+
+          if (navigator.share) {
+            return navigator.share({
+              title: shareTitle,
+              text: shareText,
+              url: shareUrl
+            })
+            .then(function() {
+              document.getElementById("status").textContent = "Spot ready to share.";
+            })
+            .catch(function(err) {
+              if (err && err.name === "AbortError") {
+                document.getElementById("status").textContent = "Share canceled.";
+                return;
+              }
+              fallbackCopySpot_(shareText, shareUrl);
+            });
+          }
+
+          fallbackCopySpot_(shareText, shareUrl);
         })
         .catch(function(err) {
-          if (err && err.name === "AbortError") {
-            document.getElementById("status").textContent = "Share canceled.";
-            return;
-          }
-          fallbackCopySpot_(shareText);
+          document.getElementById("status").textContent =
+            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
         });
-        return;
-      }
-
-      fallbackCopySpot_(shareText);
     }
 
-    function fallbackCopySpot_(shareText) {
+    function fallbackCopySpot_(shareText, shareUrl) {
+      var copyText = [shareText, shareUrl].filter(Boolean).join("\n");
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(shareText)
+        navigator.clipboard.writeText(copyText)
           .then(function() {
-            document.getElementById("status").textContent = "Spot details copied. Paste into your text or group chat.";
+            document.getElementById("status").textContent = "Spot link copied. Paste into your text or group chat.";
           })
           .catch(function() {
-            document.getElementById("status").textContent = "Could not copy automatically. Select and copy the link from the map option.";
+            document.getElementById("status").textContent = "Could not copy automatically. Try sharing again.";
           });
       } else {
-        document.getElementById("status").textContent = "Sharing is limited on this device. Use the map buttons to copy or send the location.";
+        document.getElementById("status").textContent = "Sharing is limited on this device. Try again from a device that supports sharing.";
       }
     }
 
@@ -2160,6 +2176,29 @@
       return result.data;
     }
 
+    async function getSpotShareFromBackend(spotId) {
+      const url = APP_URL + "?api=1&action=getSpotShare&spotId=" + encodeURIComponent(spotId);
+      const response = await fetch(url, { method: "GET", redirect: "follow" });
+      const rawText = await response.text();
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
+      }
+
+      let result;
+      try {
+        result = JSON.parse(rawText);
+      } catch (err) {
+        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
+      }
+
+      if (!result.ok) {
+        throw new Error(result.error || "Backend error");
+      }
+
+      return result.data;
+    }
+
     function findMatchingFields() {
       var rawQuery = String(document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
@@ -2389,6 +2428,8 @@
       latestShareUrl = "";
 
       stopLoadingState();
+      document.getElementById("sharedBanner").style.display = "none";
+      document.getElementById("searchPanel").style.display = "block";
       document.getElementById("address").value = "";
       document.getElementById("status").textContent = "";
       document.getElementById("results").innerHTML = "";
@@ -3116,6 +3157,15 @@
       }
     }
 
+    function getSpotIdFromUrl() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        return String(params.get("spot") || "").trim();
+      } catch (e) {
+        return "";
+      }
+    }
+
     function showSharedGuide(sharedGuide) {
       currentSharedGuide = sharedGuide || null;
       stopLoadingState();
@@ -3147,6 +3197,45 @@
       maybeOfferInstallPrompt(700);
     }
 
+    function showSharedSpot(sharedSpot) {
+      stopLoadingState();
+      currentSharedGuide = null;
+      document.body.classList.remove("home-mode");
+      document.getElementById("pageTitle").textContent = "GameDayGuide";
+      document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
+      document.getElementById("searchPanel").style.display = "none";
+      document.getElementById("sharedBanner").style.display = "block";
+      document.getElementById("shareTools").style.display = "none";
+      document.getElementById("shareLinkBox").style.display = "none";
+      document.getElementById("topStops").innerHTML = "";
+      document.getElementById("categoryJumpBar").innerHTML = "";
+
+      var bannerText = document.getElementById("sharedBannerText");
+      bannerText.textContent = "Shared meeting spot";
+
+      var name = String((sharedSpot && sharedSpot.name) || "").trim();
+      var address = String((sharedSpot && sharedSpot.address) || "").trim();
+      var googleMapsUrl = String((sharedSpot && sharedSpot.googleMapsUrl) || buildGoogleMapsLink(name, address)).trim();
+      var appleMapsUrl = String((sharedSpot && sharedSpot.appleMapsUrl) || buildAppleMapsLink(name, address)).trim();
+
+      var results = document.getElementById("results");
+      results.innerHTML =
+        "<div class='section-heading'>Shared Spot</div>" +
+        "<div class='card'>" +
+          "<div class='card-name'>" + esc(name || "Shared Location") + "</div>" +
+          "<div class='card-address'>" + esc(address || "") + "</div>" +
+          "<div class='card-actions'>" +
+            "<a class='location-action-btn google-btn' href='" + esc(googleMapsUrl) + "' target='_blank' rel='noopener'>Open in Google Maps</a>" +
+            "<a class='location-action-btn' href='" + esc(appleMapsUrl) + "' target='_blank' rel='noopener'>Open in Apple Maps</a>" +
+            "<a class='secondary-btn' href='" + esc(window.location.origin + window.location.pathname) + "'>Open Full App</a>" +
+          "</div>" +
+        "</div>";
+
+      document.getElementById("status").textContent = "Shared spot";
+      updateInstallTipForMode();
+      maybeOfferInstallPrompt(700);
+    }
+
     async function initializeApp() {
       renderTriangleComplexes();
       renderRecentSearches();
@@ -3157,6 +3246,24 @@
       stopLoadingState();
 
       var shareId = getShareIdFromUrl();
+      var spotId = getSpotIdFromUrl();
+
+      if (spotId) {
+        try {
+          document.getElementById("status").textContent = "Loading shared spot…";
+          var sharedSpot = await getSpotShareFromBackend(spotId);
+
+          if (sharedSpot) {
+            showSharedSpot(sharedSpot);
+            return;
+          }
+
+          document.getElementById("status").textContent = "Shared spot not found.";
+        } catch (err) {
+          document.getElementById("status").textContent =
+            "Error loading shared spot: " + (err && err.message ? err.message : JSON.stringify(err));
+        }
+      }
 
       if (shareId) {
         try {
@@ -3175,6 +3282,8 @@
         }
       }
 
+      document.getElementById("sharedBanner").style.display = "none";
+      document.getElementById("searchPanel").style.display = "block";
       document.body.classList.add("home-mode");
       setRadius(5);
       focusAddressField();
