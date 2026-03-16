@@ -613,6 +613,94 @@
       font-weight: 600;
     }
 
+    .loading-wrap {
+      display: none;
+      margin: 14px 0 18px;
+    }
+
+    .loading-card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
+      border-radius: 26px;
+      border: var(--border-soft);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding: 28px 18px 24px;
+      text-align: center;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .loading-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 110px;
+      background: linear-gradient(180deg, rgba(25,118,210,0.08), rgba(25,118,210,0));
+      pointer-events: none;
+    }
+
+    .loading-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .loading-logo-shell {
+      width: 82px;
+      height: 82px;
+      border-radius: 24px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(180deg, rgba(25,118,210,0.14), rgba(25,118,210,0.06));
+      box-shadow:
+        0 16px 30px rgba(25,118,210,0.12),
+        inset 0 1px 0 rgba(255,255,255,0.7);
+      animation: gdgPulse 1.9s ease-in-out infinite;
+    }
+
+    .loading-logo-shell img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .loading-title {
+      font-size: 24px;
+      font-weight: 800;
+      color: #1c2a35;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+
+    .loading-subtext {
+      min-height: 24px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #5e6b77;
+      line-height: 1.45;
+      transition: opacity 0.18s ease;
+    }
+
+    @keyframes gdgPulse {
+      0%,
+      100% {
+        transform: scale(1);
+        box-shadow:
+          0 16px 30px rgba(25,118,210,0.12),
+          inset 0 1px 0 rgba(255,255,255,0.7);
+      }
+      50% {
+        transform: scale(1.04);
+        box-shadow:
+          0 22px 34px rgba(25,118,210,0.18),
+          inset 0 1px 0 rgba(255,255,255,0.8);
+      }
+    }
+
     #shareTools,
     #shareLinkBox {
       margin: 14px 0 18px;
@@ -1157,7 +1245,8 @@
       body.home-mode #shareLinkBox,
       body.home-mode #topStops,
       body.home-mode #categoryJumpBar,
-      body.home-mode #results {
+      body.home-mode #results,
+      body.home-mode #loadingState {
         display: none !important;
       }
 
@@ -1300,6 +1389,16 @@
 
       <div id="status"></div>
 
+      <div id="loadingState" class="loading-wrap" style="display:none;">
+        <div class="loading-card">
+          <div class="loading-logo-shell">
+            <img src="gdg-icon.png" alt="GameDayGuide Logo">
+          </div>
+          <div class="loading-title">GDG Loading...</div>
+          <div class="loading-subtext" id="loadingSubtext">Finding nearby game day stops...</div>
+        </div>
+      </div>
+
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
           <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share Guide</button>
@@ -1352,6 +1451,8 @@
     let visibleSuggestions = [];
     let currentSharedGuide = null;
     let latestShareUrl = "";
+    let loadingRotateTimer = null;
+    let loadingRotateIndex = 0;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
@@ -1405,6 +1506,13 @@
       { label: "⛽ Closest Gas", category: "⛽ Gas" },
       { label: "☕ Closest Coffee", category: "☕ Coffee" },
       { label: "💊 Closest Pharmacy", category: "💊 Pharmacy" }
+    ];
+
+    const LOADING_MESSAGES = [
+      "Finding nearby game day stops...",
+      "Checking food, coffee, gas, and essentials...",
+      "Building your guide for this field...",
+      "Almost ready for game day..."
     ];
 
     function esc(s) {
@@ -1662,6 +1770,57 @@
           dismissInstallPrompt();
         }
       });
+    }
+
+    function startLoadingState() {
+      var loadingWrap = document.getElementById("loadingState");
+      var loadingSubtext = document.getElementById("loadingSubtext");
+      var status = document.getElementById("status");
+
+      stopLoadingState();
+
+      loadingRotateIndex = 0;
+      if (loadingSubtext) {
+        loadingSubtext.textContent = LOADING_MESSAGES[0];
+      }
+      if (loadingWrap) {
+        loadingWrap.style.display = "block";
+      }
+      if (status) {
+        status.textContent = "";
+      }
+
+      loadingRotateTimer = setInterval(function() {
+        var subtextEl = document.getElementById("loadingSubtext");
+        if (!subtextEl) return;
+
+        loadingRotateIndex = (loadingRotateIndex + 1) % LOADING_MESSAGES.length;
+        subtextEl.style.opacity = "0.45";
+
+        setTimeout(function() {
+          subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
+          subtextEl.style.opacity = "1";
+        }, 140);
+      }, 1500);
+    }
+
+    function stopLoadingState() {
+      var loadingWrap = document.getElementById("loadingState");
+      var loadingSubtext = document.getElementById("loadingSubtext");
+
+      if (loadingRotateTimer) {
+        clearInterval(loadingRotateTimer);
+        loadingRotateTimer = null;
+      }
+
+      if (loadingWrap) {
+        loadingWrap.style.display = "none";
+      }
+
+      if (loadingSubtext) {
+        loadingSubtext.style.opacity = "1";
+        loadingSubtext.textContent = LOADING_MESSAGES[0];
+      }
     }
 
     function buildGoogleMapsLink(name, address) {
@@ -2229,6 +2388,7 @@
       currentSharedGuide = null;
       latestShareUrl = "";
 
+      stopLoadingState();
       document.getElementById("address").value = "";
       document.getElementById("status").textContent = "";
       document.getElementById("results").innerHTML = "";
@@ -2256,13 +2416,14 @@
       var radius = getRadiusMiles();
       var userId = getAnonId();
 
-      document.getElementById("status").textContent = "Searching…";
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
+      document.getElementById("shareTools").style.display = "none";
       latestShareUrl = "";
+      startLoadingState();
 
       callBackend("getWeekendHub", {
         query: query,
@@ -2270,6 +2431,7 @@
         userId: userId
       })
         .then(function(data) {
+          stopLoadingState();
           lastResults = Array.isArray(data) ? data : [];
           lastSourceType = sourceType;
           lastQueryOrGps = query;
@@ -2281,22 +2443,25 @@
           maybeOfferInstallPrompt(500);
         })
         .catch(function(err) {
+          stopLoadingState();
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
         });
     }
 
     function useMyLocation() {
-      document.getElementById("status").textContent = "Getting your location…";
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
+      document.getElementById("shareTools").style.display = "none";
       latestShareUrl = "";
       hideFieldMatchResults();
+      startLoadingState();
 
       if (!navigator.geolocation) {
+        stopLoadingState();
         document.getElementById("status").textContent = "This device/browser doesn't support location.";
         return;
       }
@@ -2308,8 +2473,6 @@
           var radius = getRadiusMiles();
           var userId = getAnonId();
 
-          document.getElementById("status").textContent = "Searching…";
-
           callBackend("getWeekendHubByLatLng", {
             lat: lat,
             lng: lng,
@@ -2317,6 +2480,7 @@
             userId: userId
           })
             .then(function(data) {
+              stopLoadingState();
               lastResults = Array.isArray(data) ? data : [];
               lastSourceType = "gps";
               lastQueryOrGps = "GPS:" + lat + "," + lng;
@@ -2326,11 +2490,13 @@
               maybeOfferInstallPrompt(500);
             })
             .catch(function(err) {
+              stopLoadingState();
               document.getElementById("status").textContent =
                 "Error: " + (err && err.message ? err.message : JSON.stringify(err));
             });
         },
         function(err) {
+          stopLoadingState();
           var msg = "Location blocked. Allow location access and try again.";
           if (err && err.code === 1) msg = "Location permission denied. Allow it in browser settings.";
           if (err && err.code === 2) msg = "Location unavailable. Try again outside or with better signal.";
@@ -2952,6 +3118,7 @@
 
     function showSharedGuide(sharedGuide) {
       currentSharedGuide = sharedGuide || null;
+      stopLoadingState();
       document.body.classList.remove("home-mode");
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
@@ -2987,6 +3154,7 @@
       setupFieldMatchResults();
       setupAddressKeyActions();
       setupInstallPrompt();
+      stopLoadingState();
 
       var shareId = getShareIdFromUrl();
 
