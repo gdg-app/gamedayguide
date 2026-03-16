@@ -2186,6 +2186,20 @@ function shareSpot(name, address) {
       return result.data;
     }
 
+    function logCategoryOpened(categoryLabel) {
+      try {
+        callBackend("logClientEvent", {
+          event_type: "category_opened",
+          session_id: getAnonId(),
+          complex_name: lastQueryOrGps || "",
+          search_category: categoryLabel || "",
+          source_context: lastSourceType || ""
+        });
+      } catch (e) {
+        console.log("category logging skipped", e);
+      }
+    }
+
     async function getSharedGuideFromBackend(shareId) {
       const url = APP_URL + "?api=1&action=getSharedGuide&shareId=" + encodeURIComponent(shareId);
       const response = await fetch(url, { method: "GET", redirect: "follow" });
