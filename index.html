@@ -1826,9 +1826,16 @@
     }
 
     function buildAppleMapsLink(name, address) {
-      var query = ((name || "") + " " + (address || "")).trim();
-      return "https://maps.apple.com/?q=" + encodeURIComponent(query);
-    }
+  var label = String(name || "").trim();
+  var destination = String(address || "").trim();
+
+  if (!destination) {
+    return "https://maps.apple.com/?q=" + encodeURIComponent(label);
+  }
+
+  return "https://maps.apple.com/?daddr=" + encodeURIComponent(destination) +
+         (label ? "&q=" + encodeURIComponent(label) : "");
+}
 
     async function createSpotShareUrl(name, address) {
       var googleMapsUrl = buildGoogleMapsLink(name, address);
