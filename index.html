@@ -1799,7 +1799,7 @@ function startLoadingState() {
       subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
       subtextEl.style.opacity = "1";
     }, 180);
-  }, 2400);
+  }, 2800);
 }
 
     function stopLoadingState() {
@@ -3332,7 +3332,7 @@ function showShareLink(url) {
       document.body.classList.add("home-mode");
       setRadius(5);
       focusAddressField();
-    }
+      maybeOfferInstallPrompt(1200);
 
     window.addEventListener("load", function() {
       initializeApp();
