@@ -1769,37 +1769,38 @@
       });
     }
 
-    function startLoadingState() {
-      var loadingWrap = document.getElementById("loadingState");
-      var loadingSubtext = document.getElementById("loadingSubtext");
-      var status = document.getElementById("status");
+function startLoadingState() {
+  var loadingWrap = document.getElementById("loadingState");
+  var loadingSubtext = document.getElementById("loadingSubtext");
+  var status = document.getElementById("status");
 
-      stopLoadingState();
+  stopLoadingState();
+  document.body.classList.remove("home-mode");
 
-      loadingRotateIndex = 0;
-      if (loadingSubtext) {
-        loadingSubtext.textContent = LOADING_MESSAGES[0];
-      }
-      if (loadingWrap) {
-        loadingWrap.style.display = "block";
-      }
-      if (status) {
-        status.textContent = "";
-      }
+  loadingRotateIndex = 0;
+  if (loadingSubtext) {
+    loadingSubtext.textContent = LOADING_MESSAGES[0];
+  }
+  if (loadingWrap) {
+    loadingWrap.style.display = "block";
+  }
+  if (status) {
+    status.textContent = "";
+  }
 
-      loadingRotateTimer = setInterval(function() {
-        var subtextEl = document.getElementById("loadingSubtext");
-        if (!subtextEl) return;
+  loadingRotateTimer = setInterval(function() {
+    var subtextEl = document.getElementById("loadingSubtext");
+    if (!subtextEl) return;
 
-        loadingRotateIndex = (loadingRotateIndex + 1) % LOADING_MESSAGES.length;
-        subtextEl.style.opacity = "0.45";
+    loadingRotateIndex = (loadingRotateIndex + 1) % LOADING_MESSAGES.length;
+    subtextEl.style.opacity = "0.45";
 
-        setTimeout(function() {
-          subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
-          subtextEl.style.opacity = "1";
-        }, 180);
-      }, 2400);
-    }
+    setTimeout(function() {
+      subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
+      subtextEl.style.opacity = "1";
+    }, 180);
+  }, 2400);
+}
 
     function stopLoadingState() {
       var loadingWrap = document.getElementById("loadingState");
