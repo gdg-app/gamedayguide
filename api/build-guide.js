@@ -1,3420 +1,964 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-
-  <title>GameDayGuide</title>
-  <meta name="description" content="Game Day, Made Easier." />
-  <meta property="og:title" content="GameDayGuide" />
-  <meta property="og:description" content="Game Day, Made Easier." />
-  <meta property="og:type" content="website" />
-  <meta property="og:site_name" content="GameDayGuide" />
-  <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="GameDayGuide" />
-  <meta name="twitter:description" content="Game Day, Made Easier." />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="gdg-icon.png?v=2">
-  <link rel="apple-touch-icon" href="gdg-icon.png?v=2">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="GameDayGuide">
-  <meta name="application-name" content="GameDayGuide">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#10261d">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-  <style>
-    :root {
-      --bg-dark: #0b1713;
-      --bg-mid: #10261d;
-      --bg-light: #173529;
-      --bg-accent: #214536;
-      --panel: rgba(255,255,255,0.95);
-      --panel-strong: #ffffff;
-      --panel-soft: rgba(255,255,255,0.84);
-      --text: #16212a;
-      --muted: #66717d;
-      --muted-strong: #4d5a66;
-      --blue: #1976d2;
-      --blue-dark: #1565c0;
-      --green: #2e7d32;
-      --green-dark: #256628;
-      --purple: #7b1fa2;
-      --shadow: 0 16px 40px rgba(0,0,0,0.24);
-      --shadow-soft: 0 8px 24px rgba(0,0,0,0.14);
-      --shadow-card: 0 10px 26px rgba(0,0,0,0.12);
-      --shadow-app: 0 26px 60px rgba(0,0,0,0.2);
-      --radius-xxl: 30px;
-      --radius-xl: 24px;
-      --radius-lg: 18px;
-      --radius-md: 14px;
-      --border-soft: 1px solid rgba(255,255,255,0.48);
-    }
-
-    html {
-      width: 100%;
-      min-width: 100%;
-      min-height: 100%;
-      -webkit-text-size-adjust: 100%;
-      text-size-adjust: 100%;
-      background:
-        radial-gradient(circle at 15% 12%, rgba(255,255,255,0.12), transparent 18%),
-        radial-gradient(circle at 86% 18%, rgba(76,175,80,0.08), transparent 22%),
-        linear-gradient(135deg, rgba(255,255,255,0.045) 0 2px, transparent 2px),
-        linear-gradient(180deg, var(--bg-light) 0%, var(--bg-mid) 48%, var(--bg-dark) 100%);
-      background-size: auto, auto, 24px 24px, 100% 100%;
-      background-attachment: fixed;
-    }
-
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-
-    body {
-      width: 100%;
-      min-width: 100%;
-      min-height: 100dvh;
-      font-family: "Inter", Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      color: var(--text);
-      font-size: 18px;
-      line-height: 1.45;
-      overflow-x: hidden;
-      position: relative;
-      background:
-        radial-gradient(circle at top center, rgba(255,255,255,0.08), transparent 24%),
-        linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0) 16%),
-        linear-gradient(180deg, var(--bg-light) 0%, var(--bg-mid) 48%, var(--bg-dark) 100%);
-      background-attachment: fixed;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(circle at 50% -10%, rgba(255,255,255,0.1), transparent 30%),
-        linear-gradient(90deg, transparent 0, transparent 7%, rgba(255,255,255,0.045) 7.2%, transparent 7.4%, transparent 100%),
-        linear-gradient(140deg, transparent 0 68%, rgba(255,255,255,0.08) 68.2%, rgba(255,255,255,0.08) 68.8%, transparent 69.2%),
-        linear-gradient(160deg, transparent 0 74%, rgba(255,255,255,0.04) 74.2%, rgba(255,255,255,0.04) 74.7%, transparent 75.1%);
-      opacity: 0.9;
-    }
-
-    body::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.02) 24%, rgba(0,0,0,0.16) 100%);
-      opacity: 1;
-    }
-
-    button,
-    input,
-    textarea,
-    select {
-      font: inherit;
-    }
-
-    .app {
-      width: min(100%, 980px);
-      margin: 0 auto;
-      padding: calc(env(safe-area-inset-top, 0px) + 14px) 12px calc(env(safe-area-inset-bottom, 0px) + 28px);
-      position: relative;
-      z-index: 1;
-    }
-
-    .app-card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 34px;
-      padding: 14px 12px 18px;
-      box-shadow: var(--shadow-app);
-      backdrop-filter: blur(14px);
-    }
-
-    .header {
-      margin-bottom: 18px;
-      color: white;
-      padding: 8px 6px 4px;
-    }
-
-    .brand-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-
-    .brand-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 18px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 27px;
-      line-height: 1;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.11));
-      border: 1px solid rgba(255,255,255,0.18);
-      box-shadow: 0 10px 22px rgba(0,0,0,0.22);
-      backdrop-filter: blur(12px);
-    }
-
-    .brand-icon img {
-      width: 36px;
-      height: 36px;
-      object-fit: contain;
-      border-radius: 8px;
-    }
-
-    .brand-text {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .title {
-      font-size: 31px;
-      font-weight: 800;
-      margin: 0;
-      line-height: 1.03;
-      letter-spacing: -0.04em;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.24);
-    }
-
-    .subtitle {
-      color: rgba(255,255,255,0.9);
-      font-size: 15px;
-      line-height: 1.45;
-      margin-top: 1px;
-      text-shadow: 0 1px 8px rgba(0,0,0,0.2);
-      max-width: 38ch;
-      font-weight: 500;
-    }
-
-    .tip-banner {
-      background: rgba(255,248,225,0.98);
-      border: 1px solid #f0d98c;
-      padding: 16px;
-      border-radius: 20px;
-      box-shadow: var(--shadow-soft);
-      margin-bottom: 16px;
-      backdrop-filter: blur(10px);
-      display: none !important;
-    }
-
-    .tip-title {
-      font-weight: 700;
-      margin-bottom: 6px;
-      font-size: 16px;
-    }
-
-    .tip-text {
-      color: #555;
-      font-size: 14px;
-      line-height: 1.45;
-    }
-
-    .tip-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    .tip-link-btn,
-    .tip-dismiss-btn {
-      border: 0;
-      border-radius: 12px;
-      padding: 11px 13px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      text-decoration: none;
-      text-align: center;
-    }
-
-    .tip-link-btn {
-      background: var(--blue);
-      color: white;
-    }
-
-    .tip-dismiss-btn {
-      background: #f3f3f3;
-      color: #555;
-    }
-
-    .search-panel {
-      width: 100%;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
-      padding: 20px 14px 20px;
-      border-radius: var(--radius-xxl);
-      box-shadow: var(--shadow);
-      margin-bottom: 22px;
-      border: var(--border-soft);
-      backdrop-filter: blur(14px);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .search-panel::before {
-      content: "";
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 78px;
-      background: linear-gradient(180deg, rgba(25,118,210,0.06), rgba(25,118,210,0));
-      pointer-events: none;
-    }
-
-    .search-panel > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 800;
-      margin-bottom: 8px;
-      margin-top: 10px;
-      color: #30404f;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    input {
-      width: 100%;
-      padding: 18px 16px;
-      font-size: 18px;
-      border: 1px solid #d7e0e7;
-      border-radius: 16px;
-      margin-bottom: 10px;
-      min-height: 58px;
-      background: #fff;
-      color: var(--text);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.75),
-        0 2px 8px rgba(8,25,18,0.04);
-    }
-
-    input::placeholder {
-      color: #7a8693;
-    }
-
-    input:focus {
-      outline: none;
-      border-color: #8ec2ff;
-      box-shadow: 0 0 0 4px rgba(25,118,210,0.12);
-    }
-
-    .helper-text {
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 14px;
-      line-height: 1.5;
-    }
-
-    .match-results {
-      display: none;
-      margin-top: 12px;
-      margin-bottom: 14px;
-      background: #fff;
-      border: 1px solid #d8dde4;
-      border-radius: 18px;
-      box-shadow: var(--shadow-soft);
-      overflow: hidden;
-    }
-
-    .match-results-header {
-      padding: 12px 14px;
-      font-size: 12px;
-      font-weight: 800;
-      color: #66717d;
-      background: #f8fafc;
-      border-bottom: 1px solid #eef2f6;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .match-result-item {
-      width: 100%;
-      border: 0;
-      border-bottom: 1px solid #eef2f6;
-      background: #fff;
-      text-align: left;
-      padding: 14px;
-      cursor: pointer;
-      display: block;
-    }
-
-    .match-result-item:last-child {
-      border-bottom: 0;
-    }
-
-    .match-result-item:hover {
-      background: #f4f8fc;
-    }
-
-    .match-result-top {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 4px;
-    }
-
-    .match-result-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: #222;
-      line-height: 1.3;
-    }
-
-    .match-result-meta {
-      font-size: 13px;
-      color: #666;
-      line-height: 1.4;
-    }
-
-    .suggestion-badge {
-      display: inline-block;
-      font-size: 11px;
-      font-weight: 700;
-      border-radius: 999px;
-      padding: 4px 8px;
-      line-height: 1;
-    }
-
-    .suggestion-badge.curated {
-      background: #e8f1fb;
-      color: var(--blue);
-    }
-
-    .suggestion-badge.google {
-      background: #edf7ed;
-      color: var(--green);
-    }
-
-    .suggestion-badge.tournament {
-      background: #fff3e0;
-      color: #ef6c00;
-    }
-
-    .suggestion-note {
-      padding: 12px 14px;
-      font-size: 13px;
-      color: #666;
-    }
-
-    .quick-row-wrap {
-      margin-bottom: 16px;
-    }
-
-    .quick-row-label {
-      font-size: 14px;
-      font-weight: 700;
-      color: #4a5a68;
-      margin-bottom: 9px;
-    }
-
-    .quick-row {
-      display: flex;
-      gap: 10px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
-    }
-
-    .quick-row::-webkit-scrollbar {
-      height: 6px;
-    }
-
-    .quick-row::-webkit-scrollbar-thumb {
-      background: #c7d2de;
-      border-radius: 999px;
-    }
-
-    .chip-btn {
-      border: 0;
-      background: #eaf3ff;
-      color: var(--blue);
-      border-radius: 999px;
-      padding: 11px 15px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
-      flex: 0 0 auto;
-      box-shadow: 0 4px 12px rgba(25,118,210,0.08);
-    }
-
-    .chip-btn:hover {
-      background: #dfeeff;
-    }
-
-    .chip-btn.secondary {
-      background: #f2f5f8;
-      color: #55626f;
-    }
-
-    .chip-btn.expand-chip {
-      background: #fff;
-      color: #555;
-      border: 1px solid #d8dde4;
-    }
-
-    .radius-section {
-      margin-top: 12px;
-      margin-bottom: 18px;
-    }
-
-    .radius-buttons {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    .radius-btn {
-      background: #edf3f8;
-      color: var(--blue);
-      border: 0;
-      border-radius: 999px;
-      padding: 11px 15px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-
-    .radius-btn.active {
-      background: var(--blue);
-      color: white;
-      box-shadow: 0 8px 16px rgba(25,118,210,0.22);
-    }
-
-    .button-row {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    .action-btn {
-      width: 100%;
-      border: 0;
-      border-radius: 18px;
-      padding: 17px 16px;
-      min-height: 58px;
-      font-size: 18px;
-      font-weight: 700;
-      color: white;
-      cursor: pointer;
-      text-decoration: none;
-      text-align: center;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 12px 24px rgba(0,0,0,0.16);
-      transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
-    }
-
-    .action-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 16px 28px rgba(0,0,0,0.18);
-    }
-
-    .action-btn:active {
-      transform: translateY(0);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.14);
-    }
-
-    .build-btn {
-      background: linear-gradient(180deg, #2b93ef 0%, var(--blue) 100%);
-    }
-
-    .location-btn {
-      background: linear-gradient(180deg, #46ad4d 0%, var(--green) 100%);
-    }
-
-    .share-btn {
-      background: linear-gradient(180deg, #9340b7 0%, var(--purple) 100%);
-    }
-
-    .match-btn {
-      width: 100%;
-      margin-top: 4px;
-      background: linear-gradient(180deg, #2b82dc 0%, var(--blue-dark) 100%);
-    }
-
-    .secondary-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #eef4f8;
-      color: var(--blue);
-      text-decoration: none;
-      border: 0;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-      min-height: 48px;
-      width: 100%;
-    }
-
-    .location-action-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      background: #eef4f8;
-      color: var(--blue);
-      text-decoration: none;
-      border: 0;
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-      min-height: 48px;
-      width: 100%;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .location-action-btn.google-btn {
-      background: linear-gradient(180deg, #2b93ef 0%, var(--blue) 100%);
-      color: white;
-      box-shadow: 0 8px 16px rgba(25,118,210,0.2);
-    }
-
-    #status {
-      margin: 14px 0 8px;
-      color: rgba(255,255,255,0.96);
-      font-size: 14px;
-      min-height: 20px;
-      text-shadow: 0 1px 5px rgba(0,0,0,0.22);
-      padding: 0 4px;
-      font-weight: 600;
-    }
-
-    .loading-wrap {
-      display: none;
-      margin: 10px 0 16px;
-    }
-
-    .loading-card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(255,255,255,0.86));
-      border-radius: 22px;
-      border: 1px solid rgba(255,255,255,0.5);
-      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
-      backdrop-filter: blur(12px);
-      padding: 20px 16px 18px;
-      text-align: center;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .loading-card::before {
-      content: "";
-      position: absolute;
-      inset: 0 0 auto 0;
-      height: 72px;
-      background: linear-gradient(180deg, rgba(25,118,210,0.07), rgba(25,118,210,0));
-      pointer-events: none;
-    }
-
-    .loading-card > * {
-      position: relative;
-      z-index: 1;
-    }
-
-    .loading-logo-shell {
-      width: 62px;
-      height: 62px;
-      border-radius: 18px;
-      margin: 0 auto 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(180deg, rgba(25,118,210,0.12), rgba(25,118,210,0.05));
-      box-shadow:
-        0 10px 20px rgba(25,118,210,0.1),
-        inset 0 1px 0 rgba(255,255,255,0.65);
-      animation: gdgPulse 2.2s ease-in-out infinite;
-    }
-
-    .loading-logo-shell img {
-      width: 40px;
-      height: 40px;
-      object-fit: contain;
-      border-radius: 10px;
-    }
-
-    .loading-title {
-      font-size: 21px;
-      font-weight: 800;
-      color: #1c2a35;
-      letter-spacing: -0.03em;
-      margin-bottom: 6px;
-    }
-
-    .loading-subtext {
-      min-height: 22px;
-      font-size: 14px;
-      font-weight: 600;
-      color: #5e6b77;
-      line-height: 1.45;
-      transition: opacity 0.2s ease;
-    }
-
-    @keyframes gdgPulse {
-      0%, 100% {
-        transform: scale(1);
-        box-shadow:
-          0 10px 20px rgba(25,118,210,0.1),
-          inset 0 1px 0 rgba(255,255,255,0.65);
-      }
-      50% {
-        transform: scale(1.035);
-        box-shadow:
-          0 14px 24px rgba(25,118,210,0.14),
-          inset 0 1px 0 rgba(255,255,255,0.75);
-      }
-    }
-
-    #shareTools,
-    #shareLinkBox {
-      margin: 14px 0 18px;
-    }
-
-    .share-tools-row {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    .share-link-input {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 14px;
-      border: 1px solid #d7e0e7;
-      border-radius: 16px;
-      margin: 10px 0 0;
-      min-height: 52px;
-      background: #f8fbff;
-      color: var(--text);
-      box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.75),
-        0 2px 8px rgba(8,25,18,0.04);
-    }
-
-    .share-link-help {
-      font-size: 14px;
-      color: #555;
-      line-height: 1.45;
-      margin-top: 8px;
-    }
-
-    .section-heading {
-      margin-top: 30px;
-      margin-bottom: 12px;
-      font-size: 22px;
-      font-weight: 800;
-      color: white;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      padding: 0 4px;
-      letter-spacing: -0.02em;
-    }
-
-    .top-stops-wrap,
-    .jump-bar-wrap {
-      margin-top: 18px;
-      margin-bottom: 18px;
-    }
-
-    .top-stops-row,
-    .jump-bar-row {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: thin;
-    }
-
-    .top-stops-row::-webkit-scrollbar,
-    .jump-bar-row::-webkit-scrollbar {
-      height: 6px;
-    }
-
-    .top-stops-row::-webkit-scrollbar-thumb,
-    .jump-bar-row::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.4);
-      border-radius: 999px;
-    }
-
-    .top-stop-card {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.92));
-      border-radius: 22px;
-      box-shadow: var(--shadow);
-      padding: 16px;
-      min-width: 92%;
-      flex: 0 0 auto;
-      border: var(--border-soft);
-      backdrop-filter: blur(12px);
-    }
-
-    .top-stop-label {
-      font-size: 12px;
-      font-weight: 800;
-      color: #566472;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .top-stop-name {
-      font-size: 18px;
-      font-weight: 700;
-      line-height: 1.3;
-      margin-bottom: 8px;
-    }
-
-    .top-stop-meta {
-      font-size: 14px;
-      color: #444;
-      margin-bottom: 10px;
-    }
-
-    .top-stop-address {
-      font-size: 14px;
-      color: #666;
-      line-height: 1.45;
-      margin-bottom: 12px;
-      min-height: 36px;
-    }
-
-    .jump-chip {
-      border: 0;
-      background: rgba(255,255,255,0.95);
-      color: var(--blue);
-      border-radius: 999px;
-      padding: 11px 14px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: var(--shadow-soft);
-      white-space: nowrap;
-      flex: 0 0 auto;
-    }
-
-    .category-section {
-      margin-top: 20px;
-      scroll-margin-top: 16px;
-    }
-
-    .accordion-header {
-      width: 100%;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.92));
-      border: 0;
-      border-radius: 20px;
-      box-shadow: var(--shadow-card);
-      padding: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: left;
-      color: #222;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
-      border: var(--border-soft);
-      backdrop-filter: blur(12px);
-    }
-
-    .accordion-header:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 28px rgba(0,0,0,0.16);
-    }
-
-    .accordion-header:active {
-      transform: scale(0.99);
-    }
-
-    .accordion-header.medical-header {
-      border-left: 5px solid #d32f2f;
-    }
-
-    .accordion-left {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .accordion-count {
-      font-size: 13px;
-      font-weight: 600;
-      color: #666;
-    }
-
-    .accordion-helper {
-      font-size: 12px;
-      font-weight: 600;
-      color: #6b7785;
-    }
-
-    .accordion-chevron {
-      font-size: 18px;
-      color: #666;
-    }
-
-    .accordion-content {
-      display: none;
-      margin-top: 12px;
-    }
-
-    .accordion-content.open {
-      display: block;
-    }
-
-    .results-grid {
-      display: grid;
-      gap: 14px;
-    }
-
-    .card {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.92));
-      padding: 16px;
-      border-radius: 20px;
-      box-shadow: var(--shadow-card);
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
-      border: var(--border-soft);
-      backdrop-filter: blur(12px);
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 28px rgba(0,0,0,0.16);
-    }
-
-    .card:active {
-      transform: scale(0.99);
-    }
-
-    .urgent-card {
-      border-left: 5px solid #d32f2f;
-    }
-
-    .card-name {
-      font-size: 21px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      line-height: 1.3;
-      letter-spacing: -0.01em;
-    }
-
-    .card-meta {
-      color: #444;
-      font-size: 14px;
-      margin-bottom: 10px;
-    }
-
-    .card-address {
-      color: #666;
-      font-size: 14px;
-      margin-bottom: 12px;
-      line-height: 1.45;
-      word-break: break-word;
-    }
-
-    .card-actions {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      flex-direction: column;
-    }
-
-    .directions-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      text-decoration: none;
-      padding: 12px 14px;
-      border-radius: 14px;
-      font-size: 15px;
-      font-weight: 700;
-      border: 0;
-      cursor: pointer;
-      background: linear-gradient(180deg, #2b93ef 0%, var(--blue) 100%);
-      color: white;
-      min-height: 48px;
-      box-shadow: 0 8px 16px rgba(25,118,210,0.2);
-    }
-
-    .toggle-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-      flex-direction: column;
-    }
-
-    .show-more-btn,
-    .show-less-btn {
-      background: rgba(255,255,255,0.96);
-      color: var(--blue);
-      border: 0;
-      border-radius: 14px;
-      padding: 12px;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      width: 100%;
-      min-height: 48px;
-      box-shadow: var(--shadow-soft);
-    }
-
-    .muted {
-      color: #666;
-    }
-
-    .shared-banner {
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
-      padding: 16px;
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-      margin-bottom: 18px;
-      border: var(--border-soft);
-      backdrop-filter: blur(12px);
-    }
-
-    .shared-banner-title {
-      font-weight: 700;
-      margin-bottom: 6px;
-      font-size: 16px;
-    }
-
-    .shared-banner-actions {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .share-action-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      flex-direction: column;
-      margin-top: 12px;
-    }
-
-    .install-modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 30;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 18px;
-      background: rgba(7, 16, 13, 0.62);
-      backdrop-filter: blur(6px);
-    }
-
-    .install-modal-overlay.open {
-      display: flex;
-    }
-
-    .install-modal {
-      width: min(100%, 460px);
-      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.94));
-      border-radius: 26px;
-      border: var(--border-soft);
-      box-shadow: var(--shadow);
-      padding: 18px 16px 16px;
-      position: relative;
-    }
-
-    .install-modal-close {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      border: 0;
-      background: #eef4f8;
-      color: #4b5a67;
-      width: 38px;
-      height: 38px;
-      border-radius: 999px;
-      font-size: 18px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .install-modal-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-      padding-right: 44px;
-    }
-
-    .install-modal-icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(180deg, rgba(25,118,210,0.12), rgba(25,118,210,0.06));
-      box-shadow: var(--shadow-soft);
-      flex: 0 0 auto;
-    }
-
-    .install-modal-icon img {
-      width: 34px;
-      height: 34px;
-      object-fit: contain;
-      border-radius: 8px;
-    }
-
-    .install-modal-title {
-      font-size: 20px;
-      font-weight: 800;
-      line-height: 1.2;
-      color: #1c2a35;
-      letter-spacing: -0.02em;
-    }
-
-    .install-modal-subtitle {
-      font-size: 14px;
-      color: #5f6d79;
-      line-height: 1.45;
-      margin-top: 4px;
-    }
-
-    .install-steps {
-      display: grid;
-      gap: 12px;
-      margin-top: 14px;
-      margin-bottom: 14px;
-    }
-
-    .install-step-card {
-      background: #f7fafc;
-      border: 1px solid #e4ebf1;
-      border-radius: 18px;
-      padding: 14px;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.7);
-    }
-
-    .install-step-top {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-      flex-wrap: wrap;
-    }
-
-    .install-step-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 34px;
-      height: 34px;
-      border-radius: 999px;
-      background: #eaf3ff;
-      color: var(--blue);
-      font-weight: 800;
-      font-size: 16px;
-      padding: 0 10px;
-    }
-
-    .install-step-title {
-      font-size: 15px;
-      font-weight: 800;
-      color: #22303b;
-    }
-
-    .install-step-line {
-      font-size: 14px;
-      color: #566472;
-      line-height: 1.45;
-    }
-
-    .install-path {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    .install-path-chip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 10px;
-      border-radius: 999px;
-      background: white;
-      border: 1px solid #dce5ed;
-      color: #2c3b47;
-      font-size: 13px;
-      font-weight: 700;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-    }
-
-    .install-path-arrow {
-      color: #7a8895;
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .install-modal-actions {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .install-modal-note {
-      font-size: 13px;
-      color: #687684;
-      line-height: 1.45;
-      margin-top: 2px;
-    }
-
-    @media (max-width: 767px) {
-      .app {
-        padding: calc(env(safe-area-inset-top, 0px) + 10px) 10px calc(env(safe-area-inset-bottom, 0px) + 20px);
-      }
-
-      .app-card {
-        border-radius: 28px;
-        padding: 12px 10px 16px;
-      }
-
-      body.home-mode {
-        min-height: 100dvh;
-      }
-
-      body.home-mode .app {
-        min-height: 100dvh;
-        display: flex;
-        flex-direction: column;
-      }
-
-      body.home-mode .app-card {
-        flex: 1 1 auto;
-        display: flex;
-        flex-direction: column;
-      }
-
-      body.home-mode .search-panel {
-        flex: 1 1 auto;
-        display: flex;
-        flex-direction: column;
-        min-height: calc(100dvh - 154px);
-        padding: 22px 14px 24px;
-      }
-
-      body.home-mode #shareTools,
-      body.home-mode #shareLinkBox,
-      body.home-mode #topStops,
-      body.home-mode #categoryJumpBar,
-      body.home-mode #results,
-      body.home-mode #loadingState {
-        display: none !important;
-      }
-
-      body.home-mode .helper-text,
-      body.home-mode .quick-row-wrap {
-        margin-bottom: 18px;
-      }
-
-      body.home-mode .radius-section {
-        margin-bottom: 0;
-      }
-
-      body.home-mode .button-row {
-        margin-top: auto;
-        padding-top: 28px;
-      }
-
-      body.home-mode .action-btn {
-        min-height: 60px;
-        font-size: 18px;
-      }
-
-      body.home-mode input {
-        min-height: 60px;
-        font-size: 18px;
-      }
-
-      body.home-mode .title {
-        font-size: 29px;
-      }
-
-      body.home-mode .subtitle {
-        font-size: 15px;
-      }
-    }
-
-    @media (min-width: 768px) {
-      .app {
-        padding: calc(env(safe-area-inset-top, 0px) + 22px) 18px calc(env(safe-area-inset-bottom, 0px) + 44px);
-      }
-
-      .app-card {
-        padding: 18px 16px 22px;
-      }
-
-      .button-row {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .shared-banner-actions {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .secondary-btn,
-      .directions-btn,
-      .action-btn,
-      .location-action-btn {
-        width: auto;
-      }
-
-      .card-actions,
-      .share-action-row,
-      .toggle-row,
-      .install-modal-actions {
-        flex-direction: row;
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .top-stop-card {
-        min-width: 280px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <div class="app-card">
-      <div class="header">
-        <div class="brand-row">
-          <div class="brand-icon">
-            <img src="gdg-icon.png" alt="GameDayGuide Logo">
-          </div>
-          <div class="brand-text">
-            <div class="title" id="pageTitle">GameDayGuide</div>
-          </div>
-        </div>
-        <div class="subtitle" id="pageSubtitle">Game Day, Made Easier.</div>
-      </div>
-
-      <div id="homeScreenTip" class="tip-banner" style="display:none;">
-        <div class="tip-title">Quick access on game day</div>
-        <div class="tip-text" id="homeScreenTipText">Add this to your home screen for quick access on game day.</div>
-        <div class="tip-actions">
-          <button type="button" class="tip-link-btn" onclick="showInstallHelp()">How to add it</button>
-          <button type="button" class="tip-dismiss-btn" onclick="dismissInstallTip()">Dismiss</button>
-        </div>
-      </div>
-
-      <div id="sharedBanner" class="shared-banner" style="display:none;">
-        <div class="shared-banner-title">Shared guide</div>
-        <div class="muted" id="sharedBannerText"></div>
-        <div class="shared-banner-actions">
-          <a id="openFullAppBtn" class="action-btn build-btn" href="/">Create Your Own Guide</a>
-          <a class="secondary-btn" href="/">Open Full App</a>
-        </div>
-      </div>
-
-      <div class="search-panel" id="searchPanel">
-        <label>Field Address or Field/Facility Name</label>
-        <input id="address" placeholder="Enter field address or facility name" value="" />
-        <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
-        <div id="fieldMatchResults" class="match-results"></div>
-        <div class="helper-text">Paste a field name, field number, court number, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
-
-        <div class="quick-row-wrap" id="triangleComplexWrap">
-          <div class="quick-row-label">Triangle Baseball Complexes</div>
-          <div class="quick-row" id="triangleComplexRow"></div>
-        </div>
-
-        <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
-          <div class="quick-row-label">Recent searches</div>
-          <div class="quick-row" id="recentSearchRow"></div>
-        </div>
-
-        <div class="radius-section">
-          <label>Radius</label>
-          <div class="radius-buttons">
-            <button type="button" class="radius-btn" data-radius="2" onclick="setRadius(2)">2 mi</button>
-            <button type="button" class="radius-btn active" data-radius="5" onclick="setRadius(5)">5 mi</button>
-            <button type="button" class="radius-btn" data-radius="10" onclick="setRadius(10)">10 mi</button>
-            <button type="button" class="radius-btn" data-radius="20" onclick="setRadius(20)">20 mi</button>
-          </div>
-        </div>
-
-        <div class="button-row">
-          <button type="button" class="action-btn build-btn" onclick="runGuide()">Build Guide</button>
-          <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
-        </div>
-      </div>
-
-      <div id="status"></div>
-
-      <div id="loadingState" class="loading-wrap" style="display:none;">
-        <div class="loading-card">
-          <div class="loading-logo-shell">
-            <img src="gdg-icon.png" alt="GameDayGuide Logo">
-          </div>
-          <div class="loading-title">GDG Loading...</div>
-          <div class="loading-subtext" id="loadingSubtext">Finding nearby game day stops...</div>
-        </div>
-      </div>
-
-      <div id="shareTools" style="display:none;">
-        <div class="share-tools-row">
-          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share This Field With Your Team</button>
-          <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
-        </div>
-      </div>
-
-      <div id="shareLinkBox" style="display:none;"></div>
-      <div id="topStops"></div>
-      <div id="categoryJumpBar"></div>
-      <div id="results"></div>
-    </div>
-  </div>
-
-  <div id="installPromptModal" class="install-modal-overlay" aria-hidden="true">
-    <div class="install-modal" role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
-      <button type="button" class="install-modal-close" aria-label="Close" onclick="dismissInstallPrompt()">×</button>
-      <div class="install-modal-header">
-        <div class="install-modal-icon">
-          <img src="gdg-icon.png" alt="GameDayGuide Logo">
-        </div>
-        <div>
-          <div class="install-modal-title" id="installPromptTitle">Save GDG to your Home Screen</div>
-          <div class="install-modal-subtitle">Open GameDayGuide like an app for quick access during tournaments.</div>
-        </div>
-      </div>
-
-      <div class="install-steps" id="installPromptSteps"></div>
-
-      <div class="install-modal-note">
-        This only takes a few seconds and makes GDG much easier to find on game day.
-      </div>
-
-      <div class="install-modal-actions">
-        <button type="button" class="action-btn build-btn" onclick="dismissInstallPrompt()">Got It</button>
-        <button type="button" class="secondary-btn" onclick="dismissInstallPrompt()">Maybe Later</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const SHARED_GUIDE = null;
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_HBMJVcnAI3HCvbx8_cIF-LCmDKGauENkkUuVMY8ZgU_vdtw/exec";
-
-    let selectedRadius = 5;
-    let lastResults = [];
-    let lastSourceType = "";
-    let lastQueryOrGps = "";
-    let triangleExpanded = false;
-    let visibleSuggestions = [];
-    let currentSharedGuide = null;
-    let latestShareUrl = "";
-    let loadingRotateTimer = null;
-    let loadingRotateIndex = 0;
-
-    const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
-    const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
-    const RECENT_SEARCH_KEY = "gamedayguide_recent_searches_v1";
-    const INSTALL_PROMPT_SHOWN_KEY = "gamedayguide_install_prompt_shown_v2";
-    const INSTALL_PROMPT_DISMISSED_KEY = "gamedayguide_install_prompt_dismissed_v2";
-
-    const GAME_DAY_ESSENTIALS = [
-      BACKEND_MEDICAL_LABEL,
-      "🦷 Emergency Dentist",
-      "💊 Pharmacy",
-      "⚾ Sporting Goods"
-    ];
-
-    const FOOD_AND_DRINK = [
-      "🍔 Food",
-      "☕ Coffee",
-      "🍦 Ice Cream"
-    ];
-
-    const BREWERIES_AND_BARS = [
-      "🍺 Breweries/Bars"
-    ];
-
-    const DEFAULT_VISIBLE_COUNT = 3;
-    const CURATED_SUGGESTION_LIMIT = 6;
-    const AUTO_RUN_RANK_THRESHOLD = 800;
-
-    const TRIANGLE_COMPLEXES = [
-      { label: "USA Baseball Complex", query: "USA Baseball National Training Complex, Cary NC" },
-      { label: "Thomas Brooks Park", query: "Thomas Brooks Park Baseball Complex, Cary NC" },
-      { label: "Ting Stadium", query: "Ting Stadium, Holly Springs NC" },
-      { label: "Walnut Creek Athletic Complex", query: "Walnut Creek Athletic Complex, Raleigh NC" },
-      { label: "Middle Creek Athletic Complex", query: "Middle Creek Athletic Complex, Apex NC" },
-      { label: "Optimist Park", query: "Optimist Park, Holly Springs NC" },
-      { label: "Hunter Street Park", query: "Hunter Street Park, Apex NC" },
-      { label: "Green Hope High School", query: "Green Hope High School Baseball Field, Cary NC" },
-      { label: "Cary High School", query: "Cary High School Baseball Field, Cary NC" },
-      { label: "Athens Drive High School", query: "Athens Drive High School Baseball Field, Raleigh NC" },
-      { label: "Eastern Carolina Athletic Park", query: "Eastern Carolina Athletic Park, 871 Buck Swamp Rd, Goldsboro NC" },
-      { label: "Clayton Civitan Club", query: "Clayton Civitan Club, 340 McCullers Dr, Clayton NC" },
-      { label: "Granville Athletic Park", query: "Granville Athletic Park, 4615 Belltown Rd, Oxford NC" },
-      { label: "The Factory", query: "The Factory, 1845 Grandmark St, Wake Forest NC" },
-      { label: "DPC Baseball", query: "DPC Baseball, 3901 E Garner Rd, Clayton NC" }
-    ];
-
-    const TRIANGLE_COMPLEXES_VISIBLE_COUNT = 8;
-
-    const TOP_STOP_CONFIG = [
-      { label: "🏥 Closest Medical", category: BACKEND_MEDICAL_LABEL },
-      { label: "⛽ Closest Gas", category: "⛽ Gas" },
-      { label: "☕ Closest Coffee", category: "☕ Coffee" },
-      { label: "💊 Closest Pharmacy", category: "💊 Pharmacy" }
-    ];
-
-    const LOADING_MESSAGES = [
-      "Finding nearby game day stops...",
-      "Checking food, coffee, gas, and essentials...",
-      "Building your guide for this field...",
-      "Almost ready for game day..."
-    ];
-
-    function esc(s) {
-      return String(s || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-    }
-
-    function normalizeForMatch(value) {
-      return String(value || "")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-    }
-
-    function cleanFacilitySearchText_(value) {
-      var s = String(value || "").trim();
-      if (!s) return "";
-
-      s = s.replace(/[–—]/g, "-");
-      s = s.replace(/\s+/g, " ").trim();
-      s = s.replace(/\b(field|diamond|court|rink|sheet|pitch|mat|arena)\s*#?\d+\b/gi, " ");
-      s = s.replace(/\b#\s*\d+\b/g, " ");
-      s = s.replace(/\b(field|diamond|court|rink|sheet|pitch|mat)\b/gi, " ");
-      s = s.replace(/\s+-\s+/g, " ");
-      s = s.replace(/\s+/g, " ").trim();
-
-      return s;
-    }
-
-    function displayCategoryLabel(cat) {
-      return cat === BACKEND_MEDICAL_LABEL ? DISPLAY_MEDICAL_LABEL : cat;
-    }
-
-    function isMedicalCategory(cat) {
-      return cat === BACKEND_MEDICAL_LABEL;
-    }
-
-    function slugifyCategory(cat) {
-      return String(displayCategoryLabel(cat) || "")
-        .toLowerCase()
-        .replace(/[^\w]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-    }
-
-    function getAnonId() {
-      try {
-        var key = "gamedayguide_anon_id";
-        var existing = localStorage.getItem(key);
-        if (existing) return existing;
-        var id = "u_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-        localStorage.setItem(key, id);
-        return id;
-      } catch (e) {
-        return "u_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-      }
-    }
-
-    function categorySortKey(label) {
-      var foodOrder = [
-        "🍔 Food",
-        "☕ Coffee",
-        "🍦 Ice Cream"
-      ];
-
-      var nonFoodOrder = [
-        "🏧 ATM",
-        "🍺 Breweries/Bars",
-        "⛽ Gas",
-        "🛒 Grocery",
-        "🏨 Hotels",
-        "💊 Pharmacy",
-        "⚾ Sporting Goods",
-        BACKEND_MEDICAL_LABEL,
-        "🦷 Emergency Dentist"
-      ];
-
-      var foodIndex = foodOrder.indexOf(label);
-      if (foodIndex !== -1) return "0_" + String(foodIndex).padStart(2, "0");
-
-      var nonFoodIndex = nonFoodOrder.indexOf(label);
-      if (nonFoodIndex !== -1) return "1_" + String(nonFoodIndex).padStart(2, "0");
-
-      return "9_" + String(label || "").toLowerCase();
-    }
-
-    function setRadius(miles) {
-      selectedRadius = miles;
-      document.querySelectorAll(".radius-btn").forEach(function(btn) {
-        btn.classList.remove("active");
-      });
-      var target = document.querySelector('.radius-btn[data-radius="' + miles + '"]');
-      if (target) target.classList.add("active");
-    }
-
-    function getRadiusMiles() {
-      return selectedRadius || 5;
-    }
-
-    function dismissInstallTip() {
-      try {
-        localStorage.setItem("gamedayguide_hide_install_tip", "1");
-      } catch (e) {}
-      document.getElementById("homeScreenTip").style.display = "none";
-    }
-
-    function isStandaloneMode() {
-      var isStandalone = false;
-      try {
-        isStandalone =
-          window.matchMedia("(display-mode: standalone)").matches ||
-          window.navigator.standalone === true;
-      } catch (e) {}
-      return isStandalone;
-    }
-
-    function shouldShowInstallTip() {
-      return false;
-    }
-
-    function showInstallHelp() {
-      showInstallPrompt();
-    }
-
-    function updateInstallTipForMode() {
-      var tip = document.getElementById("homeScreenTip");
-      if (tip) tip.style.display = "none";
-    }
-
-    function getRecentSearches() {
-      try {
-        var raw = localStorage.getItem(RECENT_SEARCH_KEY);
-        var list = raw ? JSON.parse(raw) : [];
-        return Array.isArray(list) ? list : [];
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function saveRecentSearch(query) {
-      query = String(query || "").trim();
-      if (!query) return;
-
-      try {
-        var list = getRecentSearches().filter(function(item) {
-          return String(item || "").toLowerCase() !== query.toLowerCase();
-        });
-
-        list.unshift(query);
-        list = list.slice(0, 6);
-        localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(list));
-      } catch (e) {}
-    }
-
-    function getPlatformType() {
-      var ua = navigator.userAgent || "";
-      if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
-      if (/Android/i.test(ua)) return "android";
-      return "other";
-    }
-
-    function canOfferInstallPrompt() {
-      if (isStandaloneMode()) return false;
-
-      try {
-        if (localStorage.getItem(INSTALL_PROMPT_SHOWN_KEY) === "1") return false;
-        if (localStorage.getItem(INSTALL_PROMPT_DISMISSED_KEY) === "1") return false;
-      } catch (e) {}
-
-      return true;
-    }
-
-    function getInstallStepCardsHtml() {
-      var platform = getPlatformType();
-
-      var iosCard =
-        "<div class='install-step-card'>" +
-          "<div class='install-step-top'>" +
-            "<div class='install-step-badge'>📱</div>" +
-            "<div class='install-step-title'>iPhone / iPad (Safari)</div>" +
-          "</div>" +
-          "<div class='install-step-line'>Use Safari, then follow this path:</div>" +
-          "<div class='install-path'>" +
-            "<span class='install-path-chip'>📤 Share</span>" +
-            "<span class='install-path-arrow'>→</span>" +
-            "<span class='install-path-chip'>Add to Home Screen</span>" +
-          "</div>" +
-        "</div>";
-
-      var androidCard =
-        "<div class='install-step-card'>" +
-          "<div class='install-step-top'>" +
-            "<div class='install-step-badge'>🤖</div>" +
-            "<div class='install-step-title'>Android (Chrome)</div>" +
-          "</div>" +
-          "<div class='install-step-line'>Open the Chrome menu, then follow this path:</div>" +
-          "<div class='install-path'>" +
-            "<span class='install-path-chip'>⋮ Menu</span>" +
-            "<span class='install-path-arrow'>→</span>" +
-            "<span class='install-path-chip'>Add to Home Screen</span>" +
-          "</div>" +
-        "</div>";
-
-      if (platform === "ios") return iosCard;
-      if (platform === "android") return androidCard;
-      return iosCard + androidCard;
-    }
-
-    function showInstallPrompt() {
-      if (!canOfferInstallPrompt()) return;
-
-      var modal = document.getElementById("installPromptModal");
-      var steps = document.getElementById("installPromptSteps");
-      if (!modal || !steps) return;
-
-      steps.innerHTML = getInstallStepCardsHtml();
-
-      try {
-        localStorage.setItem(INSTALL_PROMPT_SHOWN_KEY, "1");
-      } catch (e) {}
-
-      modal.classList.add("open");
-      modal.setAttribute("aria-hidden", "false");
-    }
-
-    function dismissInstallPrompt() {
-      var modal = document.getElementById("installPromptModal");
-      if (modal) {
-        modal.classList.remove("open");
-        modal.setAttribute("aria-hidden", "true");
-      }
-
-      try {
-        localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, "1");
-      } catch (e) {}
-    }
-
-    function maybeOfferInstallPrompt(delayMs) {
-      if (!canOfferInstallPrompt()) return;
-      setTimeout(function() {
-        showInstallPrompt();
-      }, Number(delayMs || 0));
-    }
-
-    function setupInstallPrompt() {
-      var modal = document.getElementById("installPromptModal");
-      if (!modal) return;
-
-      modal.addEventListener("click", function(e) {
-        if (e.target === modal) {
-          dismissInstallPrompt();
-        }
-      });
-    }
-
-    function startLoadingState() {
-      var loadingWrap = document.getElementById("loadingState");
-      var loadingSubtext = document.getElementById("loadingSubtext");
-      var status = document.getElementById("status");
-
-      stopLoadingState();
-      document.body.classList.remove("home-mode");
-
-      loadingRotateIndex = 0;
-      if (loadingSubtext) {
-        loadingSubtext.textContent = LOADING_MESSAGES[0];
-      }
-      if (loadingWrap) {
-        loadingWrap.style.display = "block";
-      }
-      if (status) {
-        status.textContent = "";
-      }
-
-      loadingRotateTimer = setInterval(function() {
-        var subtextEl = document.getElementById("loadingSubtext");
-        if (!subtextEl) return;
-
-        loadingRotateIndex = (loadingRotateIndex + 1) % LOADING_MESSAGES.length;
-        subtextEl.style.opacity = "0.45";
-
-        setTimeout(function() {
-          subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
-          subtextEl.style.opacity = "1";
-        }, 180);
-      }, 2800);
-    }
-
-    function stopLoadingState() {
-      var loadingWrap = document.getElementById("loadingState");
-      var loadingSubtext = document.getElementById("loadingSubtext");
-
-      if (loadingRotateTimer) {
-        clearInterval(loadingRotateTimer);
-        loadingRotateTimer = null;
-      }
-
-      if (loadingWrap) {
-        loadingWrap.style.display = "none";
-      }
-
-      if (loadingSubtext) {
-        loadingSubtext.style.opacity = "1";
-        loadingSubtext.textContent = LOADING_MESSAGES[0];
-      }
-    }
-
-    function buildGoogleMapsLink(name, address) {
-      return "https://www.google.com/maps/search/?api=1&query=" +
-        encodeURIComponent((name || "") + " " + (address || ""));
-    }
-
-    function buildAppleMapsLink(name, address) {
-      var label = String(name || "").trim();
-      var destination = String(address || "").trim();
-
-      if (!destination) {
-        return "https://maps.apple.com/?q=" + encodeURIComponent(label);
-      }
-
-      return "https://maps.apple.com/?daddr=" + encodeURIComponent(destination) +
-             (label ? "&q=" + encodeURIComponent(label) : "");
-    }
-
-    function parseBuildGuideResponse(result) {
-      if (Array.isArray(result)) return result;
-      if (result && Array.isArray(result.data)) return result.data;
-      if (result && result.ok && Array.isArray(result.results)) return result.results;
-      if (result && result.error) throw new Error(result.error);
-      throw new Error("Build guide failed.");
-    }
-
-    async function fetchBuildGuide(params) {
-      var qs = new URLSearchParams(params).toString();
-      var response = await fetch("/api/build-guide?" + qs, {
-        method: "GET",
-        headers: {
-          "Accept": "application/json"
-        }
-      });
-
-      var rawText = await response.text();
-      var result;
-
-      try {
-        result = JSON.parse(rawText);
-      } catch (err) {
-        throw new Error("Build guide returned invalid JSON.");
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          (result && (result.detail || result.error)) ||
-          ("HTTP " + response.status)
-        );
-      }
-
-      return parseBuildGuideResponse(result);
-    }
-
-    async function callBackend(action, payload) {
-      let response;
-
-      try {
-        response = await fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-          },
-          body: JSON.stringify({
-            action: action,
-            payload: payload || {}
-          }),
-          redirect: "follow"
-        });
-      } catch (networkErr) {
-        throw new Error("Network request failed: " + (networkErr && networkErr.message ? networkErr.message : networkErr));
-      }
-
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (parseErr) {
-        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
-      }
-
-      if (!result.ok) {
-        throw new Error(result.error || "Backend error");
-      }
-
-      return result.data;
-    }
-
-    function logCategoryOpened(categoryLabel) {
-      try {
-        callBackend("logClientEvent", {
-          event_type: "category_opened",
-          session_id: getAnonId(),
-          complex_name: lastQueryOrGps || "",
-          search_category: categoryLabel || "",
-          source_context: lastSourceType || ""
-        });
-      } catch (e) {
-        console.log("category logging skipped", e);
-      }
-    }
-
-    async function getSharedGuideFromBackend(shareId) {
-      const url = APPS_SCRIPT_URL + "?api=1&action=getSharedGuide&shareId=" + encodeURIComponent(shareId);
-      const response = await fetch(url, { method: "GET", redirect: "follow" });
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (err) {
-        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
-      }
-
-      if (!result.ok) {
-        throw new Error(result.error || "Backend error");
-      }
-
-      return result.data;
-    }
-
-    async function getSpotShareFromBackend(spotId) {
-      const url = APPS_SCRIPT_URL + "?api=1&action=getSpotShare&spotId=" + encodeURIComponent(spotId);
-      const response = await fetch(url, { method: "GET", redirect: "follow" });
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (err) {
-        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
-      }
-
-      if (!result.ok) {
-        throw new Error(result.error || "Backend error");
-      }
-
-      return result.data;
-    }
-
-    async function createSpotShareUrl(name, address) {
-      var googleMapsUrl = buildGoogleMapsLink(name, address);
-      var appleMapsUrl = buildAppleMapsLink(name, address);
-
-      var res = await callBackend("createSpotShare", {
-        name: name,
-        address: address,
-        googleMapsUrl: googleMapsUrl,
-        appleMapsUrl: appleMapsUrl
-      });
-
-      var spotId = res && res.spotId ? String(res.spotId) : "";
-      if (!spotId) throw new Error("Unable to create spot share link.");
-
-      return window.location.origin + window.location.pathname + "?spot=" + encodeURIComponent(spotId);
-    }
-
-    function shareSpot(name, address) {
-      name = String(name || "").trim();
-      address = String(address || "").trim();
-
-      var btn = (typeof event !== "undefined" && event && event.target) ? event.target : null;
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = "Creating link...";
-      }
-
-      if (!name && !address) {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = "Share This Spot";
-        }
-        document.getElementById("status").textContent = "No location available to share.";
-        return;
-      }
-
-      document.getElementById("status").textContent = "Creating location link… please wait.";
-
-      createSpotShareUrl(name, address)
-        .then(function(shareUrl) {
-          var shareText = [name, address].filter(Boolean).join("\n");
-          var shareTitle = name || "GameDayGuide Spot";
-
-          if (navigator.share) {
-            return navigator.share({
-              title: shareTitle,
-              text: shareText,
-              url: shareUrl
-            })
-            .then(function() {
-              if (btn) {
-                btn.disabled = false;
-                btn.textContent = "Share This Spot";
-              }
-              document.getElementById("status").textContent = "Spot ready to share.";
-            })
-            .catch(function(err) {
-              if (btn) {
-                btn.disabled = false;
-                btn.textContent = "Share This Spot";
-              }
-              if (err && err.name === "AbortError") {
-                document.getElementById("status").textContent = "Share canceled.";
-                return;
-              }
-              fallbackCopySpot_(shareText, shareUrl);
-            });
-          }
-
-          if (btn) {
-            btn.disabled = false;
-            btn.textContent = "Share This Spot";
-          }
-          fallbackCopySpot_(shareText, shareUrl);
-        })
-        .catch(function(err) {
-          if (btn) {
-            btn.disabled = false;
-            btn.textContent = "Share This Spot";
-          }
-          document.getElementById("status").textContent =
-            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-        });
-    }
-
-    function fallbackCopySpot_(shareText, shareUrl) {
-      var copyText = [shareText, shareUrl].filter(Boolean).join("\n");
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(copyText)
-          .then(function() {
-            document.getElementById("status").textContent = "Spot link copied. Paste into your text or group chat.";
-          })
-          .catch(function() {
-            document.getElementById("status").textContent = "Could not copy automatically. Try sharing again.";
-          });
-      } else {
-        document.getElementById("status").textContent = "Sharing is limited on this device. Try again from a device that supports sharing.";
-      }
-    }
-
-    function createLocationActions(name, address) {
-      var actions = document.createElement("div");
-      actions.className = "card-actions";
-
-      var googleLink = document.createElement("a");
-      googleLink.className = "location-action-btn google-btn";
-      googleLink.href = buildGoogleMapsLink(name, address);
-      googleLink.target = "_blank";
-      googleLink.rel = "noopener";
-      googleLink.textContent = "Google Maps";
-
-      var appleLink = document.createElement("a");
-      appleLink.className = "location-action-btn";
-      appleLink.href = buildAppleMapsLink(name, address);
-      appleLink.target = "_blank";
-      appleLink.rel = "noopener";
-      appleLink.textContent = "Apple Maps";
-
-      var shareBtn = document.createElement("button");
-      shareBtn.type = "button";
-      shareBtn.className = "location-action-btn";
-      shareBtn.textContent = "Share This Spot";
-      shareBtn.onclick = function() {
-        shareSpot(name, address);
-      };
-
-      actions.appendChild(googleLink);
-      actions.appendChild(appleLink);
-      actions.appendChild(shareBtn);
-
-      return actions;
-    }
-
-    function scoreCuratedSuggestion(item, searchText) {
-      var q = normalizeForMatch(searchText);
-      var labelNorm = normalizeForMatch(item.label);
-      var queryNorm = normalizeForMatch(item.query);
-      var terms = q.split(" ").filter(Boolean);
-      var score = 0;
-
-      if (!q) return 0;
-
-      if (labelNorm === q) score += 300;
-      if (labelNorm.indexOf(q) === 0) score += 180;
-      if (labelNorm.indexOf(q) !== -1) score += 120;
-      if (queryNorm.indexOf(q) !== -1) score += 60;
-
-      terms.forEach(function(term) {
-        if (labelNorm.indexOf(term) !== -1) score += 18;
-        if (queryNorm.indexOf(term) !== -1) score += 8;
-      });
-
-      if (labelNorm.indexOf("baseball") !== -1) score += 12;
-      if (labelNorm.indexOf("athletic") !== -1) score += 8;
-      if (labelNorm.indexOf("stadium") !== -1) score += 8;
-      if (labelNorm.indexOf("park") !== -1) score += 5;
-      if (labelNorm.indexOf("field") !== -1) score += 5;
-
-      return score;
-    }
-
-    function getCuratedSuggestions(searchText) {
-      var q = normalizeForMatch(searchText);
-      if (!q) return [];
-
-      return TRIANGLE_COMPLEXES
-        .map(function(item) {
-          var score = scoreCuratedSuggestion(item, q);
-          if (score <= 0) return null;
-
-          return {
-            source: "curated",
-            subtype: "curated",
-            label: item.label,
-            secondaryText: item.query,
-            query: item.query,
-            displayValue: item.label,
-            score: score
-          };
-        })
-        .filter(function(item) {
-          return !!item;
-        })
-        .sort(function(a, b) {
-          if (b.score !== a.score) return b.score - a.score;
-          return a.label.localeCompare(b.label);
-        })
-        .slice(0, CURATED_SUGGESTION_LIMIT);
-    }
-
-    function scoreMergedSuggestion_(item, searchText) {
-      var q = normalizeForMatch(searchText);
-      var labelNorm = normalizeForMatch(item.label);
-      var secondaryNorm = normalizeForMatch(item.secondaryText || "");
-      var queryNorm = normalizeForMatch(item.query);
-      var terms = q.split(" ").filter(Boolean);
-      var score = Number(item.score || 0);
-
-      if (!q) return score;
-
-      if (labelNorm === q) score += 1000;
-      else if (queryNorm === q) score += 900;
-      else if (labelNorm.indexOf(q) === 0) score += 700;
-      else if (queryNorm.indexOf(q) === 0) score += 600;
-      else if (labelNorm.indexOf(q) !== -1) score += 450;
-      else if (queryNorm.indexOf(q) !== -1) score += 350;
-      else if (secondaryNorm.indexOf(q) !== -1) score += 200;
-
-      terms.forEach(function(term) {
-        if (labelNorm.indexOf(term) !== -1) score += 40;
-        if (queryNorm.indexOf(term) !== -1) score += 25;
-        if (secondaryNorm.indexOf(term) !== -1) score += 12;
-      });
-
-      if (item.source === "google") score += 120;
-      if (item.subtype === "tournament") score += 90;
-      if (item.source === "curated") score += 40;
-
-      return score;
-    }
-
-    function dedupeMergedSuggestions(items) {
-      var seen = {};
-      var out = [];
-
-      items.forEach(function(item) {
-        var key = normalizeForMatch(item.query || item.label);
-        if (!key || seen[key]) return;
-        seen[key] = true;
-        out.push(item);
-      });
-
-      return out;
-    }
-
-    function mergeSuggestions(curated, googleList, searchText) {
-      var normalizedGoogle = (googleList || []).map(function(item) {
-        return {
-          source: item.source || "google",
-          subtype: item.type || "autocomplete",
-          label: item.label || item.query || "",
-          secondaryText: item.secondaryText || "",
-          query: item.query || item.label || "",
-          displayValue: item.label || item.query || "",
-          score: Number(item.score || 0)
-        };
-      });
-
-      var merged = dedupeMergedSuggestions(curated.concat(normalizedGoogle));
-
-      merged.forEach(function(item) {
-        item.rankScore = scoreMergedSuggestion_(item, searchText);
-      });
-
-      merged.sort(function(a, b) {
-        if (b.rankScore !== a.rankScore) return b.rankScore - a.rankScore;
-        if (b.score !== a.score) return b.score - a.score;
-        return a.label.localeCompare(b.label);
-      });
-
-      return merged.slice(0, 8);
-    }
-
-    function badgeHtmlForSuggestion(item) {
-      if (item.source === "curated") {
-        return "<span class='suggestion-badge curated'>Saved Complex</span>";
-      }
-      if (item.subtype === "tournament") {
-        return "<span class='suggestion-badge tournament'>Tournament Parks</span>";
-      }
-      return "<span class='suggestion-badge google'>Google Field Search</span>";
-    }
-
-    function hideFieldMatchResults() {
-      visibleSuggestions = [];
-      var box = document.getElementById("fieldMatchResults");
-      box.innerHTML = "";
-      box.style.display = "none";
-    }
-
-    function renderFieldMatchResults(items) {
-      var box = document.getElementById("fieldMatchResults");
-      var html = "";
-
-      if (items && items.length) {
-        html += "<div class='match-results-header'>Matching Fields</div>";
-
-        items.forEach(function(item, index) {
-          html +=
-            "<button type='button' class='match-result-item' data-match-index='" + index + "'>" +
-              "<div class='match-result-top'>" +
-                "<div class='match-result-title'>" + esc(item.label) + "</div>" +
-                badgeHtmlForSuggestion(item) +
-              "</div>" +
-              "<div class='match-result-meta'>" + esc(item.secondaryText || item.query || "") + "</div>" +
-            "</button>";
-        });
-      } else {
-        html += "<div class='suggestion-note'>No matching facilities found.</div>";
-      }
-
-      box.innerHTML = html;
-      box.style.display = "block";
-    }
-
-    function getPreparedFacilityQuery_(rawQuery) {
-      var cleaned = cleanFacilitySearchText_(rawQuery);
-      return cleaned || String(rawQuery || "").trim();
-    }
-
-    function findMatchingFields() {
-      var rawQuery = String(document.getElementById("address").value || "").trim();
-      var query = getPreparedFacilityQuery_(rawQuery);
-
-      if (!query) {
-        document.getElementById("status").textContent = "Enter a facility name first.";
-        hideFieldMatchResults();
-        return;
-      }
-
-      document.getElementById("status").textContent = "Searching for fields…";
-      hideFieldMatchResults();
-
-      fetch("/api/field-suggestions?query=" + encodeURIComponent(query))
-        .then(function(response) {
-          return response.json();
-        })
-        .then(function(result) {
-          if (!result.ok) {
-            throw new Error(result.error || "Field suggestions failed.");
-          }
-
-          var serverSuggestions = Array.isArray(result.data) ? result.data : [];
-          var curated = getCuratedSuggestions(query);
-          var merged = mergeSuggestions(curated, serverSuggestions, query);
-          visibleSuggestions = merged.slice();
-
-          if (visibleSuggestions.length === 1 && Number(visibleSuggestions[0].rankScore || 0) > AUTO_RUN_RANK_THRESHOLD) {
-            var best = visibleSuggestions[0];
-            document.getElementById("address").value = best.query || best.label || "";
-            hideFieldMatchResults();
-            runGuideWithQuery(best.query || best.label || "", "query");
-            return;
-          }
-
-          renderFieldMatchResults(visibleSuggestions);
-          document.getElementById("status").textContent = visibleSuggestions.length ? "Select a field match." : "No matching facilities found.";
-        })
-        .catch(function(err) {
-          document.getElementById("status").textContent =
-            "Error finding facilities: " + (err && err.message ? err.message : JSON.stringify(err));
-          hideFieldMatchResults();
-        });
-    }
-
-    function selectMatchedFieldByIndex(index) {
-      var item = visibleSuggestions[index];
-      if (!item) return;
-
-      document.getElementById("address").value = item.query || item.label || "";
-      hideFieldMatchResults();
-      runGuideWithQuery(item.query || item.label || "", "query");
-    }
-
-    function setupFieldMatchResults() {
-      var box = document.getElementById("fieldMatchResults");
-      if (!box) return;
-
-      box.addEventListener("click", function(e) {
-        var btn = e.target.closest(".match-result-item");
-        if (!btn) return;
-        var index = Number(btn.getAttribute("data-match-index"));
-        if (isNaN(index)) return;
-        selectMatchedFieldByIndex(index);
-      });
-    }
-
-    function setupAddressKeyActions() {
-      var input = document.getElementById("address");
-      if (!input) return;
-
-      input.addEventListener("keydown", function(e) {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          findMatchingFields();
-        }
-      });
-
-      input.addEventListener("input", function() {
-        var value = String(input.value || "").trim();
-
-        if (!value) {
-          hideFieldMatchResults();
-          document.getElementById("status").textContent = "";
-          return;
-        }
-
-        hideFieldMatchResults();
-      });
-
-      input.addEventListener("focus", function() {
-        if (!String(input.value || "").trim()) {
-          hideFieldMatchResults();
-        }
-      });
-
-      document.addEventListener("click", function(e) {
-        if (
-          e.target.closest("#address") ||
-          e.target.closest("#fieldMatchResults") ||
-          e.target.closest(".match-btn")
-        ) {
-          return;
-        }
-        hideFieldMatchResults();
-      });
-    }
-
-    function focusAddressField() {
-      var input = document.getElementById("address");
-      if (!input) return;
-      if (currentSharedGuide && currentSharedGuide.results && currentSharedGuide.results.length) return;
-
-      setTimeout(function() {
-        try {
-          input.focus({ preventScroll: true });
-        } catch (e) {
-          try {
-            input.focus();
-          } catch (err) {}
-        }
-      }, 150);
-    }
-
-    function renderTriangleComplexes() {
-      var row = document.getElementById("triangleComplexRow");
-      row.innerHTML = "";
-
-      var visible = triangleExpanded
-        ? TRIANGLE_COMPLEXES
-        : TRIANGLE_COMPLEXES.slice(0, TRIANGLE_COMPLEXES_VISIBLE_COUNT);
-
-      visible.forEach(function(item) {
-        var btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "chip-btn";
-        btn.textContent = item.label;
-        btn.onclick = function() {
-          runPresetFacilityGuide(item.query, item.label);
-        };
-        row.appendChild(btn);
-      });
-
-      if (!triangleExpanded && TRIANGLE_COMPLEXES.length > TRIANGLE_COMPLEXES_VISIBLE_COUNT) {
-        var moreBtn = document.createElement("button");
-        moreBtn.type = "button";
-        moreBtn.className = "chip-btn expand-chip";
-        moreBtn.textContent = "More Triangle Fields";
-        moreBtn.onclick = function() {
-          triangleExpanded = true;
-          renderTriangleComplexes();
-        };
-        row.appendChild(moreBtn);
-      }
-
-      if (triangleExpanded && TRIANGLE_COMPLEXES.length > TRIANGLE_COMPLEXES_VISIBLE_COUNT) {
-        var lessBtn = document.createElement("button");
-        lessBtn.type = "button";
-        lessBtn.className = "chip-btn expand-chip";
-        lessBtn.textContent = "Show Less";
-        lessBtn.onclick = function() {
-          triangleExpanded = false;
-          renderTriangleComplexes();
-        };
-        row.appendChild(lessBtn);
-      }
-    }
-
-    function renderRecentSearches() {
-      var wrap = document.getElementById("recentSearchWrap");
-      var row = document.getElementById("recentSearchRow");
-      var list = getRecentSearches();
-
-      row.innerHTML = "";
-
-      if (!list.length || (currentSharedGuide && currentSharedGuide.results && currentSharedGuide.results.length)) {
-        wrap.style.display = "none";
-        return;
-      }
-
-      list.forEach(function(searchText) {
-        var btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "chip-btn secondary";
-        btn.textContent = searchText;
-        btn.onclick = function() {
-          document.getElementById("address").value = searchText;
-          runGuide();
-        };
-        row.appendChild(btn);
-      });
-
-      wrap.style.display = "block";
-    }
-
-    function runPresetFacilityGuide(query, displayLabel) {
-      setRadius(5);
-      document.getElementById("address").value = displayLabel || query || "";
-      hideFieldMatchResults();
-      runGuideWithQuery(query, "query");
-    }
-
-    function findExactCuratedMatch(query) {
-      var q = String(query || "").trim().toLowerCase();
-      return TRIANGLE_COMPLEXES.find(function(item) {
-        return item.label.toLowerCase() === q || item.query.toLowerCase() === q;
-      }) || null;
-    }
-
-    function runGuide() {
-      var rawQuery = (document.getElementById("address").value || "").trim();
-      var query = getPreparedFacilityQuery_(rawQuery);
-
-      if (!query) {
-        document.getElementById("status").textContent = "Please enter an address or facility name.";
-        return;
-      }
-
-      hideFieldMatchResults();
-
-      var exactMatch = findExactCuratedMatch(query);
-      if (exactMatch) {
-        runGuideWithQuery(exactMatch.query, "query");
-        return;
-      }
-
-      runGuideWithQuery(query, "query");
-    }
-
-    function startNewGuide() {
-      lastResults = [];
-      lastSourceType = "";
-      lastQueryOrGps = "";
-      currentSharedGuide = null;
-      latestShareUrl = "";
-
-      stopLoadingState();
-      document.getElementById("sharedBanner").style.display = "none";
-      document.getElementById("searchPanel").style.display = "block";
-      document.getElementById("address").value = "";
-      document.getElementById("status").textContent = "";
-      document.getElementById("results").innerHTML = "";
-      document.getElementById("topStops").innerHTML = "";
-      document.getElementById("categoryJumpBar").innerHTML = "";
-      document.getElementById("shareLinkBox").style.display = "none";
-      document.getElementById("shareLinkBox").innerHTML = "";
-      document.getElementById("shareTools").style.display = "none";
-      hideFieldMatchResults();
-      renderRecentSearches();
-      document.body.classList.add("home-mode");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      focusAddressField();
-    }
-
-    function runGuideWithQuery(query, sourceType) {
-      query = String(query || "").trim();
-      sourceType = sourceType || "query";
-
-      if (!query) {
-        document.getElementById("status").textContent = "Please enter an address or facility name.";
-        return;
-      }
-
-      var radius = getRadiusMiles();
-
-      document.getElementById("results").innerHTML = "";
-      document.getElementById("topStops").innerHTML = "";
-      document.getElementById("categoryJumpBar").innerHTML = "";
-      document.getElementById("shareLinkBox").style.display = "none";
-      document.getElementById("shareLinkBox").innerHTML = "";
-      document.getElementById("shareTools").style.display = "none";
-      latestShareUrl = "";
-      startLoadingState();
-
-      fetchBuildGuide({
-        query: query,
-        radiusMiles: radius
-      })
-        .then(function(data) {
-          stopLoadingState();
-          lastResults = Array.isArray(data) ? data : [];
-          lastSourceType = sourceType;
-          lastQueryOrGps = query;
-          saveRecentSearch(query);
-          renderRecentSearches();
-          document.getElementById("status").textContent = "Done.";
-          document.body.classList.remove("home-mode");
-          render(lastResults);
-          maybeOfferInstallPrompt(500);
-        })
-        .catch(function(err) {
-          stopLoadingState();
-          document.getElementById("status").textContent =
-            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-        });
-    }
-
-    function useMyLocation() {
-      document.getElementById("results").innerHTML = "";
-      document.getElementById("topStops").innerHTML = "";
-      document.getElementById("categoryJumpBar").innerHTML = "";
-      document.getElementById("shareLinkBox").style.display = "none";
-      document.getElementById("shareLinkBox").innerHTML = "";
-      document.getElementById("shareTools").style.display = "none";
-      latestShareUrl = "";
-      hideFieldMatchResults();
-      startLoadingState();
-
-      if (!navigator.geolocation) {
-        stopLoadingState();
-        document.getElementById("status").textContent = "This device/browser doesn't support location.";
-        return;
-      }
-
-      navigator.geolocation.getCurrentPosition(
-        function(pos) {
-          var lat = pos.coords.latitude;
-          var lng = pos.coords.longitude;
-          var radius = getRadiusMiles();
-
-          fetchBuildGuide({
-            lat: lat,
-            lng: lng,
-            radiusMiles: radius
-          })
-            .then(function(data) {
-              stopLoadingState();
-              lastResults = Array.isArray(data) ? data : [];
-              lastSourceType = "gps";
-              lastQueryOrGps = "GPS:" + lat + "," + lng;
-              document.getElementById("status").textContent = "Done.";
-              document.body.classList.remove("home-mode");
-              render(lastResults);
-              maybeOfferInstallPrompt(500);
-            })
-            .catch(function(err) {
-              stopLoadingState();
-              document.getElementById("status").textContent =
-                "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-            });
-        },
-        function(err) {
-          stopLoadingState();
-          var msg = "Location blocked. Allow location access and try again.";
-          if (err && err.code === 1) msg = "Location permission denied. Allow it in browser settings.";
-          if (err && err.code === 2) msg = "Location unavailable. Try again outside or with better signal.";
-          if (err && err.code === 3) msg = "Location timed out. Try again.";
-          document.getElementById("status").textContent = msg;
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-      );
-    }
-
-    function copyShareLink(url) {
-      if (!url) {
-        document.getElementById("status").textContent = "No share link available.";
-        return;
-      }
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url)
-          .then(function() {
-            document.getElementById("status").textContent = "Share link copied.";
-            var input = document.getElementById("shareLinkInput");
-            if (input) {
-              input.focus();
-              input.select();
-            }
-          })
-          .catch(function() {
-            document.getElementById("status").textContent = "Could not copy link automatically. You can still copy the link below.";
-          });
-      } else {
-        var input = document.getElementById("shareLinkInput");
-        if (input) {
-          input.focus();
-          input.select();
-        }
-        document.getElementById("status").textContent = "Automatic copy is not supported here. You can copy the link shown below.";
-      }
-    }
-
-    function triggerNativeShare() {
-      if (!latestShareUrl) {
-        document.getElementById("status").textContent = "No share link available.";
-        return;
-      }
-
-      if (!navigator.share) {
-        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
-        return;
-      }
-
-      var shareText = lastQueryOrGps
-        ? "GameDayGuide for " + lastQueryOrGps
-        : "GameDayGuide for our field";
-
-      navigator.share({
-        title: "GameDayGuide",
-        text: shareText,
-        url: latestShareUrl
-      })
-      .then(function() {
-        document.getElementById("status").textContent = "Share sheet opened.";
-      })
-      .catch(function(err) {
-        if (err && err.name === "AbortError") {
-          document.getElementById("status").textContent = "Share canceled.";
-          return;
-        }
-        document.getElementById("status").textContent = "Could not open share options. You can still copy the link below.";
-      });
-    }
-
-    function showShareLink(url) {
-      latestShareUrl = url || "";
-
-      var shareLabel = lastQueryOrGps
-        ? "Field guide ready for " + esc(lastQueryOrGps)
-        : "Field guide ready to share";
-
-      var shareMeta = lastQueryOrGps
-        ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
-        : "Send this to your team chat so everyone can open the same GameDayGuide.";
-
-      var box = document.getElementById("shareLinkBox");
-      box.style.display = "block";
-      box.innerHTML =
-        "<div class='card'>" +
-          "<div class='card-name'>" + shareLabel + "</div>" +
-          "<div class='card-meta'>" + shareMeta + "</div>" +
-          "<input id='shareLinkInput' class='share-link-input' type='text' readonly value='" + esc(url) + "' />" +
-          "<div class='share-link-help'>You can tap Share, copy the link, or open it first to confirm it looks right.</div>" +
-          "<div class='share-action-row'>" +
-            "<button type='button' class='action-btn share-btn' id='nativeShareBtn'>Share With Team</button>" +
-            "<button type='button' class='secondary-btn' id='copyShareAgainBtn'>Copy Link</button>" +
-            "<a class='directions-btn' href='" + esc(url) + "' target='_blank' rel='noopener'>Open Shared Guide</a>" +
-          "</div>" +
-        "</div>";
-
-      var input = document.getElementById("shareLinkInput");
-      if (input) {
-        input.addEventListener("click", function() {
-          input.select();
-        });
-      }
-
-      var copyBtn = document.getElementById("copyShareAgainBtn");
-      if (copyBtn) {
-        copyBtn.onclick = function() {
-          copyShareLink(url);
-        };
-      }
-
-      var shareBtn = document.getElementById("nativeShareBtn");
-      if (shareBtn) {
-        if (navigator.share) {
-          shareBtn.onclick = function() {
-            triggerNativeShare();
-          };
-        } else {
-          shareBtn.style.display = "none";
-        }
-      }
-    }
-
-    function shareGuide() {
-      if (!lastResults || !lastResults.length) {
-        document.getElementById("status").textContent = "No results available to share.";
-        return;
-      }
-
-      document.getElementById("status").textContent = "Creating share link…";
-
-      callBackend("createSharedGuide", {
-        sourceType: lastSourceType,
-        queryOrGps: lastQueryOrGps,
-        radius: selectedRadius,
-        results: lastResults,
-        userId: getAnonId()
-      })
-        .then(function(res) {
-          var shareId = res && res.shareId ? res.shareId : "";
-          var url = shareId
-            ? (window.location.origin + window.location.pathname + "?share=" + encodeURIComponent(shareId))
-            : "";
-
-          if (!url) {
-            document.getElementById("status").textContent = "Unable to create share link.";
-            return;
-          }
-
-          showShareLink(url);
-          document.getElementById("status").textContent = "Share link ready.";
-        })
-        .catch(function(err) {
-          document.getElementById("status").textContent =
-            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-        });
-    }
-
-    function createSectionHeading(title) {
-      var heading = document.createElement("div");
-      heading.className = "section-heading";
-      heading.textContent = title;
-      return heading;
-    }
-
-    function getClosestByCategory(grouped, category) {
-      var items = (grouped[category] || []).slice();
-      if (!items.length) return null;
-
-      items.sort(function(a, b) {
-        var da = (typeof a[6] === "number") ? a[6] : 9999;
-        var db = (typeof b[6] === "number") ? b[6] : 9999;
-        if (da < db) return -1;
-        if (da > db) return 1;
-
-        var na = String(a[1] || "").toLowerCase();
-        var nb = String(b[1] || "").toLowerCase();
-        return na < nb ? -1 : na > nb ? 1 : 0;
-      });
-
-      return items[0];
-    }
-
-    function isPreferredCoffeeName_(name) {
-      var n = String(name || "").toLowerCase();
-
-      var preferredTerms = [
-        "coffee",
-        "cafe",
-        "café",
-        "coffeehouse",
-        "coffee house",
-        "espresso",
-        "roastery",
-        "roast",
-        "starbucks",
-        "dunkin",
-        "krispy kreme",
-        "krispy creme"
-      ];
-
-      for (var i = 0; i < preferredTerms.length; i++) {
-        if (n.indexOf(preferredTerms[i]) !== -1) return true;
-      }
-
-      return false;
-    }
-
-    function isBadCoffeeMatch_(name, address) {
-      var hay = (String(name || "") + " " + String(address || "")).toLowerCase();
-
-      var badTerms = [
-        "wine",
-        "paint",
-        "painting",
-        "paint and sip",
-        "paint & sip",
-        "sip and paint",
-        "sip & paint",
-        "art studio",
-        "studio",
-        "pottery",
-        "ceramic",
-        "bar",
-        "brewery",
-        "lounge",
-        "night club",
-        "nightclub",
-        "yoga",
-        "martial arts",
-        "spa",
-        "salon"
-      ];
-
-      for (var i = 0; i < badTerms.length; i++) {
-        if (hay.indexOf(badTerms[i]) !== -1) return true;
-      }
-
-      return false;
-    }
-
-    function isFallbackCoffeeOnly_(name, address) {
-      var hay = (String(name || "") + " " + String(address || "")).toLowerCase();
-
-      var fallbackTerms = [
-        "gas",
-        "gas station",
-        "fuel",
-        "shell",
-        "bp",
-        "exxon",
-        "mobil",
-        "chevron",
-        "citgo",
-        "marathon",
-        "sunoco",
-        "valero",
-        "phillips 66",
-        "convenience",
-        "convenience store",
-        "7-eleven",
-        "7 eleven",
-        "circle k",
-        "sheetz",
-        "wawa",
-        "speedway",
-        "quicktrip",
-        "quiktrip",
-        "kwik trip",
-        "racetrac",
-        "pilot",
-        "flying j",
-        "love's",
-        "loves",
-        "travel center",
-        "travel centre"
-      ];
-
-      for (var i = 0; i < fallbackTerms.length; i++) {
-        if (hay.indexOf(fallbackTerms[i]) !== -1) return true;
-      }
-
-      return false;
-    }
-
-    function getPreferredCoffeeTopStop_(grouped) {
-      var items = (grouped["☕ Coffee"] || []).slice();
-      if (!items.length) return null;
-
-      items.sort(function(a, b) {
-        var da = (typeof a[6] === "number") ? a[6] : 9999;
-        var db = (typeof b[6] === "number") ? b[6] : 9999;
-        if (da < db) return -1;
-        if (da > db) return 1;
-
-        var na = String(a[1] || "").toLowerCase();
-        var nb = String(b[1] || "").toLowerCase();
-        return na < nb ? -1 : na > nb ? 1 : 0;
-      });
-
-      var preferred = items.filter(function(item) {
-        var name = item[1] || "";
-        var address = item[3] || "";
-
-        if (isBadCoffeeMatch_(name, address)) return false;
-        if (isFallbackCoffeeOnly_(name, address)) return false;
-        if (isPreferredCoffeeName_(name)) return true;
-
-        return true;
-      });
-
-      if (preferred.length) return preferred[0];
-
-      var fallback = items.filter(function(item) {
-        var name = item[1] || "";
-        var address = item[3] || "";
-        return !isBadCoffeeMatch_(name, address);
-      });
-
-      if (fallback.length) return fallback[0];
-      return items[0];
-    }
-
-    function renderTopStops(grouped) {
-      var container = document.getElementById("topStops");
-      container.innerHTML = "";
-
-      var topItems = [];
-      TOP_STOP_CONFIG.forEach(function(cfg) {
-        var item = null;
-
-        if (cfg.category === "☕ Coffee") {
-          item = getPreferredCoffeeTopStop_(grouped);
-        } else {
-          item = getClosestByCategory(grouped, cfg.category);
-        }
-
-        if (item) {
-          topItems.push({
-            label: cfg.label,
-            row: item
-          });
-        }
-      });
-
-      if (!topItems.length) return;
-
-      var wrap = document.createElement("div");
-      wrap.className = "top-stops-wrap";
-      wrap.appendChild(createSectionHeading("Closest Stops"));
-
-      var row = document.createElement("div");
-      row.className = "top-stops-row";
-
-      topItems.forEach(function(item) {
-        var r = item.row;
-        var name = r[1], rating = r[2], addr = r[3], openNow = r[4], dist = r[6];
-        var distText = (typeof dist === "number") ? dist.toFixed(1) + " mi" : "";
-        var metaParts = [];
-        if (rating) metaParts.push("⭐ " + esc(rating));
-        if (distText) metaParts.push(esc(distText));
-        if (openNow) metaParts.push(esc(openNow));
-
-        var card = document.createElement("div");
-        card.className = "top-stop-card";
-        card.innerHTML =
-          "<div class='top-stop-label'>" + esc(item.label) + "</div>" +
-          "<div class='top-stop-name'>" + esc(name) + "</div>" +
-          "<div class='top-stop-meta'>" + metaParts.join(" • ") + "</div>" +
-          "<div class='top-stop-address'>" + esc(addr || "") + "</div>";
-
-        card.appendChild(createLocationActions(name, addr));
-        row.appendChild(card);
-      });
-
-      wrap.appendChild(row);
-      container.appendChild(wrap);
-    }
-
-    function renderCategoryJumpBar(grouped) {
-      var container = document.getElementById("categoryJumpBar");
-      container.innerHTML = "";
-
-      var allCategories = Object.keys(grouped).sort(function(a, b) {
-        var ka = categorySortKey(a);
-        var kb = categorySortKey(b);
-        return ka < kb ? -1 : ka > kb ? 1 : 0;
-      });
-
-      if (!allCategories.length) return;
-
-      var wrap = document.createElement("div");
-      wrap.className = "jump-bar-wrap";
-      wrap.appendChild(createSectionHeading("Jump to Category"));
-
-      var row = document.createElement("div");
-      row.className = "jump-bar-row";
-
-      allCategories.forEach(function(cat) {
-        var btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "jump-chip";
-        btn.textContent = displayCategoryLabel(cat);
-
-        btn.onclick = function() {
-          var section = document.getElementById("section-" + slugifyCategory(cat));
-          if (!section) return;
-
-          var content = section.querySelector(".accordion-content");
-          var chevron = section.querySelector(".accordion-chevron");
-          if (content && !content.classList.contains("open")) {
-            content.classList.add("open");
-            if (chevron) chevron.textContent = "▼";
-          }
-
-          section.scrollIntoView({ behavior: "smooth", block: "start" });
-        };
-
-        row.appendChild(btn);
-      });
-
-      wrap.appendChild(row);
-      container.appendChild(wrap);
-    }
-
-    function renderCategoryBlock(container, cat, items) {
-      var section = document.createElement("div");
-      section.className = "category-section";
-      section.id = "section-" + slugifyCategory(cat);
-
-      var closest = "";
-      if (items.length && typeof items[0][6] === "number") {
-        closest = " • closest " + items[0][6].toFixed(1) + " mi";
-      }
-
-      var displayCat = displayCategoryLabel(cat);
-      var helperText = "";
-
-      if (cat === "🍔 Food") {
-        helperText = "Sorted by: Closest & Open";
-      }
-
-      var header = document.createElement("button");
-      header.type = "button";
-      header.className = "accordion-header" + (isMedicalCategory(cat) ? " medical-header" : "");
-      header.innerHTML =
-        "<div class='accordion-left'>" +
-          "<div>" + esc(displayCat) + "</div>" +
-          "<div class='accordion-count'>" + items.length + " results" + esc(closest) + "</div>" +
-          (helperText ? "<div class='accordion-helper'>" + esc(helperText) + "</div>" : "") +
-        "</div>" +
-        "<div class='accordion-chevron'>▶</div>";
-
-      var content = document.createElement("div");
-      content.className = "accordion-content";
-
-      var grid = document.createElement("div");
-      grid.className = "results-grid";
-      content.appendChild(grid);
-
-      var shownCount = Math.min(DEFAULT_VISIBLE_COUNT, items.length);
-
-      var toggleRow = document.createElement("div");
-      toggleRow.className = "toggle-row";
-
-      var showMoreBtn = document.createElement("button");
-      showMoreBtn.type = "button";
-      showMoreBtn.className = "show-more-btn";
-      showMoreBtn.textContent = "Show More";
-
-      var showLessBtn = document.createElement("button");
-      showLessBtn.type = "button";
-      showLessBtn.className = "show-less-btn";
-      showLessBtn.textContent = "Show Less";
-      showLessBtn.style.display = "none";
-
-      function redrawCards() {
-        grid.innerHTML = "";
-
-        for (var i = 0; i < shownCount; i++) {
-          var r = items[i];
-          var name = r[1], rating = r[2], addr = r[3], openNow = r[4], dist = r[6];
-          var distText = (typeof dist === "number") ? dist.toFixed(1) + " mi" : "";
-          var metaParts = [];
-          if (rating) metaParts.push("⭐ " + esc(rating));
-          if (distText) metaParts.push(esc(distText));
-          if (openNow) metaParts.push(esc(openNow));
-
-          var displayName = esc(name);
-          var cardClass = "card";
-
-          if (isMedicalCategory(cat)) {
-            displayName = "🚑 " + displayName;
-            cardClass += " urgent-card";
-          }
-
-          var card = document.createElement("div");
-          card.className = cardClass;
-          card.innerHTML =
-            "<div class='card-name'>" + displayName + "</div>" +
-            "<div class='card-meta'>" + metaParts.join(" • ") + "</div>" +
-            "<div class='card-address'>" + esc(addr || "") + "</div>";
-
-          card.appendChild(createLocationActions(name, addr));
-          grid.appendChild(card);
-        }
-
-        showMoreBtn.style.display = items.length > shownCount ? "block" : "none";
-        showLessBtn.style.display = shownCount > DEFAULT_VISIBLE_COUNT ? "block" : "none";
-      }
-
-      showMoreBtn.onclick = function() {
-        shownCount = Math.min(shownCount + 5, items.length);
-        redrawCards();
-      };
-
-      showLessBtn.onclick = function() {
-        shownCount = DEFAULT_VISIBLE_COUNT;
-        redrawCards();
-      };
-
-      toggleRow.appendChild(showMoreBtn);
-      toggleRow.appendChild(showLessBtn);
-      content.appendChild(toggleRow);
-
-      header.onclick = function() {
-        var isOpen = content.classList.contains("open");
-        if (isOpen) {
-          content.classList.remove("open");
-          header.querySelector(".accordion-chevron").textContent = "▶";
-        } else {
-          content.classList.add("open");
-          header.querySelector(".accordion-chevron").textContent = "▼";
-          logCategoryOpened(cat);
-        }
-      };
-
-      section.appendChild(header);
-      section.appendChild(content);
-      container.appendChild(section);
-
-      redrawCards();
-    }
-
-    function renderSection(container, title, categories, grouped) {
-      var sectionCategories = categories.filter(function(cat) {
-        return grouped[cat] && grouped[cat].length;
-      });
-
-      if (!sectionCategories.length) return;
-
-      container.appendChild(createSectionHeading(title));
-
-      sectionCategories.forEach(function(cat) {
-        var items = grouped[cat].slice().sort(function(a, b) {
-          var da = (typeof a[6] === "number") ? a[6] : 9999;
-          var db = (typeof b[6] === "number") ? b[6] : 9999;
-          if (da < db) return -1;
-          if (da > db) return 1;
-
-          var na = String(a[1] || "").toLowerCase();
-          var nb = String(b[1] || "").toLowerCase();
-          return na < nb ? -1 : na > nb ? 1 : 0;
-        });
-
-        renderCategoryBlock(container, cat, items);
-      });
-    }
-
-    function render(data) {
-      var container = document.getElementById("results");
-      var shareTools = document.getElementById("shareTools");
-      var topStopsContainer = document.getElementById("topStops");
-      var jumpBarContainer = document.getElementById("categoryJumpBar");
-
-      container.innerHTML = "";
-      topStopsContainer.innerHTML = "";
-      jumpBarContainer.innerHTML = "";
-
-      lastResults = Array.isArray(data) ? data : [];
-      shareTools.style.display = lastResults.length ? "block" : "none";
-
-      if (!lastResults.length) {
-        container.innerHTML =
-          "<div class='card'>" +
-            "<div class='card-name'>No results found</div>" +
-            "<div class='card-address'>Try a full street address, include city and state with the facility name, or increase the search radius.</div>" +
-          "</div>";
-        return;
-      }
-
-      var grouped = {};
-      lastResults.forEach(function(row) {
-        var cat = row[0] || "Other";
-        if (!grouped[cat]) grouped[cat] = [];
-        grouped[cat].push(row);
-      });
-
-      renderTopStops(grouped);
-      renderCategoryJumpBar(grouped);
-
-      var allCategories = Object.keys(grouped);
-
-      var otherCategories = allCategories
-        .filter(function(cat) {
-          return (
-            GAME_DAY_ESSENTIALS.indexOf(cat) === -1 &&
-            FOOD_AND_DRINK.indexOf(cat) === -1 &&
-            BREWERIES_AND_BARS.indexOf(cat) === -1
-          );
-        })
-        .sort(function(a, b) {
-          var ka = categorySortKey(a);
-          var kb = categorySortKey(b);
-          return ka < kb ? -1 : ka > kb ? 1 : 0;
-        });
-
-      renderSection(container, "Game Day Essentials", GAME_DAY_ESSENTIALS, grouped);
-      renderSection(container, "Food & Drink", FOOD_AND_DRINK, grouped);
-      renderSection(container, "Breweries/Bars", BREWERIES_AND_BARS, grouped);
-      renderSection(container, "Other", otherCategories, grouped);
-    }
-
-    function getShareIdFromUrl() {
-      try {
-        var params = new URLSearchParams(window.location.search);
-        return String(params.get("share") || "").trim();
-      } catch (e) {
-        return "";
-      }
-    }
-
-    function getSpotIdFromUrl() {
-      try {
-        var params = new URLSearchParams(window.location.search);
-        return String(params.get("spot") || "").trim();
-      } catch (e) {
-        return "";
-      }
-    }
-
-    function showSharedGuide(sharedGuide) {
-      currentSharedGuide = sharedGuide || null;
-      stopLoadingState();
-      document.body.classList.remove("home-mode");
-      document.getElementById("pageTitle").textContent = "GameDayGuide";
-      document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
-      document.getElementById("searchPanel").style.display = "none";
-
-      var banner = document.getElementById("sharedBanner");
-      var bannerText = document.getElementById("sharedBannerText");
-      banner.style.display = "block";
-
-      var line = "";
-      if (sharedGuide && sharedGuide.queryOrGps) {
-        line += "Built for: " + sharedGuide.queryOrGps;
-      }
-      if (sharedGuide && sharedGuide.radius) {
-        line += (line ? " • " : "") + "Radius: " + sharedGuide.radius + " mi";
-      }
-      bannerText.textContent = line || "Shared guide";
-
-      lastResults = (sharedGuide && sharedGuide.results) ? sharedGuide.results : [];
-      lastSourceType = (sharedGuide && sharedGuide.sourceType) || "";
-      lastQueryOrGps = (sharedGuide && sharedGuide.queryOrGps) || "";
-      selectedRadius = Number((sharedGuide && sharedGuide.radius) || 5);
-      document.getElementById("status").textContent = "Shared guide";
-      render(lastResults);
-      updateInstallTipForMode();
-      maybeOfferInstallPrompt(700);
-    }
-
-    function showSharedSpot(sharedSpot) {
-      stopLoadingState();
-      currentSharedGuide = null;
-      document.body.classList.remove("home-mode");
-      document.getElementById("pageTitle").textContent = "GameDayGuide";
-      document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
-      document.getElementById("searchPanel").style.display = "none";
-      document.getElementById("sharedBanner").style.display = "block";
-      document.getElementById("shareTools").style.display = "none";
-      document.getElementById("shareLinkBox").style.display = "none";
-      document.getElementById("topStops").innerHTML = "";
-      document.getElementById("categoryJumpBar").innerHTML = "";
-
-      var bannerText = document.getElementById("sharedBannerText");
-      bannerText.textContent = "Shared meeting spot";
-
-      var name = String((sharedSpot && sharedSpot.name) || "").trim();
-      var address = String((sharedSpot && sharedSpot.address) || "").trim();
-      var googleMapsUrl = String((sharedSpot && sharedSpot.googleMapsUrl) || buildGoogleMapsLink(name, address)).trim();
-      var appleMapsUrl = String((sharedSpot && sharedSpot.appleMapsUrl) || buildAppleMapsLink(name, address)).trim();
-
-      var results = document.getElementById("results");
-      results.innerHTML =
-        "<div class='section-heading'>Shared Spot</div>" +
-        "<div class='card'>" +
-          "<div class='card-name'>" + esc(name || "Shared Location") + "</div>" +
-          "<div class='card-address'>" + esc(address || "") + "</div>" +
-          "<div class='card-actions'>" +
-            "<a class='location-action-btn google-btn' href='" + esc(googleMapsUrl) + "' target='_blank' rel='noopener'>Open in Google Maps</a>" +
-            "<a class='location-action-btn' href='" + esc(appleMapsUrl) + "' target='_blank' rel='noopener'>Open in Apple Maps</a>" +
-            "<a class='secondary-btn' href='" + esc(window.location.origin + window.location.pathname) + "'>Open Full App</a>" +
-          "</div>" +
-        "</div>";
-
-      document.getElementById("status").textContent = "Shared spot";
-      updateInstallTipForMode();
-      maybeOfferInstallPrompt(700);
-    }
-
-    async function initializeApp() {
-      renderTriangleComplexes();
-      renderRecentSearches();
-      updateInstallTipForMode();
-      setupFieldMatchResults();
-      setupAddressKeyActions();
-      setupInstallPrompt();
-      stopLoadingState();
-
-      var shareId = getShareIdFromUrl();
-      var spotId = getSpotIdFromUrl();
-
-      if (spotId) {
-        try {
-          document.getElementById("status").textContent = "Loading shared spot…";
-          var sharedSpot = await getSpotShareFromBackend(spotId);
-
-          if (sharedSpot) {
-            showSharedSpot(sharedSpot);
-            return;
-          }
-
-          document.getElementById("status").textContent = "Shared spot not found.";
-        } catch (err) {
-          document.getElementById("status").textContent =
-            "Error loading shared spot: " + (err && err.message ? err.message : JSON.stringify(err));
-        }
-      }
-
-      if (shareId) {
-        try {
-          document.getElementById("status").textContent = "Loading shared guide…";
-          var sharedGuide = await getSharedGuideFromBackend(shareId);
-
-          if (sharedGuide && sharedGuide.results && sharedGuide.results.length) {
-            showSharedGuide(sharedGuide);
-            return;
-          }
-
-          document.getElementById("status").textContent = "Shared guide not found.";
-        } catch (err) {
-          document.getElementById("status").textContent =
-            "Error loading shared guide: " + (err && err.message ? err.message : JSON.stringify(err));
-        }
-      }
-
-      document.getElementById("sharedBanner").style.display = "none";
-      document.getElementById("searchPanel").style.display = "block";
-      document.body.classList.add("home-mode");
-      setRadius(5);
-      focusAddressField();
-      maybeOfferInstallPrompt(1200);
-    }
-
-    window.addEventListener("load", function() {
-      initializeApp();
+export default async function handler(req, res) {
+  try {
+    const apiKey = process.env.MAPS_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: "Missing MAPS_API_KEY" });
+    }
+
+    const query = String((req.query && req.query.query) || "").trim();
+    const lat = toFiniteNumber(req.query && req.query.lat);
+    const lng = toFiniteNumber(req.query && req.query.lng);
+    const radiusMiles = normalizeRadius((req.query && req.query.radiusMiles) || 5);
+
+    let loc = null;
+
+    if (isValidLatLng(lat, lng)) {
+      loc = { lat, lng };
+    } else if (query) {
+      loc = await resolveLocation(query, apiKey);
+    } else {
+      return res.status(400).json({ error: "Missing query or lat/lng" });
+    }
+
+    const rows = await collectAllRows(loc, radiusMiles, apiKey);
+    return res.status(200).json(rows);
+  } catch (err) {
+    return res.status(500).json({
+      error: "Build guide failed",
+      detail: err && err.message ? err.message : String(err)
     });
-  </script>
+  }
+}
 
-  <div style="
-    text-align:center;
-    font-size:12px;
-    color:#777;
-    margin-top:18px;
-    margin-bottom:10px;
-  ">
-    GameDayGuide •
-    <a href="https://docs.google.com/document/d/1bwmplZL1IHLNu7HpeP1Zp93HMN7qjUDOLDLKJ83Ty50/edit?usp=sharing"
-       target="_blank"
-       style="color:#777;text-decoration:underline;">
-       About
-    </a>
-    •
-    <a href="https://docs.google.com/document/d/1wmBtll4xLHe6XPiddzYJgCSXQq8-5OYtXrebpB7edao/edit?usp=sharing"
-       target="_blank"
-       style="color:#777;text-decoration:underline;">
-       Privacy
-    </a>
-  </div>
-</body>
-</html>
+function toFiniteNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function isValidLatLng(lat, lng) {
+  return (
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    lat >= -90 &&
+    lat <= 90 &&
+    lng >= -180 &&
+    lng <= 180
+  );
+}
+
+function normalizeRadius(radiusMiles) {
+  const n = Number(radiusMiles);
+  if (!Number.isFinite(n) || n <= 0) return 5;
+  if (n > 50) return 50;
+  return n;
+}
+
+async function fetchJson(url) {
+  const response = await fetch(url);
+  const text = await response.text();
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (err) {
+    throw new Error("Non-JSON response: " + text.slice(0, 300));
+  }
+
+  return data;
+}
+
+async function resolveLocation(query, apiKey) {
+  const geocodeLoc = await geocode(query, apiKey);
+  if (geocodeLoc) return geocodeLoc;
+
+  const textSearchLoc = await findPlaceByTextSearch(query, apiKey);
+  if (textSearchLoc) return textSearchLoc;
+
+  throw new Error("Location search failed for: " + query);
+}
+
+async function geocode(query, apiKey) {
+  const url =
+    "https://maps.googleapis.com/maps/api/geocode/json?address=" +
+    encodeURIComponent(query) +
+    "&key=" +
+    encodeURIComponent(apiKey);
+
+  const geo = await fetchJson(url);
+
+  if (geo.status === "OK" && geo.results && geo.results.length) {
+    return {
+      lat: Number(geo.results[0].geometry.location.lat),
+      lng: Number(geo.results[0].geometry.location.lng)
+    };
+  }
+
+  if (geo.status === "ZERO_RESULTS") {
+    return null;
+  }
+
+  throw new Error(
+    "Location search failed: " +
+      geo.status +
+      (geo.error_message ? " - " + geo.error_message : "")
+  );
+}
+
+async function findPlaceByTextSearch(query, apiKey) {
+  const url =
+    "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" +
+    encodeURIComponent(query) +
+    "&key=" +
+    encodeURIComponent(apiKey);
+
+  const result = await fetchJson(url);
+
+  if (result.status === "OK" && result.results && result.results.length) {
+    const first = result.results[0];
+    if (
+      first.geometry &&
+      first.geometry.location &&
+      typeof first.geometry.location.lat === "number" &&
+      typeof first.geometry.location.lng === "number"
+    ) {
+      return {
+        lat: Number(first.geometry.location.lat),
+        lng: Number(first.geometry.location.lng)
+      };
+    }
+  }
+
+  if (result.status === "ZERO_RESULTS") {
+    return null;
+  }
+
+  throw new Error(
+    "Place text search failed: " +
+      result.status +
+      (result.error_message ? " - " + result.error_message : "")
+  );
+}
+
+function categories() {
+  return [
+    ["🍔 Food", "restaurant", "", [], []],
+    ["☕ Coffee", "cafe", "", [], []],
+    ["🍦 Ice Cream", "store", "ice cream gelato frozen yogurt froyo creamery", [], ["restaurant", "bar", "night_club", "gas_station"]],
+    ["🏧 ATM", "atm", "", ["atm"], []],
+    ["🍺 Breweries/Bars", "bar", "brewery bar taproom pub", [], []],
+    ["⛽ Gas", "gas_station", "", ["gas_station"], []],
+    ["🛒 Grocery", "supermarket", "", ["supermarket"], ["gas_station", "convenience_store"]],
+    ["🏨 Hotels", "lodging", "", ["lodging"], []],
+    ["💊 Pharmacy", "pharmacy", "", ["pharmacy"], ["veterinary_care", "pet_store", "animal_hospital"]],
+    ["⚾ Sporting Goods", "sporting_goods_store", "sporting goods", [], []],
+    ["🏥 Urgent Care / ER", "doctor", "urgent care", [], []],
+    ["🦷 Emergency Dentist", "dentist", "emergency dentist", [], []]
+  ];
+}
+
+function isUrgentCareCategory(label) {
+  return label === "🏥 Urgent Care / ER";
+}
+
+function isEmergencyDentistCategory(label) {
+  return label === "🦷 Emergency Dentist";
+}
+
+function isSportingGoodsCategory(label) {
+  return label === "⚾ Sporting Goods";
+}
+
+function isGroceryCategory(label) {
+  return label === "🛒 Grocery";
+}
+
+function isFoodCategory(label) {
+  return label === "🍔 Food";
+}
+
+function categorySortKey(label) {
+  label = String(label || "").trim();
+
+  const foodOrder = ["🍔 Food", "☕ Coffee", "🍦 Ice Cream"];
+  const nonFoodOrder = [
+    "🏧 ATM",
+    "🍺 Breweries/Bars",
+    "⛽ Gas",
+    "🛒 Grocery",
+    "🏨 Hotels",
+    "💊 Pharmacy",
+    "⚾ Sporting Goods",
+    "🏥 Urgent Care / ER",
+    "🦷 Emergency Dentist"
+  ];
+
+  const foodIndex = foodOrder.indexOf(label);
+  if (foodIndex !== -1) return "0_" + ("00" + foodIndex).slice(-2);
+
+  const nonFoodIndex = nonFoodOrder.indexOf(label);
+  if (nonFoodIndex !== -1) return "1_" + ("00" + nonFoodIndex).slice(-2);
+
+  return "9_" + label.toLowerCase();
+}
+
+function haversineMiles(lat1, lon1, lat2, lon2) {
+  const R = 3958.7613;
+  const toRad = Math.PI / 180;
+
+  const dLat = (lat2 - lat1) * toRad;
+  const dLon = (lon2 - lon1) * toRad;
+
+  lat1 = lat1 * toRad;
+  lat2 = lat2 * toRad;
+
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
+
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function hasAnyType(placeTypes, requiredTypes) {
+  if (!requiredTypes || !requiredTypes.length) return true;
+  if (!placeTypes || !placeTypes.length) return false;
+
+  for (let i = 0; i < requiredTypes.length; i++) {
+    if (placeTypes.indexOf(requiredTypes[i]) !== -1) return true;
+  }
+  return false;
+}
+
+function hasExcludedType(placeTypes, excludedTypes) {
+  if (!excludedTypes || !excludedTypes.length) return false;
+  if (!placeTypes || !placeTypes.length) return false;
+
+  for (let i = 0; i < excludedTypes.length; i++) {
+    if (placeTypes.indexOf(excludedTypes[i]) !== -1) return true;
+  }
+
+  return false;
+}
+
+function textMatchesIceCream(p) {
+  const hay = (((p.name || "") + " " + (p.vicinity || "") + " " + (p.formatted_address || "")).toLowerCase());
+
+  const includeWords = ["ice cream", "gelato", "frozen yogurt", "froyo", "creamery", "custard", "yogurt"];
+  const excludeWords = ["pizza", "burger", "mexican", "grill", "bar", "steakhouse", "restaurant", "bbq"];
+
+  let include = false;
+  for (let i = 0; i < includeWords.length; i++) {
+    if (hay.indexOf(includeWords[i]) !== -1) {
+      include = true;
+      break;
+    }
+  }
+
+  if (!include) return false;
+
+  for (let j = 0; j < excludeWords.length; j++) {
+    if (hay.indexOf(excludeWords[j]) !== -1) return false;
+  }
+
+  return true;
+}
+
+function textMatchesPharmacy(p) {
+  const hay = (((p.name || "") + " " + (p.vicinity || "") + " " + (p.formatted_address || "")).toLowerCase());
+  const excludeWords = ["vet", "veterinary", "animal", "pet"];
+
+  for (let i = 0; i < excludeWords.length; i++) {
+    if (hay.indexOf(excludeWords[i]) !== -1) return false;
+  }
+
+  return true;
+}
+
+function textMatchesCoffee(p) {
+  const hay = (((p.name || "") + " " + (p.vicinity || "") + " " + (p.formatted_address || "")).toLowerCase());
+  const types = p.types || [];
+
+  const includeWords = [
+    "coffee", "coffee house", "coffeehouse", "espresso", "roastery", "roast",
+    "cafe", "café", "starbucks", "dunkin", "krispy kreme", "krispy creme"
+  ];
+
+  const excludeWords = [
+    "wine", "paint", "painting", "paint and sip", "paint & sip", "sip and paint", "sip & paint",
+    "art studio", "studio", "pottery", "ceramic", "bar", "brewery", "lounge", "night club",
+    "nightclub", "yoga", "martial arts", "spa", "salon"
+  ];
+
+  for (let i = 0; i < excludeWords.length; i++) {
+    if (hay.indexOf(excludeWords[i]) !== -1) return false;
+  }
+
+  for (let j = 0; j < includeWords.length; j++) {
+    if (hay.indexOf(includeWords[j]) !== -1) return true;
+  }
+
+  return types.indexOf("cafe") !== -1;
+}
+
+function textMatchesSportingGoods(p) {
+  const hay = (((p.name || "") + " " + (p.vicinity || "") + " " + (p.formatted_address || "")).toLowerCase());
+
+  const includeWords = [
+    "sporting goods", "sports store", "sports shop", "athletic store", "outdoor store", "outdoors",
+    "dick's sporting goods", "dicks sporting goods", "dick's house of sport", "dicks house of sport",
+    "house of sport", "academy sports", "academy sports + outdoors", "play it again sports",
+    "hibbett sports", "hibbett", "rei", "golf galaxy", "bass pro", "cabela"
+  ];
+
+  const excludeWords = [
+    "sport clips", "barber", "salon", "billiards", "pool hall", "sports bar", "restaurant",
+    "spa", "gym", "fitness", "martial arts"
+  ];
+
+  let include = false;
+  for (let i = 0; i < includeWords.length; i++) {
+    if (hay.indexOf(includeWords[i]) !== -1) {
+      include = true;
+      break;
+    }
+  }
+
+  if (!include) return false;
+
+  for (let j = 0; j < excludeWords.length; j++) {
+    if (hay.indexOf(excludeWords[j]) !== -1) return false;
+  }
+
+  return true;
+}
+
+function textMatchesUrgentCare(p) {
+  const hay = (((p.name || "") + " " + (p.formatted_address || "") + " " + (p.vicinity || "")).toLowerCase());
+  const types = p.types || [];
+
+  const urgentTerms = [
+    "urgent care", "urgentcare", "pediatric urgent care", "emergency room", "emergency department",
+    "walk-in", "walk in", "immediate care", "after hours", "after-hours", "express care",
+    "minor emergency", "er"
+  ];
+
+  const routineOnlyTerms = [
+    "primary care", "family medicine", "internal medicine", "dermatology", "cardiology",
+    "orthopedics", "orthopaedics", "neurology", "oncology", "gastroenterology", "urology",
+    "ophthalmology", "optometry", "physical therapy", "rehab", "radiology", "imaging",
+    "obgyn", "ob/gyn", "dental", "dentist"
+  ];
+
+  for (let i = 0; i < urgentTerms.length; i++) {
+    if (hay.indexOf(urgentTerms[i]) !== -1) return true;
+  }
+
+  for (let j = 0; j < routineOnlyTerms.length; j++) {
+    if (hay.indexOf(routineOnlyTerms[j]) !== -1) return false;
+  }
+
+  if (types.indexOf("hospital") !== -1) return true;
+  return false;
+}
+
+function textMatchesEmergencyDentist(p) {
+  const hay = (((p.name || "") + " " + (p.formatted_address || "") + " " + (p.vicinity || "")).toLowerCase());
+  const types = p.types || [];
+
+  const includeTerms = [
+    "emergency dentist", "emergency dental", "urgent dental", "urgent dentist", "24 hour dentist",
+    "24-hour dentist", "after hours dentist", "after-hours dentist", "same day dentist",
+    "walk in dentist", "walk-in dentist", "dental emergency"
+  ];
+
+  const excludeTerms = [
+    "orthodontics", "orthodontist", "pediatric dentistry", "cosmetic dentistry", "oral surgery",
+    "periodontics", "endodontics", "prosthodontics", "dental lab"
+  ];
+
+  if (types.indexOf("dentist") === -1) return false;
+
+  for (let i = 0; i < excludeTerms.length; i++) {
+    if (hay.indexOf(excludeTerms[i]) !== -1) return false;
+  }
+
+  for (let j = 0; j < includeTerms.length; j++) {
+    if (hay.indexOf(includeTerms[j]) !== -1) return true;
+  }
+
+  return false;
+}
+
+function textMatchesHotel(p) {
+  const hay = (((p.name || "") + " " + (p.formatted_address || "") + " " + (p.vicinity || "")).toLowerCase());
+  const types = p.types || [];
+
+  const includeWords = [
+    "hotel", "motel", "inn", "suites", "resort", "lodge", "extended stay", "hampton", "hilton",
+    "marriott", "courtyard", "fairfield", "holiday inn", "hyatt", "residence inn", "homewood suites",
+    "doubletree", "comfort inn", "quality inn", "best western", "la quinta", "springhill",
+    "embassy suites", "aloft", "westin", "sheraton", "drury", "microtel", "days inn", "super 8",
+    "tru by hilton"
+  ];
+
+  const excludeWords = [
+    "airbnb", "vrbo", "vacation rental", "vacation home", "rental property", "rental home",
+    "short-term rental", "short term rental", "apartment", "apartments", "condo", "condos",
+    "townhome", "townhouse", "corporate housing", "furnished rental", "property management"
+  ];
+
+  for (let i = 0; i < excludeWords.length; i++) {
+    if (hay.indexOf(excludeWords[i]) !== -1) return false;
+  }
+
+  if (types.indexOf("lodging") !== -1) {
+    for (let j = 0; j < includeWords.length; j++) {
+      if (hay.indexOf(includeWords[j]) !== -1) return true;
+    }
+  }
+
+  for (let k = 0; k < includeWords.length; k++) {
+    if (hay.indexOf(includeWords[k]) !== -1) return true;
+  }
+
+  return false;
+}
+
+function textMatchesGrocery(p) {
+  const hay = (((p.name || "") + " " + (p.formatted_address || "") + " " + (p.vicinity || "")).toLowerCase());
+
+  const includeWords = [
+    "grocery", "supermarket", "market", "food lion", "harris teeter", "publix", "lowe's foods",
+    "lowes foods", "aldi", "wegmans", "whole foods", "fresh market", "trader joe", "trader joe's"
+  ];
+
+  const excludeWords = ["gas station", "convenience", "convenience store", "mini mart", "martial arts", "restaurant"];
+
+  for (let i = 0; i < excludeWords.length; i++) {
+    if (hay.indexOf(excludeWords[i]) !== -1) return false;
+  }
+
+  for (let j = 0; j < includeWords.length; j++) {
+    if (hay.indexOf(includeWords[j]) !== -1) return true;
+  }
+
+  return false;
+}
+
+function textLooksLikeQuickFood(text) {
+  const hay = String(text || "").toLowerCase();
+  const quickTerms = [
+    "grill", "deli", "cafe", "café", "pizza", "bbq", "barbecue", "chicken", "taco", "tacos",
+    "burrito", "sandwich", "subs", "wings", "burger", "burgers", "panera", "chipotle",
+    "chick-fil-a", "chick fil a", "jersey mike", "jimmy john", "firehouse", "five guys",
+    "smashburger", "qdoba", "moes", "moe's", "zaxby", "raising cane", "raising cane's",
+    "shake shack", "cook out", "cookout", "whataburger", "wendy's", "mcdonald", "sonic",
+    "culver", "tropical smoothie", "panda express", "subway"
+  ];
+
+  for (let i = 0; i < quickTerms.length; i++) {
+    if (hay.indexOf(quickTerms[i]) !== -1) return true;
+  }
+
+  return false;
+}
+
+function textMatchesFood(p) {
+  const hay = (((p.name || "") + " " + (p.formatted_address || "") + " " + (p.vicinity || "")).toLowerCase());
+  const types = p.types || [];
+
+  if (types.indexOf("gas_station") !== -1) return false;
+  if (types.indexOf("convenience_store") !== -1) return false;
+  if (types.indexOf("bar") !== -1) return false;
+  if (types.indexOf("night_club") !== -1) return false;
+  if (types.indexOf("liquor_store") !== -1) return false;
+
+  const excludeWords = [
+    "gas station", "fuel", "convenience store", "mini mart", "travel center", "travel centre", "truck stop",
+    "barber", "salon", "spa", "hotel", "motel", "pharmacy", "urgent care", "dentist", "veterinary",
+    "pet store", "bank", "atm", "wine bar", "sports bar", "taproom", "brewery", "lounge", "night club",
+    "nightclub", "cocktail", "pub"
+  ];
+
+  for (let i = 0; i < excludeWords.length; i++) {
+    if (hay.indexOf(excludeWords[i]) !== -1) return false;
+  }
+
+  const includeWords = [
+    "restaurant", "grill", "pizza", "burger", "burgers", "sandwich", "subs", "sub", "burrito", "taco",
+    "tacos", "bbq", "barbecue", "chicken", "wings", "deli", "fast food", "takeout", "take-out",
+    "take away", "takeaway", "panera", "chipotle", "chick-fil-a", "chick fil a", "mcdonald",
+    "wendy's", "five guys", "cook out", "cookout", "zaxby", "subway", "jersey mike", "jimmy john",
+    "firehouse", "qdoba", "moes", "moe's", "panda express", "raising cane", "raising cane's",
+    "shake shack", "whataburger", "sonic", "culver", "panera bread"
+  ];
+
+  if (
+    types.indexOf("restaurant") !== -1 ||
+    types.indexOf("meal_takeaway") !== -1 ||
+    types.indexOf("meal_delivery") !== -1
+  ) {
+    return true;
+  }
+
+  for (let j = 0; j < includeWords.length; j++) {
+    if (hay.indexOf(includeWords[j]) !== -1) return true;
+  }
+
+  return false;
+}
+
+function categoryPassesExtraFilter(category, p) {
+  if (category === "🍔 Food") return textMatchesFood(p);
+  if (category === "🍦 Ice Cream") return textMatchesIceCream(p);
+  if (category === "☕ Coffee") return textMatchesCoffee(p);
+  if (category === "💊 Pharmacy") return textMatchesPharmacy(p);
+  if (category === "🏨 Hotels") return textMatchesHotel(p);
+  return true;
+}
+
+function buildNearbyUrl(loc, radiusMeters, type, keyword, apiKey) {
+  return (
+    "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" +
+    loc.lat + "," + loc.lng +
+    "&radius=" + radiusMeters +
+    "&type=" + encodeURIComponent(type) +
+    (keyword ? "&keyword=" + encodeURIComponent(keyword) : "") +
+    "&key=" + encodeURIComponent(apiKey)
+  );
+}
+
+function buildStandardCategoryRequests(loc, radiusMeters, apiKey) {
+  const cats = categories();
+  const requests = [];
+
+  for (let i = 0; i < cats.length; i++) {
+    const c = cats[i];
+    if (
+      isUrgentCareCategory(c[0]) ||
+      isSportingGoodsCategory(c[0]) ||
+      isGroceryCategory(c[0]) ||
+      isEmergencyDentistCategory(c[0]) ||
+      isFoodCategory(c[0])
+    ) {
+      continue;
+    }
+
+    requests.push({
+      category: c[0],
+      type: c[1],
+      keyword: c[2],
+      requiredTypes: c[3],
+      excludedTypes: c[4],
+      url: buildNearbyUrl(loc, radiusMeters, c[1], c[2], apiKey)
+    });
+  }
+
+  return requests;
+}
+
+function buildTextSearchUrl(loc, radiusMeters, queryText, apiKey) {
+  return (
+    "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" +
+    encodeURIComponent(queryText) +
+    "&location=" + loc.lat + "," + loc.lng +
+    "&radius=" + radiusMeters +
+    "&key=" + encodeURIComponent(apiKey)
+  );
+}
+
+function buildUrgentCareTextSearchRequests(loc, radiusMeters, apiKey) {
+  return [
+    { category: "🏥 Urgent Care / ER", queryText: "urgent care", specialType: "urgent", url: buildTextSearchUrl(loc, radiusMeters, "urgent care", apiKey) },
+    { category: "🏥 Urgent Care / ER", queryText: "pediatric urgent care", specialType: "urgent", url: buildTextSearchUrl(loc, radiusMeters, "pediatric urgent care", apiKey) },
+    { category: "🏥 Urgent Care / ER", queryText: "emergency room", specialType: "urgent", url: buildTextSearchUrl(loc, radiusMeters, "emergency room", apiKey) }
+  ];
+}
+
+function buildEmergencyDentistTextSearchRequests(loc, radiusMeters, apiKey) {
+  return [
+    { category: "🦷 Emergency Dentist", queryText: "emergency dentist", specialType: "dentist", url: buildTextSearchUrl(loc, radiusMeters, "emergency dentist", apiKey) },
+    { category: "🦷 Emergency Dentist", queryText: "urgent dental care", specialType: "dentist", url: buildTextSearchUrl(loc, radiusMeters, "urgent dental care", apiKey) },
+    { category: "🦷 Emergency Dentist", queryText: "24 hour dentist", specialType: "dentist", url: buildTextSearchUrl(loc, radiusMeters, "24 hour dentist", apiKey) },
+    { category: "🦷 Emergency Dentist", queryText: "dental emergency", specialType: "dentist", url: buildTextSearchUrl(loc, radiusMeters, "dental emergency", apiKey) }
+  ];
+}
+
+function buildSportingGoodsTextSearchRequests(loc, radiusMeters, apiKey) {
+  return [
+    { category: "⚾ Sporting Goods", queryText: "sporting goods", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "sporting goods", apiKey) },
+    { category: "⚾ Sporting Goods", queryText: "sports store", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "sports store", apiKey) },
+    { category: "⚾ Sporting Goods", queryText: "Dick's Sporting Goods", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Dick's Sporting Goods", apiKey) },
+    { category: "⚾ Sporting Goods", queryText: "Dicks Sporting Goods", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Dicks Sporting Goods", apiKey) },
+    { category: "⚾ Sporting Goods", queryText: "Dick's House of Sport", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Dick's House of Sport", apiKey) },
+    { category: "⚾ Sporting Goods", queryText: "Dicks House of Sport", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Dicks House of Sport", apiKey) },
+    { category: "⚾ Sporting Goods", queryText: "House of Sport", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "House of Sport", apiKey) },
+    { category: "⚾ Sporting Goods", queryText: "Academy Sports", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Academy Sports", apiKey) },
+    { category: "⚾ Sporting Goods", queryText: "Play It Again Sports", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Play It Again Sports", apiKey) },
+    { category: "⚾ Sporting Goods", queryText: "Hibbett Sports", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Hibbett Sports", apiKey) },
+    { category: "⚾ Sporting Goods", queryText: "REI", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "REI", apiKey) },
+    { category: "⚾ Sporting Goods", queryText: "Golf Galaxy", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Golf Galaxy", apiKey) }
+  ];
+}
+
+function buildGroceryTextSearchRequests(loc, radiusMeters, apiKey) {
+  return [
+    { category: "🛒 Grocery", queryText: "grocery store", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "grocery store", apiKey) },
+    { category: "🛒 Grocery", queryText: "supermarket", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "supermarket", apiKey) },
+    { category: "🛒 Grocery", queryText: "Harris Teeter", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Harris Teeter", apiKey) },
+    { category: "🛒 Grocery", queryText: "Food Lion", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Food Lion", apiKey) },
+    { category: "🛒 Grocery", queryText: "Publix", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Publix", apiKey) },
+    { category: "🛒 Grocery", queryText: "Lowe's Foods", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Lowe's Foods", apiKey) },
+    { category: "🛒 Grocery", queryText: "Aldi", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Aldi", apiKey) },
+    { category: "🛒 Grocery", queryText: "Wegmans", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Wegmans", apiKey) },
+    { category: "🛒 Grocery", queryText: "Whole Foods", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Whole Foods", apiKey) }
+  ];
+}
+
+function buildFoodSearchRequests(loc, radiusMeters, apiKey) {
+  return [
+    { category: "🍔 Food", type: "restaurant", keyword: "", specialType: "food", queryText: "", url: buildNearbyUrl(loc, radiusMeters, "restaurant", "", apiKey) },
+    { category: "🍔 Food", type: "meal_takeaway", keyword: "", specialType: "food", queryText: "", url: buildNearbyUrl(loc, radiusMeters, "meal_takeaway", "", apiKey) },
+    { category: "🍔 Food", type: "meal_delivery", keyword: "", specialType: "food", queryText: "", url: buildNearbyUrl(loc, radiusMeters, "meal_delivery", "", apiKey) },
+    { category: "🍔 Food", queryText: "fast food", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "fast food", apiKey) },
+    { category: "🍔 Food", queryText: "burger restaurant", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "burger restaurant", apiKey) },
+    { category: "🍔 Food", queryText: "chicken restaurant", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "chicken restaurant", apiKey) },
+    { category: "🍔 Food", queryText: "sandwich shop", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "sandwich shop", apiKey) },
+    { category: "🍔 Food", queryText: "burrito restaurant", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "burrito restaurant", apiKey) },
+    { category: "🍔 Food", queryText: "pizza restaurant", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "pizza restaurant", apiKey) },
+    { category: "🍔 Food", queryText: "McDonald's", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "McDonald's", apiKey) },
+    { category: "🍔 Food", queryText: "Chick-fil-A", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Chick-fil-A", apiKey) },
+    { category: "🍔 Food", queryText: "Wendy's", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Wendy's", apiKey) },
+    { category: "🍔 Food", queryText: "Cook Out", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Cook Out", apiKey) },
+    { category: "🍔 Food", queryText: "Zaxby's", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Zaxby's", apiKey) },
+    { category: "🍔 Food", queryText: "Five Guys", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Five Guys", apiKey) },
+    { category: "🍔 Food", queryText: "Chipotle", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Chipotle", apiKey) },
+    { category: "🍔 Food", queryText: "Panera Bread", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Panera Bread", apiKey) },
+    { category: "🍔 Food", queryText: "Subway", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Subway", apiKey) }
+  ];
+}
+
+function getFoodRankingScore(p, loc) {
+  let placeLat = null;
+  let placeLng = null;
+
+  if (
+    p.geometry &&
+    p.geometry.location &&
+    typeof p.geometry.location.lat === "number" &&
+    typeof p.geometry.location.lng === "number"
+  ) {
+    placeLat = p.geometry.location.lat;
+    placeLng = p.geometry.location.lng;
+  }
+
+  if (placeLat === null || placeLng === null) return -9999;
+
+  const distance = haversineMiles(loc.lat, loc.lng, placeLat, placeLng);
+  let score = 0;
+
+  if (distance < 1) score += 40;
+  else if (distance <= 3) score += 30;
+  else if (distance <= 6) score += 15;
+  else if (distance <= 10) score += 5;
+
+  if (p.opening_hours && typeof p.opening_hours.open_now === "boolean") {
+    if (p.opening_hours.open_now) score += 25;
+    else score -= 100;
+  }
+
+  const rating = Number(p.rating || 0);
+  if (rating >= 4.5) score += 20;
+  else if (rating >= 4.0) score += 15;
+  else if (rating >= 3.5) score += 8;
+
+  const textBlob = [p.name || "", p.formatted_address || "", p.vicinity || ""].join(" ");
+  if (textLooksLikeQuickFood(textBlob)) score += 10;
+
+  return score;
+}
+
+function buildFoodRows(places, loc, radiusMiles, limit) {
+  const deduped = dedupePlaces(places);
+  const scored = [];
+
+  for (let i = 0; i < deduped.length; i++) {
+    const p = deduped[i];
+    if (!textMatchesFood(p)) continue;
+
+    const row = buildRowFromPlace("🍔 Food", p, loc, radiusMiles);
+    if (!row) continue;
+
+    scored.push({ row, score: getFoodRankingScore(p, loc) });
+  }
+
+  scored.sort(function(a, b) {
+    if (b.score !== a.score) return b.score - a.score;
+
+    const da = typeof a.row[6] === "number" ? a.row[6] : 9999;
+    const db = typeof b.row[6] === "number" ? b.row[6] : 9999;
+    if (da < db) return -1;
+    if (da > db) return 1;
+
+    const ra = Number(a.row[2] || 0);
+    const rb = Number(b.row[2] || 0);
+    if (rb !== ra) return rb - ra;
+
+    const na = String(a.row[1] || "").toLowerCase();
+    const nb = String(b.row[1] || "").toLowerCase();
+    return na < nb ? -1 : na > nb ? 1 : 0;
+  });
+
+  return scored.slice(0, limit).map(function(item) {
+    return item.row;
+  });
+}
+
+function buildRowFromPlace(category, p, loc, radiusMiles) {
+  let placeLat = null;
+  let placeLng = null;
+
+  if (
+    p.geometry &&
+    p.geometry.location &&
+    typeof p.geometry.location.lat === "number" &&
+    typeof p.geometry.location.lng === "number"
+  ) {
+    placeLat = p.geometry.location.lat;
+    placeLng = p.geometry.location.lng;
+  }
+
+  if (placeLat === null || placeLng === null) return null;
+
+  const dist = haversineMiles(loc.lat, loc.lng, placeLat, placeLng);
+  if (typeof dist === "number" && dist > radiusMiles) return null;
+
+  const openNow =
+    p.opening_hours && typeof p.opening_hours.open_now === "boolean"
+      ? (p.opening_hours.open_now ? "Open" : "Closed")
+      : "";
+
+  const address = p.formatted_address || p.vicinity || "";
+  const link =
+    "https://www.google.com/maps/search/?api=1&query=" +
+    encodeURIComponent((p.name || "") + " " + address);
+
+  return [category, p.name || "", p.rating || "", address, openNow, link, dist];
+}
+
+function parseStandardCategoryResponse(request, res, loc, radiusMiles, limit) {
+  if (res.status !== "OK" && res.status !== "ZERO_RESULTS") {
+    throw new Error(
+      "Places failed for " +
+        request.category +
+        ": " +
+        res.status +
+        (res.error_message ? " - " + res.error_message : "")
+    );
+  }
+
+  const rows = [];
+  const results = res.results || [];
+
+  for (let i = 0; i < results.length && rows.length < limit; i++) {
+    const p = results[i];
+    const pTypes = p.types || [];
+
+    if (!hasAnyType(pTypes, request.requiredTypes)) continue;
+    if (hasExcludedType(pTypes, request.excludedTypes)) continue;
+    if (!categoryPassesExtraFilter(request.category, p)) continue;
+
+    const row = buildRowFromPlace(request.category, p, loc, radiusMiles);
+    if (row) rows.push(row);
+  }
+
+  return rows;
+}
+
+function collectPlacesFromTextResponse(res, labelForErrors) {
+  if (res.status !== "OK" && res.status !== "ZERO_RESULTS") {
+    throw new Error(
+      "Text Search failed for " +
+        labelForErrors +
+        ": " +
+        res.status +
+        (res.error_message ? " - " + res.error_message : "")
+    );
+  }
+  return res.results || [];
+}
+
+function collectPlacesFromNearbyResponse(res, labelForErrors) {
+  if (res.status !== "OK" && res.status !== "ZERO_RESULTS") {
+    throw new Error(
+      "Nearby Search failed for " +
+        labelForErrors +
+        ": " +
+        res.status +
+        (res.error_message ? " - " + res.error_message : "")
+    );
+  }
+  return res.results || [];
+}
+
+function dedupePlaces(places) {
+  const seen = {};
+  const deduped = [];
+
+  for (let i = 0; i < places.length; i++) {
+    const p = places[i];
+    const key =
+      p.place_id ||
+      ((p.name || "") + "|" + (p.formatted_address || p.vicinity || "")).toLowerCase();
+
+    if (seen[key]) continue;
+    seen[key] = true;
+    deduped.push(p);
+  }
+
+  return deduped;
+}
+
+function buildSpecialCategoryRows(category, places, loc, radiusMiles, limit) {
+  const deduped = dedupePlaces(places);
+
+  if (category === "🍔 Food") {
+    return buildFoodRows(deduped, loc, radiusMiles, limit);
+  }
+
+  const rows = [];
+  for (let i = 0; i < deduped.length; i++) {
+    const p = deduped[i];
+
+    if (category === "🏥 Urgent Care / ER" && !textMatchesUrgentCare(p)) continue;
+    if (category === "⚾ Sporting Goods" && !textMatchesSportingGoods(p)) continue;
+    if (category === "🛒 Grocery" && !textMatchesGrocery(p)) continue;
+    if (category === "🦷 Emergency Dentist" && !textMatchesEmergencyDentist(p)) continue;
+
+    const row = buildRowFromPlace(category, p, loc, radiusMiles);
+    if (row) rows.push(row);
+  }
+
+  rows.sort(function(a, b) {
+    const da = typeof a[6] === "number" ? a[6] : 9999;
+    const db = typeof b[6] === "number" ? b[6] : 9999;
+    if (da < db) return -1;
+    if (da > db) return 1;
+
+    const na = String(a[1] || "").toLowerCase();
+    const nb = String(b[1] || "").toLowerCase();
+    return na < nb ? -1 : na > nb ? 1 : 0;
+  });
+
+  return rows.slice(0, limit);
+}
+
+function sortRows(rows) {
+  rows.sort(function(a, b) {
+    const catA = categorySortKey(a[0]);
+    const catB = categorySortKey(b[0]);
+
+    if (catA < catB) return -1;
+    if (catA > catB) return 1;
+
+    const da = typeof a[6] === "number" ? a[6] : 9999;
+    const db = typeof b[6] === "number" ? b[6] : 9999;
+    if (da < db) return -1;
+    if (da > db) return 1;
+
+    const nameA = String(a[1] || "").toLowerCase();
+    const nameB = String(b[1] || "").toLowerCase();
+    if (nameA < nameB) return -1;
+    if (nameA > nameB) return 1;
+    return 0;
+  });
+
+  return rows;
+}
+
+async function collectAllRows(loc, radiusMiles, apiKey) {
+  const radiusMeters = Math.round(radiusMiles * 1609.34);
+
+  const standardRequests = buildStandardCategoryRequests(loc, radiusMeters, apiKey);
+  const urgentRequests = buildUrgentCareTextSearchRequests(loc, radiusMeters, apiKey);
+  const dentistRequests = buildEmergencyDentistTextSearchRequests(loc, radiusMeters, apiKey);
+  const sportingRequests = buildSportingGoodsTextSearchRequests(loc, radiusMeters, apiKey);
+  const groceryRequests = buildGroceryTextSearchRequests(loc, radiusMeters, apiKey);
+  const foodRequests = buildFoodSearchRequests(loc, radiusMeters, apiKey);
+
+  const allRequests = standardRequests
+    .concat(urgentRequests)
+    .concat(dentistRequests)
+    .concat(sportingRequests)
+    .concat(groceryRequests)
+    .concat(foodRequests);
+
+  const responses = await Promise.all(
+    allRequests.map(async function(request) {
+      try {
+        const res = await fetchJson(request.url);
+        return { request, res, error: null };
+      } catch (err) {
+        return {
+          request,
+          res: null,
+          error: err && err.message ? err.message : String(err)
+        };
+      }
+    })
+  );
+
+  let allRows = [];
+  let urgentPlaces = [];
+  let dentistPlaces = [];
+  let sportingPlaces = [];
+  let groceryPlaces = [];
+  let foodPlaces = [];
+
+  for (let i = 0; i < responses.length; i++) {
+    const item = responses[i];
+    const request = item.request;
+    const res = item.res;
+    const error = item.error;
+
+    if (error || !res) continue;
+
+    try {
+      if (request.specialType === "urgent") {
+        urgentPlaces = urgentPlaces.concat(collectPlacesFromTextResponse(res, "urgent care"));
+      } else if (request.specialType === "dentist") {
+        dentistPlaces = dentistPlaces.concat(collectPlacesFromTextResponse(res, "emergency dentist"));
+      } else if (request.specialType === "sporting") {
+        sportingPlaces = sportingPlaces.concat(collectPlacesFromTextResponse(res, "sporting goods"));
+      } else if (request.specialType === "grocery") {
+        groceryPlaces = groceryPlaces.concat(collectPlacesFromTextResponse(res, "grocery"));
+      } else if (request.specialType === "food") {
+        if (request.type) {
+          foodPlaces = foodPlaces.concat(collectPlacesFromNearbyResponse(res, "food nearby"));
+        } else {
+          foodPlaces = foodPlaces.concat(collectPlacesFromTextResponse(res, "food text search"));
+        }
+      } else {
+        const rows = parseStandardCategoryResponse(request, res, loc, radiusMiles, 15);
+        allRows = allRows.concat(rows);
+      }
+    } catch (_e) {
+      // Skip failed category parsing without breaking the full guide.
+    }
+  }
+
+  const urgentRows = buildSpecialCategoryRows("🏥 Urgent Care / ER", urgentPlaces, loc, radiusMiles, 15);
+  const dentistRows = buildSpecialCategoryRows("🦷 Emergency Dentist", dentistPlaces, loc, radiusMiles, 15);
+  const sportingRows = buildSpecialCategoryRows("⚾ Sporting Goods", sportingPlaces, loc, radiusMiles, 15);
+  const groceryRows = buildSpecialCategoryRows("🛒 Grocery", groceryPlaces, loc, radiusMiles, 15);
+  const foodRows = buildSpecialCategoryRows("🍔 Food", foodPlaces, loc, radiusMiles, 15);
+
+  allRows = allRows
+    .concat(urgentRows)
+    .concat(dentistRows)
+    .concat(sportingRows)
+    .concat(groceryRows)
+    .concat(foodRows);
+
+  return sortRows(allRows);
+}
