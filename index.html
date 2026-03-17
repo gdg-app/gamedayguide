@@ -1396,12 +1396,12 @@
         </div>
       </div>
 
-<div id="shareTools" style="display:none;">
-  <div class="share-tools-row">
-    <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share This Field With Your Team</button>
-    <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
-  </div>
-</div>
+      <div id="shareTools" style="display:none;">
+        <div class="share-tools-row">
+          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share This Field With Your Team</button>
+          <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
+        </div>
+      </div>
 
       <div id="shareLinkBox" style="display:none;"></div>
       <div id="topStops"></div>
@@ -1438,7 +1438,7 @@
 
   <script>
     const SHARED_GUIDE = null;
-    const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_HBMJVcnAI3HCvbx8_cIF-LCmDKGauENkkUuVMY8ZgU_vdtw/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_HBMJVcnAI3HCvbx8_cIF-LCmDKGauENkkUuVMY8ZgU_vdtw/exec";
 
     let selectedRadius = 5;
     let lastResults = [];
@@ -1769,38 +1769,38 @@
       });
     }
 
-function startLoadingState() {
-  var loadingWrap = document.getElementById("loadingState");
-  var loadingSubtext = document.getElementById("loadingSubtext");
-  var status = document.getElementById("status");
+    function startLoadingState() {
+      var loadingWrap = document.getElementById("loadingState");
+      var loadingSubtext = document.getElementById("loadingSubtext");
+      var status = document.getElementById("status");
 
-  stopLoadingState();
-  document.body.classList.remove("home-mode");
+      stopLoadingState();
+      document.body.classList.remove("home-mode");
 
-  loadingRotateIndex = 0;
-  if (loadingSubtext) {
-    loadingSubtext.textContent = LOADING_MESSAGES[0];
-  }
-  if (loadingWrap) {
-    loadingWrap.style.display = "block";
-  }
-  if (status) {
-    status.textContent = "";
-  }
+      loadingRotateIndex = 0;
+      if (loadingSubtext) {
+        loadingSubtext.textContent = LOADING_MESSAGES[0];
+      }
+      if (loadingWrap) {
+        loadingWrap.style.display = "block";
+      }
+      if (status) {
+        status.textContent = "";
+      }
 
-  loadingRotateTimer = setInterval(function() {
-    var subtextEl = document.getElementById("loadingSubtext");
-    if (!subtextEl) return;
+      loadingRotateTimer = setInterval(function() {
+        var subtextEl = document.getElementById("loadingSubtext");
+        if (!subtextEl) return;
 
-    loadingRotateIndex = (loadingRotateIndex + 1) % LOADING_MESSAGES.length;
-    subtextEl.style.opacity = "0.45";
+        loadingRotateIndex = (loadingRotateIndex + 1) % LOADING_MESSAGES.length;
+        subtextEl.style.opacity = "0.45";
 
-    setTimeout(function() {
-      subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
-      subtextEl.style.opacity = "1";
-    }, 180);
-  }, 2800);
-}
+        setTimeout(function() {
+          subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
+          subtextEl.style.opacity = "1";
+        }, 180);
+      }, 2800);
+    }
 
     function stopLoadingState() {
       var loadingWrap = document.getElementById("loadingState");
@@ -1827,16 +1827,151 @@ function startLoadingState() {
     }
 
     function buildAppleMapsLink(name, address) {
-  var label = String(name || "").trim();
-  var destination = String(address || "").trim();
+      var label = String(name || "").trim();
+      var destination = String(address || "").trim();
 
-  if (!destination) {
-    return "https://maps.apple.com/?q=" + encodeURIComponent(label);
-  }
+      if (!destination) {
+        return "https://maps.apple.com/?q=" + encodeURIComponent(label);
+      }
 
-  return "https://maps.apple.com/?daddr=" + encodeURIComponent(destination) +
-         (label ? "&q=" + encodeURIComponent(label) : "");
-}
+      return "https://maps.apple.com/?daddr=" + encodeURIComponent(destination) +
+             (label ? "&q=" + encodeURIComponent(label) : "");
+    }
+
+    function parseBuildGuideResponse(result) {
+      if (Array.isArray(result)) return result;
+      if (result && Array.isArray(result.data)) return result.data;
+      if (result && result.ok && Array.isArray(result.results)) return result.results;
+      if (result && result.error) throw new Error(result.error);
+      throw new Error("Build guide failed.");
+    }
+
+    async function fetchBuildGuide(params) {
+      var qs = new URLSearchParams(params).toString();
+      var response = await fetch("/api/build-guide?" + qs, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      var rawText = await response.text();
+      var result;
+
+      try {
+        result = JSON.parse(rawText);
+      } catch (err) {
+        throw new Error("Build guide returned invalid JSON.");
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          (result && (result.detail || result.error)) ||
+          ("HTTP " + response.status)
+        );
+      }
+
+      return parseBuildGuideResponse(result);
+    }
+
+    async function callBackend(action, payload) {
+      let response;
+
+      try {
+        response = await fetch(APPS_SCRIPT_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+          },
+          body: JSON.stringify({
+            action: action,
+            payload: payload || {}
+          }),
+          redirect: "follow"
+        });
+      } catch (networkErr) {
+        throw new Error("Network request failed: " + (networkErr && networkErr.message ? networkErr.message : networkErr));
+      }
+
+      const rawText = await response.text();
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
+      }
+
+      let result;
+      try {
+        result = JSON.parse(rawText);
+      } catch (parseErr) {
+        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
+      }
+
+      if (!result.ok) {
+        throw new Error(result.error || "Backend error");
+      }
+
+      return result.data;
+    }
+
+    function logCategoryOpened(categoryLabel) {
+      try {
+        callBackend("logClientEvent", {
+          event_type: "category_opened",
+          session_id: getAnonId(),
+          complex_name: lastQueryOrGps || "",
+          search_category: categoryLabel || "",
+          source_context: lastSourceType || ""
+        });
+      } catch (e) {
+        console.log("category logging skipped", e);
+      }
+    }
+
+    async function getSharedGuideFromBackend(shareId) {
+      const url = APPS_SCRIPT_URL + "?api=1&action=getSharedGuide&shareId=" + encodeURIComponent(shareId);
+      const response = await fetch(url, { method: "GET", redirect: "follow" });
+      const rawText = await response.text();
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
+      }
+
+      let result;
+      try {
+        result = JSON.parse(rawText);
+      } catch (err) {
+        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
+      }
+
+      if (!result.ok) {
+        throw new Error(result.error || "Backend error");
+      }
+
+      return result.data;
+    }
+
+    async function getSpotShareFromBackend(spotId) {
+      const url = APPS_SCRIPT_URL + "?api=1&action=getSpotShare&spotId=" + encodeURIComponent(spotId);
+      const response = await fetch(url, { method: "GET", redirect: "follow" });
+      const rawText = await response.text();
+
+      if (!response.ok) {
+        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
+      }
+
+      let result;
+      try {
+        result = JSON.parse(rawText);
+      } catch (err) {
+        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
+      }
+
+      if (!result.ok) {
+        throw new Error(result.error || "Backend error");
+      }
+
+      return result.data;
+    }
 
     async function createSpotShareUrl(name, address) {
       var googleMapsUrl = buildGoogleMapsLink(name, address);
@@ -1854,73 +1989,74 @@ function startLoadingState() {
 
       return window.location.origin + window.location.pathname + "?spot=" + encodeURIComponent(spotId);
     }
-function shareSpot(name, address) {
-  name = String(name || "").trim();
-  address = String(address || "").trim();
 
-  var btn = (typeof event !== "undefined" && event && event.target) ? event.target : null;
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "Creating link...";
-  }
+    function shareSpot(name, address) {
+      name = String(name || "").trim();
+      address = String(address || "").trim();
 
-  if (!name && !address) {
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "Share This Spot";
-    }
-    document.getElementById("status").textContent = "No location available to share.";
-    return;
-  }
+      var btn = (typeof event !== "undefined" && event && event.target) ? event.target : null;
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Creating link...";
+      }
 
-  document.getElementById("status").textContent = "Creating location link… please wait.";
+      if (!name && !address) {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Share This Spot";
+        }
+        document.getElementById("status").textContent = "No location available to share.";
+        return;
+      }
 
-  createSpotShareUrl(name, address)
-    .then(function(shareUrl) {
-      var shareText = [name, address].filter(Boolean).join("\n");
-      var shareTitle = name || "GameDayGuide Spot";
+      document.getElementById("status").textContent = "Creating location link… please wait.";
 
-      if (navigator.share) {
-        return navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl
-        })
-        .then(function() {
+      createSpotShareUrl(name, address)
+        .then(function(shareUrl) {
+          var shareText = [name, address].filter(Boolean).join("\n");
+          var shareTitle = name || "GameDayGuide Spot";
+
+          if (navigator.share) {
+            return navigator.share({
+              title: shareTitle,
+              text: shareText,
+              url: shareUrl
+            })
+            .then(function() {
+              if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Share This Spot";
+              }
+              document.getElementById("status").textContent = "Spot ready to share.";
+            })
+            .catch(function(err) {
+              if (btn) {
+                btn.disabled = false;
+                btn.textContent = "Share This Spot";
+              }
+              if (err && err.name === "AbortError") {
+                document.getElementById("status").textContent = "Share canceled.";
+                return;
+              }
+              fallbackCopySpot_(shareText, shareUrl);
+            });
+          }
+
           if (btn) {
             btn.disabled = false;
             btn.textContent = "Share This Spot";
           }
-          document.getElementById("status").textContent = "Spot ready to share.";
+          fallbackCopySpot_(shareText, shareUrl);
         })
         .catch(function(err) {
           if (btn) {
             btn.disabled = false;
             btn.textContent = "Share This Spot";
           }
-          if (err && err.name === "AbortError") {
-            document.getElementById("status").textContent = "Share canceled.";
-            return;
-          }
-          fallbackCopySpot_(shareText, shareUrl);
+          document.getElementById("status").textContent =
+            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
         });
-      }
-
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "Share This Spot";
-      }
-      fallbackCopySpot_(shareText, shareUrl);
-    })
-    .catch(function(err) {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "Share This Spot";
-      }
-      document.getElementById("status").textContent =
-        "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-    });
-}
+    }
 
     function fallbackCopySpot_(shareText, shareUrl) {
       var copyText = [shareText, shareUrl].filter(Boolean).join("\n");
@@ -2145,105 +2281,6 @@ function shareSpot(name, address) {
     function getPreparedFacilityQuery_(rawQuery) {
       var cleaned = cleanFacilitySearchText_(rawQuery);
       return cleaned || String(rawQuery || "").trim();
-    }
-
-    async function callBackend(action, payload = {}) {
-      let response;
-
-      try {
-        response = await fetch(APP_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-          },
-          body: JSON.stringify({
-            action: action,
-            payload: payload
-          }),
-          redirect: "follow"
-        });
-      } catch (networkErr) {
-        throw new Error("Network request failed: " + (networkErr && networkErr.message ? networkErr.message : networkErr));
-      }
-
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (parseErr) {
-        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
-      }
-
-      if (!result.ok) {
-        throw new Error(result.error || "Backend error");
-      }
-
-      return result.data;
-    }
-
-    function logCategoryOpened(categoryLabel) {
-      try {
-        callBackend("logClientEvent", {
-          event_type: "category_opened",
-          session_id: getAnonId(),
-          complex_name: lastQueryOrGps || "",
-          search_category: categoryLabel || "",
-          source_context: lastSourceType || ""
-        });
-      } catch (e) {
-        console.log("category logging skipped", e);
-      }
-    }
-
-    async function getSharedGuideFromBackend(shareId) {
-      const url = APP_URL + "?api=1&action=getSharedGuide&shareId=" + encodeURIComponent(shareId);
-      const response = await fetch(url, { method: "GET", redirect: "follow" });
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (err) {
-        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
-      }
-
-      if (!result.ok) {
-        throw new Error(result.error || "Backend error");
-      }
-
-      return result.data;
-    }
-
-    async function getSpotShareFromBackend(spotId) {
-      const url = APP_URL + "?api=1&action=getSpotShare&spotId=" + encodeURIComponent(spotId);
-      const response = await fetch(url, { method: "GET", redirect: "follow" });
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (err) {
-        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
-      }
-
-      if (!result.ok) {
-        throw new Error(result.error || "Backend error");
-      }
-
-      return result.data;
     }
 
     function findMatchingFields() {
@@ -2510,7 +2547,6 @@ function shareSpot(name, address) {
       }
 
       var radius = getRadiusMiles();
-      var userId = getAnonId();
 
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
@@ -2521,21 +2557,11 @@ function shareSpot(name, address) {
       latestShareUrl = "";
       startLoadingState();
 
-      callBackend("getWeekendHub", {
+      fetchBuildGuide({
         query: query,
-        radiusMiles: radius,
-        userId: userId
+        radiusMiles: radius
       })
-      fetch("/api/build-guide?query=" + encodeURIComponent(query) + "&radiusMiles=" + encodeURIComponent(radius))
-        .then(function(response) {
-          return response.json();
-        })
-        .then(function(result) {
-  if (!Array.isArray(result)) {
-    throw new Error(result.error || "Build guide failed.");
-  }
-
-          var data = result || [];
+        .then(function(data) {
           stopLoadingState();
           lastResults = Array.isArray(data) ? data : [];
           lastSourceType = sourceType;
@@ -2576,13 +2602,11 @@ function shareSpot(name, address) {
           var lat = pos.coords.latitude;
           var lng = pos.coords.longitude;
           var radius = getRadiusMiles();
-          var userId = getAnonId();
 
-          callBackend("getWeekendHubByLatLng", {
+          fetchBuildGuide({
             lat: lat,
             lng: lng,
-            radiusMiles: radius,
-            userId: userId
+            radiusMiles: radius
           })
             .then(function(data) {
               stopLoadingState();
@@ -2642,62 +2666,62 @@ function shareSpot(name, address) {
     }
 
     function triggerNativeShare() {
-  if (!latestShareUrl) {
-    document.getElementById("status").textContent = "No share link available.";
-    return;
-  }
+      if (!latestShareUrl) {
+        document.getElementById("status").textContent = "No share link available.";
+        return;
+      }
 
-  if (!navigator.share) {
-    document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
-    return;
-  }
+      if (!navigator.share) {
+        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
+        return;
+      }
 
-  var shareText = lastQueryOrGps
-    ? "GameDayGuide for " + lastQueryOrGps
-    : "GameDayGuide for our field";
+      var shareText = lastQueryOrGps
+        ? "GameDayGuide for " + lastQueryOrGps
+        : "GameDayGuide for our field";
 
-  navigator.share({
-    title: "GameDayGuide",
-    text: shareText,
-    url: latestShareUrl
-  })
-  .then(function() {
-    document.getElementById("status").textContent = "Share sheet opened.";
-  })
-  .catch(function(err) {
-    if (err && err.name === "AbortError") {
-      document.getElementById("status").textContent = "Share canceled.";
-      return;
+      navigator.share({
+        title: "GameDayGuide",
+        text: shareText,
+        url: latestShareUrl
+      })
+      .then(function() {
+        document.getElementById("status").textContent = "Share sheet opened.";
+      })
+      .catch(function(err) {
+        if (err && err.name === "AbortError") {
+          document.getElementById("status").textContent = "Share canceled.";
+          return;
+        }
+        document.getElementById("status").textContent = "Could not open share options. You can still copy the link below.";
+      });
     }
-    document.getElementById("status").textContent = "Could not open share options. You can still copy the link below.";
-  });
-}
 
-function showShareLink(url) {
-  latestShareUrl = url || "";
+    function showShareLink(url) {
+      latestShareUrl = url || "";
 
-  var shareLabel = lastQueryOrGps
-    ? "Field guide ready for " + esc(lastQueryOrGps)
-    : "Field guide ready to share";
+      var shareLabel = lastQueryOrGps
+        ? "Field guide ready for " + esc(lastQueryOrGps)
+        : "Field guide ready to share";
 
-  var shareMeta = lastQueryOrGps
-    ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
-    : "Send this to your team chat so everyone can open the same GameDayGuide.";
+      var shareMeta = lastQueryOrGps
+        ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
+        : "Send this to your team chat so everyone can open the same GameDayGuide.";
 
-  var box = document.getElementById("shareLinkBox");
-  box.style.display = "block";
-  box.innerHTML =
-    "<div class='card'>" +
-      "<div class='card-name'>" + shareLabel + "</div>" +
-      "<div class='card-meta'>" + shareMeta + "</div>" +
-      "<input id='shareLinkInput' class='share-link-input' type='text' readonly value='" + esc(url) + "' />" +
-      "<div class='share-link-help'>You can tap Share, copy the link, or open it first to confirm it looks right.</div>" +
-      "<div class='share-action-row'>" +
-        "<button type='button' class='action-btn share-btn' id='nativeShareBtn'>Share With Team</button>" +
-        "<button type='button' class='secondary-btn' id='copyShareAgainBtn'>Copy Link</button>" +
-        "<a class='directions-btn' href='" + esc(url) + "' target='_blank' rel='noopener'>Open Shared Guide</a>" +
-      "</div>" +
-    "</div>";
+      var box = document.getElementById("shareLinkBox");
+      box.style.display = "block";
+      box.innerHTML =
+        "<div class='card'>" +
+          "<div class='card-name'>" + shareLabel + "</div>" +
+          "<div class='card-meta'>" + shareMeta + "</div>" +
+          "<input id='shareLinkInput' class='share-link-input' type='text' readonly value='" + esc(url) + "' />" +
+          "<div class='share-link-help'>You can tap Share, copy the link, or open it first to confirm it looks right.</div>" +
+          "<div class='share-action-row'>" +
+            "<button type='button' class='action-btn share-btn' id='nativeShareBtn'>Share With Team</button>" +
+            "<button type='button' class='secondary-btn' id='copyShareAgainBtn'>Copy Link</button>" +
+            "<a class='directions-btn' href='" + esc(url) + "' target='_blank' rel='noopener'>Open Shared Guide</a>" +
+          "</div>" +
+        "</div>";
 
       var input = document.getElementById("shareLinkInput");
       if (input) {
@@ -3371,28 +3395,26 @@ function showShareLink(url) {
       initializeApp();
     });
   </script>
-<div style="
-  text-align:center;
-  font-size:12px;
-  color:#777;
-  margin-top:18px;
-  margin-bottom:10px;
-">
-  GameDayGuide • 
-  <a href="https://docs.google.com/document/d/1bwmplZL1IHLNu7HpeP1Zp93HMN7qjUDOLDLKJ83Ty50/edit?usp=sharing"
-     target="_blank"
-     style="color:#777;text-decoration:underline;">
-     About
-  </a>
-  •
-  <a href="https://docs.google.com/document/d/1wmBtll4xLHe6XPiddzYJgCSXQq8-5OYtXrebpB7edao/edit?usp=sharing"
-     target="_blank"
-     style="color:#777;text-decoration:underline;">
-     Privacy
-  </a>
-</div>
-  </a>
-</div>
-  
+
+  <div style="
+    text-align:center;
+    font-size:12px;
+    color:#777;
+    margin-top:18px;
+    margin-bottom:10px;
+  ">
+    GameDayGuide •
+    <a href="https://docs.google.com/document/d/1bwmplZL1IHLNu7HpeP1Zp93HMN7qjUDOLDLKJ83Ty50/edit?usp=sharing"
+       target="_blank"
+       style="color:#777;text-decoration:underline;">
+       About
+    </a>
+    •
+    <a href="https://docs.google.com/document/d/1wmBtll4xLHe6XPiddzYJgCSXQq8-5OYtXrebpB7edao/edit?usp=sharing"
+       target="_blank"
+       style="color:#777;text-decoration:underline;">
+       Privacy
+    </a>
+  </div>
 </body>
 </html>
