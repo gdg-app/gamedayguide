@@ -951,7 +951,7 @@ async function collectAllRows(loc, radiusMiles, apiKey) {
   const dentistRows = buildSpecialCategoryRows("🦷 Emergency Dentist", dentistPlaces, loc, radiusMiles, 15);
   const sportingRows = buildSpecialCategoryRows("⚾ Sporting Goods", sportingPlaces, loc, radiusMiles, 15);
   const groceryRows = buildSpecialCategoryRows("🛒 Grocery", groceryPlaces, loc, radiusMiles, 15);
-  const foodRows = buildSpecialCategoryRows("🍔 Food", foodPlaces, loc, radiusMiles, 15);
+  const foodRows = buildSpecialCategoryRows("🍔 Food", foodPlaces, loc, radiusMiles, 25);
 
   allRows = allRows
     .concat(urgentRows)
