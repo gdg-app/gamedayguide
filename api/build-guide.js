@@ -1,26 +1,16 @@
 export default async function handler(req, res) {
   try {
     const apiKey = process.env.MAPS_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: "Missing MAPS_API_KEY" });
-    }
+    if (!apiKey) return res.status(500).json({ error: "Missing MAPS_API_KEY" });
 
-    const query = String(req.query.query || "").trim();
-    const radiusMilesRaw = Number(req.query.radiusMiles || 5);
-    const radiusMiles = clampNumber(
-      Number.isFinite(radiusMilesRaw) ? radiusMilesRaw : 5,
-      1,
-      25
-    );
+    const query = String((req.query && req.query.query) || "").trim();
+    const radiusMilesRaw = Number((req.query && req.query.radiusMiles) || 5);
+    const radiusMiles = Math.max(1, Math.min(25, Number.isFinite(radiusMilesRaw) ? radiusMilesRaw : 5));
 
-    if (!query) {
-      return res.status(400).json({ error: "Missing query" });
-    }
+    if (!query) return res.status(400).json({ error: "Missing query" });
 
     const loc = await geocodeQuery(query, apiKey);
-    if (!loc) {
-      return res.status(200).json([]);
-    }
+    if (!loc) return res.status(200).json([]);
 
     const radiusMeters = Math.round(radiusMiles * 1609.34);
     const requests = buildRequests(loc, radiusMeters, apiKey);
@@ -31,11 +21,7 @@ export default async function handler(req, res) {
           const data = await fetchJson(request.url);
           return { ok: true, request: request, data: data };
         } catch (error) {
-          return {
-            ok: false,
-            request: request,
-            error: String(error && error.message ? error.message : error)
-          };
+          return { ok: false, request: request, error: String(error && error.message ? error.message : error) };
         }
       })
     );
@@ -43,14 +29,8 @@ export default async function handler(req, res) {
     const rows = buildRowsFromSettled(settled, loc, radiusMiles);
     return res.status(200).json(rows);
   } catch (error) {
-    return res.status(500).send(
-      "Build guide error: " + String(error && error.message ? error.message : error)
-    );
+    return res.status(500).send("Build guide error: " + String(error && error.message ? error.message : error));
   }
-}
-
-function clampNumber(value, min, max) {
-  return Math.max(min, Math.min(max, value));
 }
 
 async function fetchJson(url) {
@@ -65,9 +45,7 @@ async function fetchJson(url) {
   }
 
   if (data.status && data.status !== "OK" && data.status !== "ZERO_RESULTS") {
-    throw new Error(
-      data.error_message ? (data.status + " - " + data.error_message) : data.status
-    );
+    throw new Error(data.error_message ? (data.status + " - " + data.error_message) : data.status);
   }
 
   return data;
@@ -77,15 +55,11 @@ async function geocodeQuery(query, apiKey) {
   const url =
     "https://maps.googleapis.com/maps/api/geocode/json?address=" +
     encodeURIComponent(query) +
-    "&key=" +
-    encodeURIComponent(apiKey);
+    "&key=" + encodeURIComponent(apiKey);
 
   const data = await fetchJson(url);
   const first = data.results && data.results[0];
-
-  if (!first || !first.geometry || !first.geometry.location) {
-    return null;
-  }
+  if (!first || !first.geometry || !first.geometry.location) return null;
 
   return {
     lat: Number(first.geometry.location.lat),
@@ -97,217 +71,39 @@ function buildNearbyUrl(loc, radiusMeters, type, keyword, apiKey) {
   return (
     "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" +
     encodeURIComponent(loc.lat + "," + loc.lng) +
-    "&radius=" +
-    encodeURIComponent(radiusMeters) +
+    "&radius=" + encodeURIComponent(radiusMeters) +
     (type ? "&type=" + encodeURIComponent(type) : "") +
     (keyword ? "&keyword=" + encodeURIComponent(keyword) : "") +
-    "&key=" +
-    encodeURIComponent(apiKey)
+    "&key=" + encodeURIComponent(apiKey)
   );
 }
 
 function buildRequests(loc, radiusMeters, apiKey) {
-  const requests = [];
-
-  // Closest Stops categories
-  requests.push({
-    category: "⛽ Gas",
-    group: "standard",
-    url: buildNearbyUrl(loc, radiusMeters, "gas_station", "", apiKey)
-  });
-
-  requests.push({
-    category: "☕ Coffee",
-    group: "standard",
-    url: buildNearbyUrl(loc, radiusMeters, "cafe", "coffee", apiKey)
-  });
-
-  requests.push({
-    category: "💊 Pharmacy",
-    group: "standard",
-    url: buildNearbyUrl(loc, radiusMeters, "pharmacy", "", apiKey)
-  });
-
-  requests.push({
-    category: "🏥 Medical",
-    group: "standard",
-    url: buildNearbyUrl(loc, radiusMeters, "hospital", "", apiKey)
-  });
-
-  requests.push({
-    category: "🏥 Medical",
-    group: "standard",
-    url: buildNearbyUrl(loc, radiusMeters, "doctor", "urgent care", apiKey)
-  });
-
-  // Special categories
-  requests.push({
-    category: "🏥 Urgent Care / ER",
-    group: "urgent",
-    url: buildNearbyUrl(loc, radiusMeters, "doctor", "urgent care", apiKey)
-  });
-
-  requests.push({
-    category: "🏥 Urgent Care / ER",
-    group: "urgent",
-    url: buildNearbyUrl(loc, radiusMeters, "hospital", "emergency room", apiKey)
-  });
-
-  requests.push({
-    category: "🦷 Emergency Dentist",
-    group: "dentist",
-    url: buildNearbyUrl(loc, radiusMeters, "dentist", "emergency dentist", apiKey)
-  });
-
-  requests.push({
-    category: "🦷 Emergency Dentist",
-    group: "dentist",
-    url: buildNearbyUrl(loc, radiusMeters, "dentist", "", apiKey)
-  });
-
-  requests.push({
-    category: "⚾ Sporting Goods",
-    group: "sporting",
-    url: buildNearbyUrl(loc, radiusMeters, "store", "sporting goods", apiKey)
-  });
-
-  requests.push({
-    category: "⚾ Sporting Goods",
-    group: "sporting",
-    url: buildNearbyUrl(loc, radiusMeters, "store", "sports equipment", apiKey)
-  });
-
-  requests.push({
-    category: "⚾ Sporting Goods",
-    group: "sporting",
-    url: buildNearbyUrl(loc, radiusMeters, "store", "Dick's Sporting Goods", apiKey)
-  });
-
-  requests.push({
-    category: "⚾ Sporting Goods",
-    group: "sporting",
-    url: buildNearbyUrl(loc, radiusMeters, "store", "Academy Sports", apiKey)
-  });
-
-  requests.push({
-    category: "🛒 Grocery",
-    group: "grocery",
-    url: buildNearbyUrl(loc, radiusMeters, "supermarket", "", apiKey)
-  });
-
-  requests.push({
-    category: "🛒 Grocery",
-    group: "grocery",
-    url: buildNearbyUrl(loc, radiusMeters, "store", "grocery", apiKey)
-  });
-
-  // Food
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "meal_takeaway", "", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "meal_delivery", "", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "fast food", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "burger", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "fried chicken", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "sandwich", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "pizza", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "McDonald's", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "Wendy's", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "Chick-fil-A", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "Cook Out", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "Bojangles", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "Subway", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "Chipotle", apiKey)
-  });
-
-  requests.push({
-    category: "🍔 Food",
-    group: "food",
-    url: buildNearbyUrl(loc, radiusMeters, "restaurant", "Panera Bread", apiKey)
-  });
-
-  return requests;
+  return [
+    { category: "⛽ Gas", group: "standard", url: buildNearbyUrl(loc, radiusMeters, "gas_station", "", apiKey) },
+    { category: "☕ Coffee", group: "standard", url: buildNearbyUrl(loc, radiusMeters, "cafe", "coffee", apiKey) },
+    { category: "💊 Pharmacy", group: "standard", url: buildNearbyUrl(loc, radiusMeters, "pharmacy", "", apiKey) },
+    { category: "🏥 Medical", group: "standard", url: buildNearbyUrl(loc, radiusMeters, "hospital", "", apiKey) },
+    { category: "🏥 Medical", group: "standard", url: buildNearbyUrl(loc, radiusMeters, "doctor", "urgent care", apiKey) },
+    { category: "🏥 Urgent Care / ER", group: "urgent", url: buildNearbyUrl(loc, radiusMeters, "doctor", "urgent care", apiKey) },
+    { category: "🦷 Emergency Dentist", group: "dentist", url: buildNearbyUrl(loc, radiusMeters, "dentist", "emergency dentist", apiKey) },
+    { category: "⚾ Sporting Goods", group: "sporting", url: buildNearbyUrl(loc, radiusMeters, "store", "sporting goods", apiKey) },
+    { category: "🛒 Grocery", group: "grocery", url: buildNearbyUrl(loc, radiusMeters, "supermarket", "", apiKey) },
+    { category: "🍔 Food", group: "food", url: buildNearbyUrl(loc, radiusMeters, "restaurant", "", apiKey) },
+    { category: "🍔 Food", group: "food", url: buildNearbyUrl(loc, radiusMeters, "meal_takeaway", "", apiKey) },
+    { category: "🍔 Food", group: "food", url: buildNearbyUrl(loc, radiusMeters, "restaurant", "fast food", apiKey) },
+    { category: "🍔 Food", group: "food", url: buildNearbyUrl(loc, radiusMeters, "restaurant", "burger", apiKey) },
+    { category: "🍔 Food", group: "food", url: buildNearbyUrl(loc, radiusMeters, "restaurant", "chicken", apiKey) }
+  ];
 }
 
 function buildRowsFromSettled(settled, loc, radiusMiles) {
-  var allRows = [];
-  var urgentPlaces = [];
-  var dentistPlaces = [];
-  var sportingPlaces = [];
-  var groceryPlaces = [];
-  var foodPlaces = [];
+  let allRows = [];
+  let urgentPlaces = [];
+  let dentistPlaces = [];
+  let sportingPlaces = [];
+  let groceryPlaces = [];
+  let foodPlaces = [];
 
   for (const item of settled) {
     if (!item.ok || !item.data) continue;
@@ -326,235 +122,72 @@ function buildRowsFromSettled(settled, loc, radiusMiles) {
     } else if (request.group === "food") {
       foodPlaces = foodPlaces.concat(places);
     } else {
-      const rows = parseStandardCategoryResponse(
-        request.category,
-        places,
-        loc,
-        radiusMiles,
-        12
-      );
-      allRows = allRows.concat(rows);
+      allRows = allRows.concat(parseStandardCategoryResponse(request.category, places, loc, radiusMiles, 12));
     }
   }
 
-  const urgentRows = buildGenericSpecialRows(
-    "🏥 Urgent Care / ER",
-    urgentPlaces,
-    loc,
-    radiusMiles,
-    15
-  );
-
-  const dentistRows = buildGenericSpecialRows(
-    "🦷 Emergency Dentist",
-    dentistPlaces,
-    loc,
-    radiusMiles,
-    15
-  );
-
-  const sportingRows = buildGenericSpecialRows(
-    "⚾ Sporting Goods",
-    sportingPlaces,
-    loc,
-    radiusMiles,
-    15
-  );
-
-  const groceryRows = buildGenericSpecialRows(
-    "🛒 Grocery",
-    groceryPlaces,
-    loc,
-    radiusMiles,
-    15
-  );
-
-  const foodRows = buildFoodRows(foodPlaces, loc, radiusMiles, 20);
-
   allRows = allRows
-    .concat(urgentRows)
-    .concat(dentistRows)
-    .concat(sportingRows)
-    .concat(groceryRows)
-    .concat(foodRows);
+    .concat(buildGenericSpecialRows("🏥 Urgent Care / ER", urgentPlaces, loc, radiusMiles, 12))
+    .concat(buildGenericSpecialRows("🦷 Emergency Dentist", dentistPlaces, loc, radiusMiles, 12))
+    .concat(buildGenericSpecialRows("⚾ Sporting Goods", sportingPlaces, loc, radiusMiles, 12))
+    .concat(buildGenericSpecialRows("🛒 Grocery", groceryPlaces, loc, radiusMiles, 12))
+    .concat(buildFoodRows(foodPlaces, loc, radiusMiles, 18));
 
   return sortRows(allRows);
 }
 
 function parseStandardCategoryResponse(category, places, loc, radiusMiles, limit) {
-  const deduped = dedupePlaces(places);
   const rows = [];
-
-  for (const p of deduped) {
+  for (const p of dedupePlaces(places)) {
     const row = buildRowFromPlace(category, p, loc, radiusMiles);
-    if (!row) continue;
-    rows.push(row);
+    if (row) rows.push(row);
   }
-
   rows.sort(compareRowsByDistanceThenRating);
   return rows.slice(0, limit);
 }
 
 function buildGenericSpecialRows(category, places, loc, radiusMiles, limit) {
-  const deduped = dedupePlaces(places);
   const rows = [];
-
-  for (const p of deduped) {
+  for (const p of dedupePlaces(places)) {
     const row = buildRowFromPlace(category, p, loc, radiusMiles);
-    if (!row) continue;
-    rows.push(row);
+    if (row) rows.push(row);
   }
-
   rows.sort(compareRowsByDistanceThenRating);
   return rows.slice(0, limit);
 }
 
 function buildFoodRows(places, loc, radiusMiles, limit) {
-  const deduped = dedupePlaces(places);
   const scored = [];
 
-  for (const p of deduped) {
+  for (const p of dedupePlaces(places)) {
     if (!textMatchesFood(p)) continue;
-
     const row = buildRowFromPlace("🍔 Food", p, loc, radiusMiles);
     if (!row) continue;
 
-    scored.push({
-      row: row,
-      score: getFoodRankingScore(p, loc)
-    });
+    scored.push({ row: row, score: getFoodRankingScore(p, loc) });
   }
 
   scored.sort(function (a, b) {
     if (b.score !== a.score) return b.score - a.score;
-
-    const da = typeof a.row[6] === "number" ? a.row[6] : 9999;
-    const db = typeof b.row[6] === "number" ? b.row[6] : 9999;
-    if (da !== db) return da - db;
-
-    const ra = Number(a.row[2] || 0);
-    const rb = Number(b.row[2] || 0);
-    if (rb !== ra) return rb - ra;
-
-    const na = String(a.row[1] || "").toLowerCase();
-    const nb = String(b.row[1] || "").toLowerCase();
-    if (na < nb) return -1;
-    if (na > nb) return 1;
-    return 0;
+    return compareRowsByDistanceThenRating(a.row, b.row);
   });
 
-  return scored.slice(0, limit).map(function (item) {
-    return item.row;
-  });
+  return scored.slice(0, limit).map(function (item) { return item.row; });
 }
 
 function textMatchesFood(p) {
-  const name = String(p.name || "").toLowerCase();
-  const address = String(p.formatted_address || p.vicinity || "").toLowerCase();
   const types = Array.isArray(p.types) ? p.types : [];
-  const typesBlob = types.join(" ").toLowerCase();
-  const hay = (name + " " + address + " " + typesBlob).trim();
+  const hay = [p.name || "", p.formatted_address || "", p.vicinity || "", types.join(" ")].join(" ").toLowerCase();
 
-  if (
-    types.includes("restaurant") ||
-    types.includes("meal_takeaway") ||
-    types.includes("meal_delivery")
-  ) {
+  if (types.includes("restaurant") || types.includes("meal_takeaway") || types.includes("meal_delivery")) {
     return true;
   }
 
-  if (types.includes("gas_station")) return false;
-  if (types.includes("convenience_store")) return false;
-
-  const excludeWords = [
-    "gas station",
-    "fuel",
-    "convenience store",
-    "mini mart",
-    "travel center",
-    "travel centre",
-    "truck stop",
-    "barber",
-    "salon",
-    "spa",
-    "hotel",
-    "motel",
-    "pharmacy",
-    "urgent care",
-    "dentist",
-    "veterinary",
-    "pet store",
-    "bank",
-    "atm"
-  ];
-
-  for (const word of excludeWords) {
-    if (hay.includes(word)) return false;
-  }
+  if (types.includes("gas_station") || types.includes("convenience_store")) return false;
 
   const includeWords = [
-    "restaurant",
-    "grill",
-    "pizza",
-    "burger",
-    "burgers",
-    "sandwich",
-    "subs",
-    "sub",
-    "burrito",
-    "taco",
-    "tacos",
-    "bbq",
-    "barbecue",
-    "chicken",
-    "wings",
-    "deli",
-    "fast food",
-    "takeout",
-    "take-out",
-    "take away",
-    "takeaway",
-    "panera",
-    "chipotle",
-    "chick-fil-a",
-    "chick fil a",
-    "mcdonald",
-    "mcdonalds",
-    "wendy",
-    "five guys",
-    "cook out",
-    "cookout",
-    "bojangles",
-    "zaxby",
-    "subway",
-    "jersey mike",
-    "jimmy john",
-    "firehouse",
-    "qdoba",
-    "moes",
-    "moe's",
-    "panda express",
-    "raising cane",
-    "raising cane's",
-    "shake shack",
-    "whataburger",
-    "sonic",
-    "culver",
-    "panera bread",
-    "arbys",
-    "arby's",
-    "hardee",
-    "hardee's",
-    "krystal",
-    "del taco",
-    "jack in the box",
-    "dairy queen",
-    "dq",
-    "little caesars",
-    "dominos",
-    "domino's",
-    "pizza hut",
-    "kfc"
+    "restaurant", "fast food", "burger", "pizza", "chicken", "sandwich", "subway", "mcdonald", "wendy",
+    "chick-fil-a", "chick fil a", "cook out", "bojangles", "zaxby", "panera", "chipotle", "five guys"
   ];
 
   for (const word of includeWords) {
@@ -577,94 +210,30 @@ function getFoodRankingScore(p, loc) {
   else if (distance <= 10) score += 8;
 
   if (p.opening_hours && typeof p.opening_hours.open_now === "boolean") {
-    if (p.opening_hours.open_now) score += 25;
-    else score -= 40;
+    if (p.opening_hours.open_now) score += 20;
+    else score -= 30;
   }
 
   const rating = Number(p.rating || 0);
-  if (rating >= 4.5) score += 18;
-  else if (rating >= 4.0) score += 12;
-  else if (rating >= 3.5) score += 6;
+  if (rating >= 4.5) score += 16;
+  else if (rating >= 4.0) score += 10;
+  else if (rating >= 3.5) score += 5;
 
-  const textBlob = [
-    p.name || "",
-    p.formatted_address || "",
-    p.vicinity || "",
-    Array.isArray(p.types) ? p.types.join(" ") : ""
-  ].join(" ");
-
-  if (textLooksLikeQuickFood(textBlob)) score += 35;
+  if (textLooksLikeQuickFood([p.name || "", p.vicinity || ""].join(" "))) score += 35;
 
   return score;
 }
 
 function textLooksLikeQuickFood(text) {
   const hay = String(text || "").toLowerCase();
-
   const quickTerms = [
-    "grill",
-    "deli",
-    "cafe",
-    "café",
-    "pizza",
-    "bbq",
-    "barbecue",
-    "chicken",
-    "taco",
-    "tacos",
-    "burrito",
-    "sandwich",
-    "subs",
-    "wings",
-    "burger",
-    "burgers",
-    "panera",
-    "chipotle",
-    "chick-fil-a",
-    "chick fil a",
-    "jersey mike",
-    "jimmy john",
-    "firehouse",
-    "five guys",
-    "qdoba",
-    "moes",
-    "moe's",
-    "zaxby",
-    "raising cane",
-    "raising cane's",
-    "shake shack",
-    "cook out",
-    "cookout",
-    "whataburger",
-    "wendy",
-    "mcdonald",
-    "mcdonalds",
-    "sonic",
-    "culver",
-    "tropical smoothie",
-    "panda express",
-    "subway",
-    "arbys",
-    "arby's",
-    "bojangles",
-    "hardee",
-    "hardee's",
-    "krystal",
-    "del taco",
-    "jack in the box",
-    "dairy queen",
-    "dq",
-    "little caesars",
-    "dominos",
-    "domino's",
-    "pizza hut",
-    "kfc"
+    "mcdonald", "wendy", "chick-fil-a", "chick fil a", "cook out", "bojangles", "zaxby", "subway",
+    "chipotle", "panera", "five guys", "burger", "pizza", "sandwich", "chicken", "taco"
   ];
 
   for (const term of quickTerms) {
     if (hay.includes(term)) return true;
   }
-
   return false;
 }
 
@@ -673,7 +242,7 @@ function buildRowFromPlace(category, p, loc, radiusMiles) {
   if (!coords) return null;
 
   const dist = haversineMiles(loc.lat, loc.lng, coords.lat, coords.lng);
-  if (typeof dist === "number" && dist > radiusMiles) return null;
+  if (dist > radiusMiles) return null;
 
   const openNow =
     p.opening_hours && typeof p.opening_hours.open_now === "boolean"
@@ -681,35 +250,15 @@ function buildRowFromPlace(category, p, loc, radiusMiles) {
       : "";
 
   const address = p.formatted_address || p.vicinity || "";
-  const link =
-    "https://www.google.com/maps/search/?api=1&query=" +
-    encodeURIComponent((p.name || "") + " " + address);
+  const link = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent((p.name || "") + " " + address);
 
-  return [
-    category,
-    p.name || "",
-    p.rating || "",
-    address,
-    openNow,
-    link,
-    dist
-  ];
+  return [category, p.name || "", p.rating || "", address, openNow, link, dist];
 }
 
 function getPlaceCoords(p) {
-  if (
-    p &&
-    p.geometry &&
-    p.geometry.location &&
-    typeof p.geometry.location.lat === "number" &&
-    typeof p.geometry.location.lng === "number"
-  ) {
-    return {
-      lat: Number(p.geometry.location.lat),
-      lng: Number(p.geometry.location.lng)
-    };
+  if (p && p.geometry && p.geometry.location && typeof p.geometry.location.lat === "number" && typeof p.geometry.location.lng === "number") {
+    return { lat: Number(p.geometry.location.lat), lng: Number(p.geometry.location.lng) };
   }
-
   return null;
 }
 
@@ -718,11 +267,7 @@ function dedupePlaces(places) {
   const deduped = [];
 
   for (const p of places || []) {
-    const key = String(
-      p.place_id ||
-      ((p.name || "") + "|" + (p.formatted_address || p.vicinity || ""))
-    ).toLowerCase();
-
+    const key = String(p.place_id || ((p.name || "") + "|" + (p.formatted_address || p.vicinity || ""))).toLowerCase();
     if (seen[key]) continue;
     seen[key] = true;
     deduped.push(p);
@@ -732,16 +277,11 @@ function dedupePlaces(places) {
 }
 
 function sortRows(rows) {
-  const dedupedRows = [];
   const seen = {};
+  const dedupedRows = [];
 
   for (const row of rows || []) {
-    const key = (
-      String(row[0] || "") + "|" +
-      String(row[1] || "") + "|" +
-      String(row[3] || "")
-    ).toLowerCase();
-
+    const key = (String(row[0] || "") + "|" + String(row[1] || "") + "|" + String(row[3] || "")).toLowerCase();
     if (seen[key]) continue;
     seen[key] = true;
     dedupedRows.push(row);
@@ -760,17 +300,11 @@ function compareRowsByDistanceThenRating(a, b) {
   const rb = Number(b[2] || 0);
   if (rb !== ra) return rb - ra;
 
-  const na = String(a[1] || "").toLowerCase();
-  const nb = String(b[1] || "").toLowerCase();
-  if (na < nb) return -1;
-  if (na > nb) return 1;
-  return 0;
+  return String(a[1] || "").localeCompare(String(b[1] || ""));
 }
 
 function haversineMiles(lat1, lng1, lat2, lng2) {
-  const toRad = function (deg) {
-    return deg * Math.PI / 180;
-  };
+  function toRad(deg) { return deg * Math.PI / 180; }
 
   const R = 3958.8;
   const dLat = toRad(lat2 - lat1);
@@ -778,10 +312,8 @@ function haversineMiles(lat1, lng1, lat2, lng2) {
 
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return Math.round(R * c * 10) / 10;
