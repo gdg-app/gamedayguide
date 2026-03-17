@@ -549,6 +549,20 @@ function textLooksLikeQuickFood(text) {
     "tropical smoothie",
     "panda express",
     "subway"
+    "arbys",
+"bojangles",
+"hardee",
+"hardee's",
+"krystal",
+"del taco",
+"jack in the box",
+"dairy queen",
+"dq",
+"little caesars",
+"dominos",
+"domino's",
+"pizza hut",
+"kfc"
   ];
 
   for (const term of quickTerms) {
