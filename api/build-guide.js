@@ -548,7 +548,7 @@ function textLooksLikeQuickFood(text) {
     "culver",
     "tropical smoothie",
     "panda express",
-    "subway"
+    "subway",
     "arbys",
 "bojangles",
 "hardee",
