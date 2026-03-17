@@ -823,7 +823,7 @@ function getFoodRankingScore(p, loc) {
   else if (rating >= 3.5) score += 8;
 
   const textBlob = [p.name || "", p.formatted_address || "", p.vicinity || ""].join(" ");
-  if (textLooksLikeQuickFood(textBlob)) score += 10;
+  if (textLooksLikeQuickFood(textBlob)) score += 25;
 
   return score;
 }
