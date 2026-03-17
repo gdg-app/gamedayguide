@@ -689,8 +689,7 @@ function buildTextSearchUrl(loc, radiusMeters, queryText, apiKey) {
   return (
     "https://maps.googleapis.com/maps/api/place/textsearch/json?query=" +
     encodeURIComponent(queryText) +
-    "&location=" + loc.lat + "," + loc.lng +
-    "&radius=" + radiusMeters +
+"&locationbias=circle:" + radiusMeters + "@" + loc.lat + "," + loc.lng +
     "&key=" + encodeURIComponent(apiKey)
   );
 }
