@@ -2526,7 +2526,16 @@ function shareSpot(name, address) {
         radiusMiles: radius,
         userId: userId
       })
-        .then(function(data) {
+      fetch("/api/build-guide?query=" + encodeURIComponent(query) + "&radiusMiles=" + encodeURIComponent(radius))
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(result) {
+          if (!result.ok) {
+            throw new Error(result.error || "Build guide failed.");
+          }
+
+          var data = result.data || [];
           stopLoadingState();
           lastResults = Array.isArray(data) ? data : [];
           lastSourceType = sourceType;
