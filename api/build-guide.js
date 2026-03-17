@@ -445,6 +445,28 @@ function textMatchesGrocery(p) {
   return false;
 }
 
+function isBrandMatch(p, brandTerms) {
+  const hay = (((p.name || "") + " " + (p.formatted_address || "") + " " + (p.vicinity || "")).toLowerCase());
+
+  for (let i = 0; i < brandTerms.length; i++) {
+    if (hay.indexOf(brandTerms[i]) !== -1) return true;
+  }
+  return false;
+}
+
+function getFoodBrandBoost(p) {
+  if (isBrandMatch(p, ["mcdonald", "mcdonald"])) return 80;
+  if (isBrandMatch(p, ["chick-fil-a", "chick fil a"])) return 55;
+  if (isBrandMatch(p, ["wendy's", "wendys"])) return 45;
+  if (isBrandMatch(p, ["cook out", "cookout"])) return 45;
+  if (isBrandMatch(p, ["five guys"])) return 40;
+  if (isBrandMatch(p, ["chipotle"])) return 35;
+  if (isBrandMatch(p, ["panera", "panera bread"])) return 30;
+  if (isBrandMatch(p, ["subway"])) return 28;
+  if (isBrandMatch(p, ["zaxby's", "zaxbys"])) return 28;
+  return 0;
+}
+
 function textLooksLikeQuickFood(text) {
   const hay = String(text || "").toLowerCase();
   const quickTerms = [
@@ -675,12 +697,15 @@ function getFoodRankingScore(p, loc) {
   const textBlob = [p.name || "", p.formatted_address || "", p.vicinity || ""].join(" ");
   if (textLooksLikeQuickFood(textBlob)) score += 10;
 
+  score += getFoodBrandBoost(p);
+
   return score;
 }
 
 function buildFoodRows(places, loc, radiusMiles, limit) {
   const deduped = dedupePlaces(places);
   const scored = [];
+  const brandRows = [];
 
   for (let i = 0; i < deduped.length; i++) {
     const p = deduped[i];
@@ -689,7 +714,14 @@ function buildFoodRows(places, loc, radiusMiles, limit) {
     const row = buildRowFromPlace("🍔 Food", p, loc, radiusMiles);
     if (!row) continue;
 
-    scored.push({ row, score: getFoodRankingScore(p, loc) });
+    const score = getFoodRankingScore(p, loc);
+    const brandBoost = getFoodBrandBoost(p);
+
+    scored.push({ row, score, brandBoost });
+
+    if (brandBoost >= 40) {
+      brandRows.push({ row, score, brandBoost });
+    }
   }
 
   scored.sort(function(a, b) {
@@ -709,9 +741,43 @@ function buildFoodRows(places, loc, radiusMiles, limit) {
     return na < nb ? -1 : na > nb ? 1 : 0;
   });
 
-  return scored.slice(0, limit).map(function(item) {
-    return item.row;
+  brandRows.sort(function(a, b) {
+    if (b.brandBoost !== a.brandBoost) return b.brandBoost - a.brandBoost;
+    if (b.score !== a.score) return b.score - a.score;
+
+    const da = typeof a.row[6] === "number" ? a.row[6] : 9999;
+    const db = typeof b.row[6] === "number" ? b.row[6] : 9999;
+    return da - db;
   });
+
+  const combined = [];
+  const seen = {};
+
+  for (let i = 0; i < brandRows.length; i++) {
+    const key = foodRowKey(brandRows[i].row);
+    if (seen[key]) continue;
+    seen[key] = true;
+    combined.push(brandRows[i].row);
+    if (combined.length >= Math.min(4, limit)) break;
+  }
+
+  for (let i = 0; i < scored.length; i++) {
+    const key = foodRowKey(scored[i].row);
+    if (seen[key]) continue;
+    seen[key] = true;
+    combined.push(scored[i].row);
+    if (combined.length >= limit) break;
+  }
+
+  return combined;
+}
+
+function foodRowKey(row) {
+  return (
+    String(row[1] || "").toLowerCase() +
+    "|" +
+    String(row[3] || "").toLowerCase()
+  );
 }
 
 function buildRowFromPlace(category, p, loc, radiusMiles) {
@@ -897,7 +963,11 @@ async function collectAllRows(loc, radiusMiles, apiKey) {
     allRequests.map(async function(request) {
       try {
         const res = await fetchJson(request.url);
-        return { request, res, error: null };
+        return {
+          request,
+          res,
+          error: null
+        };
       } catch (err) {
         return {
           request,
@@ -943,7 +1013,7 @@ async function collectAllRows(loc, radiusMiles, apiKey) {
         allRows = allRows.concat(rows);
       }
     } catch (_e) {
-      // Skip failed category parsing without breaking the full guide.
+      // skip one failed category parse without failing the whole guide
     }
   }
 
@@ -951,7 +1021,7 @@ async function collectAllRows(loc, radiusMiles, apiKey) {
   const dentistRows = buildSpecialCategoryRows("🦷 Emergency Dentist", dentistPlaces, loc, radiusMiles, 15);
   const sportingRows = buildSpecialCategoryRows("⚾ Sporting Goods", sportingPlaces, loc, radiusMiles, 15);
   const groceryRows = buildSpecialCategoryRows("🛒 Grocery", groceryPlaces, loc, radiusMiles, 15);
-  const foodRows = buildSpecialCategoryRows("🍔 Food", foodPlaces, loc, radiusMiles, 15);
+  const foodRows = buildSpecialCategoryRows("🍔 Food", foodPlaces, loc, radiusMiles, 20);
 
   allRows = allRows
     .concat(urgentRows)
