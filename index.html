@@ -2259,10 +2259,18 @@ function shareSpot(name, address) {
       document.getElementById("status").textContent = "Searching for fields…";
       hideFieldMatchResults();
 
-      callBackend("getFieldSuggestions", { query: query })
-        .then(function(serverSuggestions) {
+      fetch("/api/field-suggestions?query=" + encodeURIComponent(query))
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(result) {
+          if (!result.ok) {
+            throw new Error(result.error || "Field suggestions failed.");
+          }
+
+          var serverSuggestions = Array.isArray(result.data) ? result.data : [];
           var curated = getCuratedSuggestions(query);
-          var merged = mergeSuggestions(curated, Array.isArray(serverSuggestions) ? serverSuggestions : [], query);
+          var merged = mergeSuggestions(curated, serverSuggestions, query);
           visibleSuggestions = merged.slice();
 
           if (visibleSuggestions.length === 1 && Number(visibleSuggestions[0].rankScore || 0) > AUTO_RUN_RANK_THRESHOLD) {
