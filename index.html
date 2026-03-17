@@ -2535,7 +2535,7 @@ function shareSpot(name, address) {
     throw new Error(result.error || "Build guide failed.");
   }
 
-          var data = result.data || [];
+          var data = result || [];
           stopLoadingState();
           lastResults = Array.isArray(data) ? data : [];
           lastSourceType = sourceType;
