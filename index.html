@@ -1832,17 +1832,17 @@
     }
 
     function buildAppleMapsLink(name, address) {
-      var label = String(name || "").trim();
-      var destination = String(address || "").trim();
-      var query = [label, destination].filter(Boolean).join(" ");
+  var label = String(name || "").trim();
+  var destination = String(address || "").trim();
+  var query = [label, destination].filter(Boolean).join(", ");
 
-      if (!destination) {
-        return "https://maps.apple.com/?q=" + encodeURIComponent(query || label);
-      }
+  if (!query) {
+    return "https://maps.apple.com/";
+  }
 
-      return "https://maps.apple.com/?daddr=" + encodeURIComponent(destination) +
-             "&q=" + encodeURIComponent(query || destination);
-    }
+  return "https://maps.apple.com/?q=" + encodeURIComponent(query) +
+         "&daddr=" + encodeURIComponent(query);
+}
 
     function buildSmsShareLink(name, address, shareUrl) {
       var body = [name, address, shareUrl].filter(Boolean).join("\n");
@@ -2011,63 +2011,68 @@
     }
 
     function copyTextToClipboard(text, successMessage, failureMessage) {
-      if (!text) {
-        document.getElementById("status").textContent = failureMessage || "Nothing to copy.";
-        return;
-      }
+  text = String(text || "").trim();
 
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text)
-          .then(function() {
-            document.getElementById("status").textContent = successMessage || "Copied.";
-          })
-          .catch(function() {
-            document.getElementById("status").textContent = failureMessage || "Could not copy automatically.";
-          });
-        return;
-      }
+  if (!text) {
+    document.getElementById("status").textContent = failureMessage || "Nothing to copy.";
+    return;
+  }
 
-      var temp = document.createElement("textarea");
-      temp.value = text;
-      temp.setAttribute("readonly", "readonly");
-      temp.style.position = "absolute";
-      temp.style.left = "-9999px";
-      document.body.appendChild(temp);
-      temp.select();
-
-      try {
-        document.execCommand("copy");
-        document.getElementById("status").textContent = successMessage || "Copied.";
-      } catch (e) {
-        document.getElementById("status").textContent = failureMessage || "Could not copy automatically.";
-      }
-
-      document.body.removeChild(temp);
+  function selectShareInputIfPresent() {
+    var input = document.getElementById("shareLinkInput");
+    if (input) {
+      input.focus();
+      input.select();
+      input.setSelectionRange(0, input.value.length);
     }
+  }
 
-    function triggerNativeSpotShare(name, address, shareUrl) {
-      if (!navigator.share) {
-        document.getElementById("status").textContent = "Use Copy Link, Text, or Email below.";
-        return;
-      }
-
-      navigator.share({
-        title: name || "GameDayGuide Spot",
-        text: [name, address].filter(Boolean).join("\n"),
-        url: shareUrl
-      })
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text)
       .then(function() {
-        document.getElementById("status").textContent = "Spot share ready.";
+        document.getElementById("status").textContent = successMessage || "Copied.";
       })
-      .catch(function(err) {
-        if (err && err.name === "AbortError") {
-          document.getElementById("status").textContent = "Share canceled.";
-          return;
-        }
-        document.getElementById("status").textContent = "Could not open share sheet. Use Copy Link, Text, or Email below.";
+      .catch(function() {
+        tryLegacyCopy();
       });
+    return;
+  }
+
+  tryLegacyCopy();
+
+  function tryLegacyCopy() {
+    var temp = document.createElement("textarea");
+    temp.value = text;
+    temp.setAttribute("readonly", "readonly");
+    temp.style.position = "fixed";
+    temp.style.top = "-1000px";
+    temp.style.left = "-1000px";
+    temp.style.opacity = "0";
+    document.body.appendChild(temp);
+
+    temp.focus();
+    temp.select();
+    temp.setSelectionRange(0, temp.value.length);
+
+    var copied = false;
+
+    try {
+      copied = document.execCommand("copy");
+    } catch (e) {
+      copied = false;
     }
 
+    document.body.removeChild(temp);
+
+    if (copied) {
+      document.getElementById("status").textContent = successMessage || "Copied.";
+    } else {
+      selectShareInputIfPresent();
+      document.getElementById("status").textContent =
+        failureMessage || "Copy failed. The link is highlighted so you can copy it manually.";
+    }
+  }
+}
     function showSpotShareBox(name, address, shareUrl) {
       latestShareUrl = shareUrl || "";
 
