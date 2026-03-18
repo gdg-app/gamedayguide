@@ -1856,6 +1856,30 @@
       return "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
     }
 
+    function buildGuideShareTitle() {
+      return lastQueryOrGps
+        ? ("GameDayGuide for " + lastQueryOrGps)
+        : "GameDayGuide";
+    }
+
+    function buildGuideShareText(url) {
+      var lines = [];
+      if (lastQueryOrGps) lines.push("GameDayGuide for " + lastQueryOrGps);
+      if (selectedRadius) lines.push("Radius: " + selectedRadius + " mi");
+      if (url) lines.push(url);
+      return lines.join("\n\n");
+    }
+
+    function buildGuideSmsShareLink(url) {
+      return "sms:?&body=" + encodeURIComponent(buildGuideShareText(url));
+    }
+
+    function buildGuideEmailShareLink(url) {
+      var subject = buildGuideShareTitle();
+      var body = buildGuideShareText(url);
+      return "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    }
+
     function parseBuildGuideResponse(result) {
       if (Array.isArray(result)) return result;
       if (result && Array.isArray(result.data)) return result.data;
@@ -2071,6 +2095,8 @@
 
       var smsLink = buildSmsShareLink(name, address, shareUrl);
       var emailLink = buildEmailShareLink(name, address, shareUrl);
+      var googleMapsLink = buildGoogleMapsLink(name, address);
+      var appleMapsLink = buildAppleMapsLink(name, address);
 
       var box = document.getElementById("shareLinkBox");
       box.style.display = "block";
@@ -2080,12 +2106,14 @@
           "<div class='card-meta'>Share this location by text, email, copy link, or native share.</div>" +
           "<div class='card-address'>" + esc(address || "") + "</div>" +
           "<input id='shareLinkInput' class='share-link-input' type='text' readonly value='" + esc(shareUrl) + "' />" +
-          "<div class='share-link-help'>Copy the link for group chat, tap Text to send by SMS, or Email to send directly.</div>" +
+          "<div class='share-link-help'>Your team can open the shared spot and then choose Google Maps or Apple Maps on their phone.</div>" +
           "<div class='share-action-row'>" +
             "<button type='button' class='action-btn share-btn' id='nativeSpotShareBtn'>Share Spot</button>" +
             "<button type='button' class='secondary-btn' id='copySpotLinkBtn'>Copy Link</button>" +
             "<a class='secondary-btn' id='textSpotBtn' href='" + esc(smsLink) + "'>Text</a>" +
             "<a class='secondary-btn' id='emailSpotBtn' href='" + esc(emailLink) + "'>Email</a>" +
+            "<a class='location-action-btn google-btn' href='" + esc(googleMapsLink) + "' target='_blank' rel='noopener'>Open in Google Maps</a>" +
+            "<a class='location-action-btn' href='" + esc(appleMapsLink) + "' target='_blank' rel='noopener'>Open in Apple Maps</a>" +
             "<a class='directions-btn' href='" + esc(shareUrl) + "' target='_blank' rel='noopener'>Open Shared Spot</a>" +
           "</div>" +
         "</div>";
@@ -2759,7 +2787,7 @@
       }
 
       if (!navigator.share) {
-        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
+        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link, Text, or Email instead.";
         return;
       }
 
@@ -2780,7 +2808,7 @@
           document.getElementById("status").textContent = "Share canceled.";
           return;
         }
-        document.getElementById("status").textContent = "Could not open share options. You can still copy the link below.";
+        document.getElementById("status").textContent = "Could not open share options. You can still copy, text, or email the link below.";
       });
     }
 
@@ -2795,6 +2823,9 @@
         ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
         : "Send this to your team chat so everyone can open the same GameDayGuide.";
 
+      var smsLink = buildGuideSmsShareLink(url);
+      var emailLink = buildGuideEmailShareLink(url);
+
       var box = document.getElementById("shareLinkBox");
       box.style.display = "block";
       box.innerHTML =
@@ -2802,10 +2833,12 @@
           "<div class='card-name'>" + shareLabel + "</div>" +
           "<div class='card-meta'>" + shareMeta + "</div>" +
           "<input id='shareLinkInput' class='share-link-input' type='text' readonly value='" + esc(url) + "' />" +
-          "<div class='share-link-help'>You can tap Share, copy the link, or open it first to confirm it looks right.</div>" +
+          "<div class='share-link-help'>You can share it directly, copy the link, send by text or email, or open it first to confirm it looks right.</div>" +
           "<div class='share-action-row'>" +
             "<button type='button' class='action-btn share-btn' id='nativeShareBtn'>Share With Team</button>" +
             "<button type='button' class='secondary-btn' id='copyShareAgainBtn'>Copy Link</button>" +
+            "<a class='secondary-btn' id='textGuideBtn' href='" + esc(smsLink) + "'>Text</a>" +
+            "<a class='secondary-btn' id='emailGuideBtn' href='" + esc(emailLink) + "'>Email</a>" +
             "<a class='directions-btn' href='" + esc(url) + "' target='_blank' rel='noopener'>Open Shared Guide</a>" +
           "</div>" +
         "</div>";
@@ -2834,6 +2867,8 @@
           shareBtn.style.display = "none";
         }
       }
+
+      box.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     function shareGuide() {
