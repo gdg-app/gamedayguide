@@ -123,7 +123,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, data: [] });
     }
 
-    const apiKey = process.env.MAPS_API_KEY;
+    const apiKey = "BAD_KEY_TEST";;
 
     const url =
       "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=" +
