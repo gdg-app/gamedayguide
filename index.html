@@ -1444,7 +1444,6 @@
 
   <script>
     const SHARED_GUIDE = null;
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_HBMJVcnAI3HCvbx8_cIF-LCmDKGauENkkUuVMY8ZgU_vdtw/exec";
 
     let selectedRadius = 5;
     let lastResults = [];
@@ -1916,36 +1915,61 @@
       return parseBuildGuideResponse(result);
     }
 
-    async function callBackend(action, payload) {
-      let response;
+    async function postJson(url, payload) {
+      var response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload || {})
+      });
 
-      try {
-        response = await fetch(APPS_SCRIPT_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-          },
-          body: JSON.stringify({
-            action: action,
-            payload: payload || {}
-          }),
-          redirect: "follow"
-        });
-      } catch (networkErr) {
-        throw new Error("Network request failed: " + (networkErr && networkErr.message ? networkErr.message : networkErr));
-      }
+      var rawText = await response.text();
+      var result;
 
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
       try {
         result = JSON.parse(rawText);
-      } catch (parseErr) {
+      } catch (err) {
         throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          (result && (result.detail || result.error)) ||
+          ("HTTP " + response.status)
+        );
+      }
+
+      if (!result.ok) {
+        throw new Error(result.error || "Backend error");
+      }
+
+      return result.data;
+    }
+
+    async function getJson(url) {
+      var response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      var rawText = await response.text();
+      var result;
+
+      try {
+        result = JSON.parse(rawText);
+      } catch (err) {
+        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          (result && (result.detail || result.error)) ||
+          ("HTTP " + response.status)
+        );
       }
 
       if (!result.ok) {
@@ -1957,69 +1981,23 @@
 
     function logCategoryOpened(categoryLabel) {
       try {
-        callBackend("logClientEvent", {
-          event_type: "category_opened",
-          session_id: getAnonId(),
-          complex_name: lastQueryOrGps || "",
-          search_category: categoryLabel || "",
-          source_context: lastSourceType || ""
-        });
-      } catch (e) {
-        console.log("category logging skipped", e);
-      }
+        console.log("category opened", categoryLabel || "");
+      } catch (e) {}
     }
 
     async function getSharedGuideFromBackend(shareId) {
-      const url = APPS_SCRIPT_URL + "?api=1&action=getSharedGuide&shareId=" + encodeURIComponent(shareId);
-      const response = await fetch(url, { method: "GET", redirect: "follow" });
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (err) {
-        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
-      }
-
-      if (!result.ok) {
-        throw new Error(result.error || "Backend error");
-      }
-
-      return result.data;
+      return getJson("/api/get-shared-guide?shareId=" + encodeURIComponent(shareId));
     }
 
     async function getSpotShareFromBackend(spotId) {
-      const url = APPS_SCRIPT_URL + "?api=1&action=getSpotShare&spotId=" + encodeURIComponent(spotId);
-      const response = await fetch(url, { method: "GET", redirect: "follow" });
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (err) {
-        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
-      }
-
-      if (!result.ok) {
-        throw new Error(result.error || "Backend error");
-      }
-
-      return result.data;
+      return getJson("/api/get-spot-share?spotId=" + encodeURIComponent(spotId));
     }
 
     async function createSpotShareUrl(name, address) {
       var googleMapsUrl = buildGoogleMapsLink(name, address);
       var appleMapsUrl = buildAppleMapsLink(name, address);
 
-      var res = await callBackend("createSpotShare", {
+      var res = await postJson("/api/create-spot-share", {
         name: name,
         address: address,
         googleMapsUrl: googleMapsUrl,
@@ -2879,7 +2857,7 @@
 
       document.getElementById("status").textContent = "Creating share link…";
 
-      callBackend("createSharedGuide", {
+      postJson("/api/create-shared-guide", {
         sourceType: lastSourceType,
         queryOrGps: lastQueryOrGps,
         radius: selectedRadius,
