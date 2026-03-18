@@ -1831,17 +1831,17 @@
       return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query || address || name || "");
     }
 
-    function buildAppleMapsLink(name, address) {
+   function buildAppleMapsLink(name, address) {
   var label = String(name || "").trim();
   var destination = String(address || "").trim();
-  var query = [label, destination].filter(Boolean).join(", ");
+  var full = [label, destination].filter(Boolean).join(", ");
 
-  if (!query) {
+  if (!full) {
     return "https://maps.apple.com/";
   }
 
-  return "https://maps.apple.com/?q=" + encodeURIComponent(query) +
-         "&daddr=" + encodeURIComponent(query);
+  return "https://maps.apple.com/?address=" + encodeURIComponent(destination || full) +
+         "&q=" + encodeURIComponent(full);
 }
 
     function buildSmsShareLink(name, address, shareUrl) {
