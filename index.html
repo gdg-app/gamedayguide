@@ -1449,7 +1449,6 @@
     let visibleSuggestions = [];
     let currentSharedGuide = null;
     let latestShareUrl = "";
-    let spotShareCache = {};
     let loadingRotateTimer = null;
     let loadingRotateIndex = 0;
 
@@ -2107,7 +2106,7 @@
         if (navigator.share) {
           shareBtn.onclick = function() {
            latestShareUrl = shareUrl;
-triggerNativeShare();
+           triggerNativeShare();
           };
         } else {
           shareBtn.style.display = "none";
@@ -2139,42 +2138,18 @@ function shareSpot(name, address, buttonEl) {
 
   document.getElementById("status").textContent = "Creating spot share link…";
 
-  var cacheKey = name + "|" + address;
-
-  if (spotShareCache && spotShareCache[cacheKey]) {
-    var cachedUrl = spotShareCache[cacheKey];
-
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "Share This Spot";
-    }
-
-    latestShareUrl = cachedUrl;
-
-    if (navigator.share) {
-      triggerNativeShare();
-      document.getElementById("status").textContent = "Opening share options…";
-      return;
-    }
-  }
-
   createSpotShareUrl(name, address)
     .then(function(shareUrl) {
-      if (!spotShareCache) spotShareCache = {};
-      spotShareCache[cacheKey] = shareUrl;
-
       if (btn) {
         btn.disabled = false;
         btn.textContent = "Share This Spot";
       }
 
-      latestShareUrl = shareUrl;
+      showSpotShareBox(name, address, shareUrl);
 
       if (navigator.share) {
-        triggerNativeShare();
-        document.getElementById("status").textContent = "Opening share options…";
+        document.getElementById("status").textContent = "Spot share options ready.";
       } else {
-        showSpotShareBox(name, address, shareUrl);
         document.getElementById("status").textContent = "Spot share link ready.";
       }
     })
@@ -2186,17 +2161,7 @@ function shareSpot(name, address, buttonEl) {
       document.getElementById("status").textContent =
         "Error: " + (err && err.message ? err.message : JSON.stringify(err));
     });
-})
-        .catch(function(err) {
-          if (btn) {
-            btn.disabled = false;
-            btn.textContent = "Share This Spot";
-          }
-          document.getElementById("status").textContent =
-            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-        });
-    }
-
+}
     function createLocationActions(name, address) {
       var actions = document.createElement("div");
       actions.className = "card-actions";
