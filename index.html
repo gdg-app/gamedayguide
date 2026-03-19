@@ -603,6 +603,12 @@
       box-shadow: 0 8px 16px rgba(25,118,210,0.2);
     }
 
+    .location-action-btn.share-action {
+      background: linear-gradient(180deg, #9340b7 0%, var(--purple) 100%);
+      color: white;
+      box-shadow: 0 8px 16px rgba(123,31,162,0.2);
+    }
+
     #status {
       margin: 14px 0 8px;
       color: rgba(255,255,255,0.96);
@@ -948,10 +954,9 @@
     }
 
     .card-actions {
-      display: flex;
+      display: grid;
       gap: 8px;
-      flex-wrap: wrap;
-      flex-direction: column;
+      grid-template-columns: 1fr;
     }
 
     .directions-btn {
@@ -973,10 +978,10 @@
     }
 
     .toggle-row {
-      display: flex;
+      display: grid;
       gap: 10px;
       margin-top: 12px;
-      flex-direction: column;
+      grid-template-columns: 1fr;
     }
 
     .show-more-btn,
@@ -1023,10 +1028,9 @@
     }
 
     .share-action-row {
-      display: flex;
+      display: grid;
       gap: 10px;
-      flex-wrap: wrap;
-      flex-direction: column;
+      grid-template-columns: 1fr;
       margin-top: 12px;
     }
 
@@ -1304,11 +1308,13 @@
         width: auto;
       }
 
-      .card-actions,
+      .card-actions {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
       .share-action-row,
       .toggle-row,
       .install-modal-actions {
-        flex-direction: row;
         grid-template-columns: 1fr 1fr;
       }
 
@@ -1358,10 +1364,7 @@
         <div id="fieldMatchResults" class="match-results"></div>
         <div class="helper-text">Paste a field name, field number, court number, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
 
-        <div class="quick-row-wrap" id="triangleComplexWrap">
-          <div class="quick-row-label">Triangle Baseball Complexes</div>
-          <div class="quick-row" id="triangleComplexRow"></div>
-        </div>
+        
 
         <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
@@ -1396,12 +1399,12 @@
         </div>
       </div>
 
-<div id="shareTools" style="display:none;">
-  <div class="share-tools-row">
-    <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share This Field With Your Team</button>
-    <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
-  </div>
-</div>
+      <div id="shareTools" style="display:none;">
+        <div class="share-tools-row">
+          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share This Field With Your Team</button>
+          <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
+        </div>
+      </div>
 
       <div id="shareLinkBox" style="display:none;"></div>
       <div id="topStops"></div>
@@ -1438,13 +1441,11 @@
 
   <script>
     const SHARED_GUIDE = null;
-    const APP_URL = "https://script.google.com/macros/s/AKfycbzIrauP8mP5PrnZQwqqPN_HBMJVcnAI3HCvbx8_cIF-LCmDKGauENkkUuVMY8ZgU_vdtw/exec";
 
     let selectedRadius = 5;
     let lastResults = [];
     let lastSourceType = "";
     let lastQueryOrGps = "";
-    let triangleExpanded = false;
     let visibleSuggestions = [];
     let currentSharedGuide = null;
     let latestShareUrl = "";
@@ -1478,25 +1479,9 @@
     const CURATED_SUGGESTION_LIMIT = 6;
     const AUTO_RUN_RANK_THRESHOLD = 800;
 
-    const TRIANGLE_COMPLEXES = [
-      { label: "USA Baseball Complex", query: "USA Baseball National Training Complex, Cary NC" },
-      { label: "Thomas Brooks Park", query: "Thomas Brooks Park Baseball Complex, Cary NC" },
-      { label: "Ting Stadium", query: "Ting Stadium, Holly Springs NC" },
-      { label: "Walnut Creek Athletic Complex", query: "Walnut Creek Athletic Complex, Raleigh NC" },
-      { label: "Middle Creek Athletic Complex", query: "Middle Creek Athletic Complex, Apex NC" },
-      { label: "Optimist Park", query: "Optimist Park, Holly Springs NC" },
-      { label: "Hunter Street Park", query: "Hunter Street Park, Apex NC" },
-      { label: "Green Hope High School", query: "Green Hope High School Baseball Field, Cary NC" },
-      { label: "Cary High School", query: "Cary High School Baseball Field, Cary NC" },
-      { label: "Athens Drive High School", query: "Athens Drive High School Baseball Field, Raleigh NC" },
-      { label: "Eastern Carolina Athletic Park", query: "Eastern Carolina Athletic Park, 871 Buck Swamp Rd, Goldsboro NC" },
-      { label: "Clayton Civitan Club", query: "Clayton Civitan Club, 340 McCullers Dr, Clayton NC" },
-      { label: "Granville Athletic Park", query: "Granville Athletic Park, 4615 Belltown Rd, Oxford NC" },
-      { label: "The Factory", query: "The Factory, 1845 Grandmark St, Wake Forest NC" },
-      { label: "DPC Baseball", query: "DPC Baseball, 3901 E Garner Rd, Clayton NC" }
-    ];
+   
 
-    const TRIANGLE_COMPLEXES_VISIBLE_COUNT = 8;
+  
 
     const TOP_STOP_CONFIG = [
       { label: "🏥 Closest Medical", category: BACKEND_MEDICAL_LABEL },
@@ -1723,6 +1708,7 @@
     }
 
     function showInstallPrompt() {
+      return;
       if (!canOfferInstallPrompt()) return;
 
       var modal = document.getElementById("installPromptModal");
@@ -1769,38 +1755,38 @@
       });
     }
 
-function startLoadingState() {
-  var loadingWrap = document.getElementById("loadingState");
-  var loadingSubtext = document.getElementById("loadingSubtext");
-  var status = document.getElementById("status");
+    function startLoadingState() {
+      var loadingWrap = document.getElementById("loadingState");
+      var loadingSubtext = document.getElementById("loadingSubtext");
+      var status = document.getElementById("status");
 
-  stopLoadingState();
-  document.body.classList.remove("home-mode");
+      stopLoadingState();
+      document.body.classList.remove("home-mode");
 
-  loadingRotateIndex = 0;
-  if (loadingSubtext) {
-    loadingSubtext.textContent = LOADING_MESSAGES[0];
-  }
-  if (loadingWrap) {
-    loadingWrap.style.display = "block";
-  }
-  if (status) {
-    status.textContent = "";
-  }
+      loadingRotateIndex = 0;
+      if (loadingSubtext) {
+        loadingSubtext.textContent = LOADING_MESSAGES[0];
+      }
+      if (loadingWrap) {
+        loadingWrap.style.display = "block";
+      }
+      if (status) {
+        status.textContent = "";
+      }
 
-  loadingRotateTimer = setInterval(function() {
-    var subtextEl = document.getElementById("loadingSubtext");
-    if (!subtextEl) return;
+      loadingRotateTimer = setInterval(function() {
+        var subtextEl = document.getElementById("loadingSubtext");
+        if (!subtextEl) return;
 
-    loadingRotateIndex = (loadingRotateIndex + 1) % LOADING_MESSAGES.length;
-    subtextEl.style.opacity = "0.45";
+        loadingRotateIndex = (loadingRotateIndex + 1) % LOADING_MESSAGES.length;
+        subtextEl.style.opacity = "0.45";
 
-    setTimeout(function() {
-      subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
-      subtextEl.style.opacity = "1";
-    }, 180);
-  }, 2800);
-}
+        setTimeout(function() {
+          subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
+          subtextEl.style.opacity = "1";
+        }, 180);
+      }, 2800);
+    }
 
     function stopLoadingState() {
       var loadingWrap = document.getElementById("loadingState");
@@ -1822,27 +1808,177 @@ function startLoadingState() {
     }
 
     function buildGoogleMapsLink(name, address) {
-      return "https://www.google.com/maps/search/?api=1&query=" +
-        encodeURIComponent((name || "") + " " + (address || ""));
+      var query = [String(name || "").trim(), String(address || "").trim()].filter(Boolean).join(" ");
+      return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query || address || name || "");
     }
 
-    function buildAppleMapsLink(name, address) {
+   function buildAppleMapsLink(name, address) {
   var label = String(name || "").trim();
   var destination = String(address || "").trim();
+  var full = [label, destination].filter(Boolean).join(", ");
 
-  if (!destination) {
-    return "https://maps.apple.com/?q=" + encodeURIComponent(label);
+  if (!full) {
+    return "https://maps.apple.com/";
   }
 
-  return "https://maps.apple.com/?daddr=" + encodeURIComponent(destination) +
-         (label ? "&q=" + encodeURIComponent(label) : "");
+  return "https://maps.apple.com/?address=" + encodeURIComponent(destination || full) +
+         "&q=" + encodeURIComponent(full);
 }
+
+    function buildSmsShareLink(name, address, shareUrl) {
+      var body = [name, address, shareUrl].filter(Boolean).join("\n");
+      return "sms:?&body=" + encodeURIComponent(body);
+    }
+
+    function buildEmailShareLink(name, address, shareUrl) {
+      var subject = name ? ("GameDayGuide Spot: " + name) : "GameDayGuide Spot";
+      var body = [name, address, shareUrl].filter(Boolean).join("\n\n");
+      return "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    }
+
+    function buildGuideShareTitle() {
+      return lastQueryOrGps
+        ? ("GameDayGuide for " + lastQueryOrGps)
+        : "GameDayGuide";
+    }
+
+    function buildGuideShareText(url) {
+      var lines = [];
+      if (lastQueryOrGps) lines.push("GameDayGuide for " + lastQueryOrGps);
+      if (selectedRadius) lines.push("Radius: " + selectedRadius + " mi");
+      if (url) lines.push(url);
+      return lines.join("\n\n");
+    }
+
+    function buildGuideSmsShareLink(url) {
+      return "sms:?&body=" + encodeURIComponent(buildGuideShareText(url));
+    }
+
+    function buildGuideEmailShareLink(url) {
+      var subject = buildGuideShareTitle();
+      var body = buildGuideShareText(url);
+      return "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+    }
+
+    function parseBuildGuideResponse(result) {
+      if (Array.isArray(result)) return result;
+      if (result && Array.isArray(result.data)) return result.data;
+      if (result && result.ok && Array.isArray(result.results)) return result.results;
+      if (result && result.error) throw new Error(result.error);
+      throw new Error("Build guide failed.");
+    }
+
+    async function fetchBuildGuide(params) {
+      var qs = new URLSearchParams(params).toString();
+      var response = await fetch("/api/build-guide?" + qs, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      var rawText = await response.text();
+      var result;
+
+      try {
+        result = JSON.parse(rawText);
+      } catch (err) {
+        throw new Error("Build guide returned invalid JSON.");
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          (result && (result.detail || result.error)) ||
+          ("HTTP " + response.status)
+        );
+      }
+
+      return parseBuildGuideResponse(result);
+    }
+
+    async function postJson(url, payload) {
+      var response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload || {})
+      });
+
+      var rawText = await response.text();
+      var result;
+
+      try {
+        result = JSON.parse(rawText);
+      } catch (err) {
+        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          (result && (result.detail || result.error)) ||
+          ("HTTP " + response.status)
+        );
+      }
+
+      if (!result.ok) {
+        throw new Error(result.error || "Backend error");
+      }
+
+      return result.data;
+    }
+
+    async function getJson(url) {
+      var response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      var rawText = await response.text();
+      var result;
+
+      try {
+        result = JSON.parse(rawText);
+      } catch (err) {
+        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
+      }
+
+      if (!response.ok) {
+        throw new Error(
+          (result && (result.detail || result.error)) ||
+          ("HTTP " + response.status)
+        );
+      }
+
+      if (!result.ok) {
+        throw new Error(result.error || "Backend error");
+      }
+
+      return result.data;
+    }
+
+    function logCategoryOpened(categoryLabel) {
+      try {
+        console.log("category opened", categoryLabel || "");
+      } catch (e) {}
+    }
+
+    async function getSharedGuideFromBackend(shareId) {
+      return getJson("/api/get-shared-guide?shareId=" + encodeURIComponent(shareId));
+    }
+
+    async function getSpotShareFromBackend(spotId) {
+      return getJson("/api/get-spot-share?spotId=" + encodeURIComponent(spotId));
+    }
 
     async function createSpotShareUrl(name, address) {
       var googleMapsUrl = buildGoogleMapsLink(name, address);
       var appleMapsUrl = buildAppleMapsLink(name, address);
 
-      var res = await callBackend("createSpotShare", {
+      var res = await postJson("/api/create-spot-share", {
         name: name,
         address: address,
         googleMapsUrl: googleMapsUrl,
@@ -1854,87 +1990,176 @@ function startLoadingState() {
 
       return window.location.origin + window.location.pathname + "?spot=" + encodeURIComponent(spotId);
     }
-function shareSpot(name, address) {
-  name = String(name || "").trim();
-  address = String(address || "").trim();
 
-  var btn = (typeof event !== "undefined" && event && event.target) ? event.target : null;
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "Creating link...";
-  }
+    function copyTextToClipboard(text, successMessage, failureMessage) {
+  text = String(text || "").trim();
 
-  if (!name && !address) {
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "Share This Spot";
-    }
-    document.getElementById("status").textContent = "No location available to share.";
+  if (!text) {
+    document.getElementById("status").textContent = failureMessage || "Nothing to copy.";
     return;
   }
 
-  document.getElementById("status").textContent = "Creating location link… please wait.";
+  function selectShareInputIfPresent() {
+    var input = document.getElementById("shareLinkInput");
+    if (input) {
+      input.focus();
+      input.select();
+      input.setSelectionRange(0, input.value.length);
+    }
+  }
 
-  createSpotShareUrl(name, address)
-    .then(function(shareUrl) {
-      var shareText = [name, address].filter(Boolean).join("\n");
-      var shareTitle = name || "GameDayGuide Spot";
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text)
+      .then(function() {
+        document.getElementById("status").textContent = successMessage || "Copied.";
+      })
+      .catch(function() {
+        tryLegacyCopy();
+      });
+    return;
+  }
 
-      if (navigator.share) {
-        return navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: shareUrl
-        })
-        .then(function() {
+  tryLegacyCopy();
+
+  function tryLegacyCopy() {
+    var temp = document.createElement("textarea");
+    temp.value = text;
+    temp.setAttribute("readonly", "readonly");
+    temp.style.position = "fixed";
+    temp.style.top = "-1000px";
+    temp.style.left = "-1000px";
+    temp.style.opacity = "0";
+    document.body.appendChild(temp);
+
+    temp.focus();
+    temp.select();
+    temp.setSelectionRange(0, temp.value.length);
+
+    var copied = false;
+
+    try {
+      copied = document.execCommand("copy");
+    } catch (e) {
+      copied = false;
+    }
+
+    document.body.removeChild(temp);
+
+    if (copied) {
+      document.getElementById("status").textContent = successMessage || "Copied.";
+    } else {
+      selectShareInputIfPresent();
+      document.getElementById("status").textContent =
+        failureMessage || "Copy failed. The link is highlighted so you can copy it manually.";
+    }
+  }
+}
+    function showSpotShareBox(name, address, shareUrl) {
+      latestShareUrl = shareUrl || "";
+
+      var smsLink = buildSmsShareLink(name, address, shareUrl);
+      var emailLink = buildEmailShareLink(name, address, shareUrl);
+      var googleMapsLink = buildGoogleMapsLink(name, address);
+      var appleMapsLink = buildAppleMapsLink(name, address);
+
+      var box = document.getElementById("shareLinkBox");
+      box.style.display = "block";
+      box.innerHTML =
+        "<div class='card'>" +
+          "<div class='card-name'>" + esc(name || "Shared Spot") + "</div>" +
+          "<div class='card-meta'>Share this location by text, email, copy link, or native share.</div>" +
+          "<div class='card-address'>" + esc(address || "") + "</div>" +
+          "<input id='shareLinkInput' class='share-link-input' type='text' readonly value='" + esc(shareUrl) + "' />" +
+          "<div class='share-link-help'>Your team can open the shared spot and then choose Google Maps or Apple Maps on their phone.</div>" +
+          "<div class='share-action-row'>" +
+            "<button type='button' class='action-btn share-btn' id='nativeSpotShareBtn'>Share Spot</button>" +
+            "<button type='button' class='secondary-btn' id='copySpotLinkBtn'>Copy Link</button>" +
+            "<a class='secondary-btn' id='textSpotBtn' href='" + esc(smsLink) + "'>Text</a>" +
+            "<a class='secondary-btn' id='emailSpotBtn' href='" + esc(emailLink) + "'>Email</a>" +
+            "<a class='location-action-btn google-btn' href='" + esc(googleMapsLink) + "' target='_blank' rel='noopener'>Open in Google Maps</a>" +
+            "<a class='location-action-btn' href='" + esc(appleMapsLink) + "' target='_blank' rel='noopener'>Open in Apple Maps</a>" +
+            "<a class='directions-btn' href='" + esc(shareUrl) + "' target='_blank' rel='noopener'>Open Shared Spot</a>" +
+          "</div>" +
+        "</div>";
+
+      var input = document.getElementById("shareLinkInput");
+      if (input) {
+        input.addEventListener("click", function() {
+          input.focus();
+          input.select();
+        });
+      }
+
+      var copyBtn = document.getElementById("copySpotLinkBtn");
+      if (copyBtn) {
+        copyBtn.onclick = function() {
+          copyTextToClipboard(
+            shareUrl,
+            "Spot link copied. Paste it into your text, email, or group chat.",
+            "Could not copy automatically. You can still copy the link shown below."
+          );
+        };
+      }
+
+      var shareBtn = document.getElementById("nativeSpotShareBtn");
+      if (shareBtn) {
+        if (navigator.share) {
+          shareBtn.onclick = function() {
+            triggerNativeSpotShare(name, address, shareUrl);
+          };
+        } else {
+          shareBtn.style.display = "none";
+        }
+      }
+
+      box.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function shareSpot(name, address, buttonEl) {
+      name = String(name || "").trim();
+      address = String(address || "").trim();
+
+      var btn = buttonEl || null;
+
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Creating link...";
+      }
+
+      if (!name && !address) {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Share This Spot";
+        }
+        document.getElementById("status").textContent = "No location available to share.";
+        return;
+      }
+
+      document.getElementById("status").textContent = "Creating spot share link…";
+
+      createSpotShareUrl(name, address)
+        .then(function(shareUrl) {
           if (btn) {
             btn.disabled = false;
             btn.textContent = "Share This Spot";
           }
-          document.getElementById("status").textContent = "Spot ready to share.";
+
+          showSpotShareBox(name, address, shareUrl);
+
+          if (navigator.share) {
+            document.getElementById("status").textContent = "Spot share options ready.";
+          } else {
+            document.getElementById("status").textContent = "Spot share link ready.";
+          }
         })
         .catch(function(err) {
           if (btn) {
             btn.disabled = false;
             btn.textContent = "Share This Spot";
           }
-          if (err && err.name === "AbortError") {
-            document.getElementById("status").textContent = "Share canceled.";
-            return;
-          }
-          fallbackCopySpot_(shareText, shareUrl);
+          document.getElementById("status").textContent =
+            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
         });
-      }
-
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "Share This Spot";
-      }
-      fallbackCopySpot_(shareText, shareUrl);
-    })
-    .catch(function(err) {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "Share This Spot";
-      }
-      document.getElementById("status").textContent =
-        "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-    });
-}
-
-    function fallbackCopySpot_(shareText, shareUrl) {
-      var copyText = [shareText, shareUrl].filter(Boolean).join("\n");
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(copyText)
-          .then(function() {
-            document.getElementById("status").textContent = "Spot link copied. Paste into your text or group chat.";
-          })
-          .catch(function() {
-            document.getElementById("status").textContent = "Could not copy automatically. Try sharing again.";
-          });
-      } else {
-        document.getElementById("status").textContent = "Sharing is limited on this device. Try again from a device that supports sharing.";
-      }
     }
 
     function createLocationActions(name, address) {
@@ -1946,21 +2171,21 @@ function shareSpot(name, address) {
       googleLink.href = buildGoogleMapsLink(name, address);
       googleLink.target = "_blank";
       googleLink.rel = "noopener";
-      googleLink.textContent = "Google Maps";
+      googleLink.textContent = "Open in Google Maps";
 
       var appleLink = document.createElement("a");
       appleLink.className = "location-action-btn";
       appleLink.href = buildAppleMapsLink(name, address);
       appleLink.target = "_blank";
       appleLink.rel = "noopener";
-      appleLink.textContent = "Apple Maps";
+      appleLink.textContent = "Open in Apple Maps";
 
       var shareBtn = document.createElement("button");
       shareBtn.type = "button";
-      shareBtn.className = "location-action-btn";
+      shareBtn.className = "location-action-btn share-action";
       shareBtn.textContent = "Share This Spot";
       shareBtn.onclick = function() {
-        shareSpot(name, address);
+        shareSpot(name, address, shareBtn);
       };
 
       actions.appendChild(googleLink);
@@ -1970,62 +2195,9 @@ function shareSpot(name, address) {
       return actions;
     }
 
-    function scoreCuratedSuggestion(item, searchText) {
-      var q = normalizeForMatch(searchText);
-      var labelNorm = normalizeForMatch(item.label);
-      var queryNorm = normalizeForMatch(item.query);
-      var terms = q.split(" ").filter(Boolean);
-      var score = 0;
-
-      if (!q) return 0;
-
-      if (labelNorm === q) score += 300;
-      if (labelNorm.indexOf(q) === 0) score += 180;
-      if (labelNorm.indexOf(q) !== -1) score += 120;
-      if (queryNorm.indexOf(q) !== -1) score += 60;
-
-      terms.forEach(function(term) {
-        if (labelNorm.indexOf(term) !== -1) score += 18;
-        if (queryNorm.indexOf(term) !== -1) score += 8;
-      });
-
-      if (labelNorm.indexOf("baseball") !== -1) score += 12;
-      if (labelNorm.indexOf("athletic") !== -1) score += 8;
-      if (labelNorm.indexOf("stadium") !== -1) score += 8;
-      if (labelNorm.indexOf("park") !== -1) score += 5;
-      if (labelNorm.indexOf("field") !== -1) score += 5;
-
-      return score;
-    }
-
     function getCuratedSuggestions(searchText) {
-      var q = normalizeForMatch(searchText);
-      if (!q) return [];
-
-      return TRIANGLE_COMPLEXES
-        .map(function(item) {
-          var score = scoreCuratedSuggestion(item, q);
-          if (score <= 0) return null;
-
-          return {
-            source: "curated",
-            subtype: "curated",
-            label: item.label,
-            secondaryText: item.query,
-            query: item.query,
-            displayValue: item.label,
-            score: score
-          };
-        })
-        .filter(function(item) {
-          return !!item;
-        })
-        .sort(function(a, b) {
-          if (b.score !== a.score) return b.score - a.score;
-          return a.label.localeCompare(b.label);
-        })
-        .slice(0, CURATED_SUGGESTION_LIMIT);
-    }
+  return [];
+}
 
     function scoreMergedSuggestion_(item, searchText) {
       var q = normalizeForMatch(searchText);
@@ -2147,105 +2319,6 @@ function shareSpot(name, address) {
       return cleaned || String(rawQuery || "").trim();
     }
 
-    async function callBackend(action, payload = {}) {
-      let response;
-
-      try {
-        response = await fetch(APP_URL, {
-          method: "POST",
-          headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-          },
-          body: JSON.stringify({
-            action: action,
-            payload: payload
-          }),
-          redirect: "follow"
-        });
-      } catch (networkErr) {
-        throw new Error("Network request failed: " + (networkErr && networkErr.message ? networkErr.message : networkErr));
-      }
-
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (parseErr) {
-        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
-      }
-
-      if (!result.ok) {
-        throw new Error(result.error || "Backend error");
-      }
-
-      return result.data;
-    }
-
-    function logCategoryOpened(categoryLabel) {
-      try {
-        callBackend("logClientEvent", {
-          event_type: "category_opened",
-          session_id: getAnonId(),
-          complex_name: lastQueryOrGps || "",
-          search_category: categoryLabel || "",
-          source_context: lastSourceType || ""
-        });
-      } catch (e) {
-        console.log("category logging skipped", e);
-      }
-    }
-
-    async function getSharedGuideFromBackend(shareId) {
-      const url = APP_URL + "?api=1&action=getSharedGuide&shareId=" + encodeURIComponent(shareId);
-      const response = await fetch(url, { method: "GET", redirect: "follow" });
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (err) {
-        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
-      }
-
-      if (!result.ok) {
-        throw new Error(result.error || "Backend error");
-      }
-
-      return result.data;
-    }
-
-    async function getSpotShareFromBackend(spotId) {
-      const url = APP_URL + "?api=1&action=getSpotShare&spotId=" + encodeURIComponent(spotId);
-      const response = await fetch(url, { method: "GET", redirect: "follow" });
-      const rawText = await response.text();
-
-      if (!response.ok) {
-        throw new Error("HTTP " + response.status + ": " + rawText.slice(0, 300));
-      }
-
-      let result;
-      try {
-        result = JSON.parse(rawText);
-      } catch (err) {
-        throw new Error("Backend did not return valid JSON: " + rawText.slice(0, 300));
-      }
-
-      if (!result.ok) {
-        throw new Error(result.error || "Backend error");
-      }
-
-      return result.data;
-    }
-
     function findMatchingFields() {
       var rawQuery = String(document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
@@ -2259,10 +2332,18 @@ function shareSpot(name, address) {
       document.getElementById("status").textContent = "Searching for fields…";
       hideFieldMatchResults();
 
-      callBackend("getFieldSuggestions", { query: query })
-        .then(function(serverSuggestions) {
+      fetch("/api/field-suggestions?query=" + encodeURIComponent(query))
+        .then(function(response) {
+          return response.json();
+        })
+        .then(function(result) {
+          if (!result.ok) {
+            throw new Error(result.error || "Field suggestions failed.");
+          }
+
+          var serverSuggestions = Array.isArray(result.data) ? result.data : [];
           var curated = getCuratedSuggestions(query);
-          var merged = mergeSuggestions(curated, Array.isArray(serverSuggestions) ? serverSuggestions : [], query);
+          var merged = mergeSuggestions(curated, serverSuggestions, query);
           visibleSuggestions = merged.slice();
 
           if (visibleSuggestions.length === 1 && Number(visibleSuggestions[0].rankScore || 0) > AUTO_RUN_RANK_THRESHOLD) {
@@ -2362,49 +2443,7 @@ function shareSpot(name, address) {
       }, 150);
     }
 
-    function renderTriangleComplexes() {
-      var row = document.getElementById("triangleComplexRow");
-      row.innerHTML = "";
 
-      var visible = triangleExpanded
-        ? TRIANGLE_COMPLEXES
-        : TRIANGLE_COMPLEXES.slice(0, TRIANGLE_COMPLEXES_VISIBLE_COUNT);
-
-      visible.forEach(function(item) {
-        var btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "chip-btn";
-        btn.textContent = item.label;
-        btn.onclick = function() {
-          runPresetFacilityGuide(item.query, item.label);
-        };
-        row.appendChild(btn);
-      });
-
-      if (!triangleExpanded && TRIANGLE_COMPLEXES.length > TRIANGLE_COMPLEXES_VISIBLE_COUNT) {
-        var moreBtn = document.createElement("button");
-        moreBtn.type = "button";
-        moreBtn.className = "chip-btn expand-chip";
-        moreBtn.textContent = "More Triangle Fields";
-        moreBtn.onclick = function() {
-          triangleExpanded = true;
-          renderTriangleComplexes();
-        };
-        row.appendChild(moreBtn);
-      }
-
-      if (triangleExpanded && TRIANGLE_COMPLEXES.length > TRIANGLE_COMPLEXES_VISIBLE_COUNT) {
-        var lessBtn = document.createElement("button");
-        lessBtn.type = "button";
-        lessBtn.className = "chip-btn expand-chip";
-        lessBtn.textContent = "Show Less";
-        lessBtn.onclick = function() {
-          triangleExpanded = false;
-          renderTriangleComplexes();
-        };
-        row.appendChild(lessBtn);
-      }
-    }
 
     function renderRecentSearches() {
       var wrap = document.getElementById("recentSearchWrap");
@@ -2440,12 +2479,7 @@ function shareSpot(name, address) {
       runGuideWithQuery(query, "query");
     }
 
-    function findExactCuratedMatch(query) {
-      var q = String(query || "").trim().toLowerCase();
-      return TRIANGLE_COMPLEXES.find(function(item) {
-        return item.label.toLowerCase() === q || item.query.toLowerCase() === q;
-      }) || null;
-    }
+
 
     function runGuide() {
       var rawQuery = (document.getElementById("address").value || "").trim();
@@ -2458,12 +2492,7 @@ function shareSpot(name, address) {
 
       hideFieldMatchResults();
 
-      var exactMatch = findExactCuratedMatch(query);
-      if (exactMatch) {
-        runGuideWithQuery(exactMatch.query, "query");
-        return;
-      }
-
+var exactMatch = null;
       runGuideWithQuery(query, "query");
     }
 
@@ -2502,7 +2531,6 @@ function shareSpot(name, address) {
       }
 
       var radius = getRadiusMiles();
-      var userId = getAnonId();
 
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
@@ -2513,10 +2541,9 @@ function shareSpot(name, address) {
       latestShareUrl = "";
       startLoadingState();
 
-      callBackend("getWeekendHub", {
+      fetchBuildGuide({
         query: query,
-        radiusMiles: radius,
-        userId: userId
+        radiusMiles: radius
       })
         .then(function(data) {
           stopLoadingState();
@@ -2559,13 +2586,11 @@ function shareSpot(name, address) {
           var lat = pos.coords.latitude;
           var lng = pos.coords.longitude;
           var radius = getRadiusMiles();
-          var userId = getAnonId();
 
-          callBackend("getWeekendHubByLatLng", {
+          fetchBuildGuide({
             lat: lat,
             lng: lng,
-            radiusMiles: radius,
-            userId: userId
+            radiusMiles: radius
           })
             .then(function(data) {
               stopLoadingState();
@@ -2601,86 +2626,81 @@ function shareSpot(name, address) {
         return;
       }
 
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(url)
-          .then(function() {
-            document.getElementById("status").textContent = "Share link copied.";
-            var input = document.getElementById("shareLinkInput");
-            if (input) {
-              input.focus();
-              input.select();
-            }
-          })
-          .catch(function() {
-            document.getElementById("status").textContent = "Could not copy link automatically. You can still copy the link below.";
-          });
-      } else {
-        var input = document.getElementById("shareLinkInput");
-        if (input) {
-          input.focus();
-          input.select();
-        }
-        document.getElementById("status").textContent = "Automatic copy is not supported here. You can copy the link shown below.";
+      copyTextToClipboard(
+        url,
+        "Share link copied.",
+        "Could not copy link automatically. You can still copy the link below."
+      );
+
+      var input = document.getElementById("shareLinkInput");
+      if (input) {
+        input.focus();
+        input.select();
       }
     }
 
     function triggerNativeShare() {
-  if (!latestShareUrl) {
-    document.getElementById("status").textContent = "No share link available.";
-    return;
-  }
+      if (!latestShareUrl) {
+        document.getElementById("status").textContent = "No share link available.";
+        return;
+      }
 
-  if (!navigator.share) {
-    document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
-    return;
-  }
+      if (!navigator.share) {
+        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link, Text, or Email instead.";
+        return;
+      }
 
-  var shareText = lastQueryOrGps
-    ? "GameDayGuide for " + lastQueryOrGps
-    : "GameDayGuide for our field";
+      var shareText = lastQueryOrGps
+        ? "GameDayGuide for " + lastQueryOrGps
+        : "GameDayGuide for our field";
 
-  navigator.share({
-    title: "GameDayGuide",
-    text: shareText,
-    url: latestShareUrl
-  })
-  .then(function() {
-    document.getElementById("status").textContent = "Share sheet opened.";
-  })
-  .catch(function(err) {
-    if (err && err.name === "AbortError") {
-      document.getElementById("status").textContent = "Share canceled.";
-      return;
+      navigator.share({
+        title: "GameDayGuide",
+        text: shareText,
+        url: latestShareUrl
+      })
+      .then(function() {
+        document.getElementById("status").textContent = "Share sheet opened.";
+      })
+      .catch(function(err) {
+        if (err && err.name === "AbortError") {
+          document.getElementById("status").textContent = "Share canceled.";
+          return;
+        }
+        document.getElementById("status").textContent = "Could not open share options. You can still copy, text, or email the link below.";
+      });
     }
-    document.getElementById("status").textContent = "Could not open share options. You can still copy the link below.";
-  });
-}
 
-function showShareLink(url) {
-  latestShareUrl = url || "";
+    function showShareLink(url) {
+      latestShareUrl = url || "";
 
-  var shareLabel = lastQueryOrGps
-    ? "Field guide ready for " + esc(lastQueryOrGps)
-    : "Field guide ready to share";
+      var shareLabel = lastQueryOrGps
+        ? "Field guide ready for " + esc(lastQueryOrGps)
+        : "Field guide ready to share";
 
-  var shareMeta = lastQueryOrGps
-    ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
-    : "Send this to your team chat so everyone can open the same GameDayGuide.";
+      var shareMeta = lastQueryOrGps
+        ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
+        : "Send this to your team chat so everyone can open the same GameDayGuide.";
 
-  var box = document.getElementById("shareLinkBox");
-  box.style.display = "block";
-  box.innerHTML =
-    "<div class='card'>" +
-      "<div class='card-name'>" + shareLabel + "</div>" +
-      "<div class='card-meta'>" + shareMeta + "</div>" +
-      "<input id='shareLinkInput' class='share-link-input' type='text' readonly value='" + esc(url) + "' />" +
-      "<div class='share-link-help'>You can tap Share, copy the link, or open it first to confirm it looks right.</div>" +
-      "<div class='share-action-row'>" +
-        "<button type='button' class='action-btn share-btn' id='nativeShareBtn'>Share With Team</button>" +
-        "<button type='button' class='secondary-btn' id='copyShareAgainBtn'>Copy Link</button>" +
-        "<a class='directions-btn' href='" + esc(url) + "' target='_blank' rel='noopener'>Open Shared Guide</a>" +
-      "</div>" +
-    "</div>";
+      var smsLink = buildGuideSmsShareLink(url);
+      var emailLink = buildGuideEmailShareLink(url);
+
+      var box = document.getElementById("shareLinkBox");
+      box.style.display = "block";
+      box.innerHTML =
+        "<div class='card'>" +
+          "<div class='card-name'>" + shareLabel + "</div>" +
+          "<div class='card-meta'>" + shareMeta + "</div>" +
+          "<input id='shareLinkInput' class='share-link-input' type='text' readonly value='" + esc(url) + "' />" +
+          "<div class='share-link-help'>You can share it directly, copy the link, send by text or email, or open it first to confirm it looks right.</div>" +
+          "<div class='share-action-row'>" +
+            "<button type='button' class='action-btn share-btn' id='nativeShareBtn'>Share With Team</button>" +
+            "<button type='button' class='secondary-btn' id='copyShareAgainBtn'>Copy Link</button>" +
+            "<a class='secondary-btn' id='textGuideBtn' href='" + esc(smsLink) + "'>Text</a>" +
+            "<a class='secondary-btn' id='emailGuideBtn' href='" + esc(emailLink) + "'>Email</a>" +
+            "<a class='directions-btn' href='" + esc(url) + "' target='_blank' rel='noopener'>Open Shared Guide</a>" +
+          "</div>" +
+        "</div>";
 
       var input = document.getElementById("shareLinkInput");
       if (input) {
@@ -2706,6 +2726,8 @@ function showShareLink(url) {
           shareBtn.style.display = "none";
         }
       }
+
+      box.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
     function shareGuide() {
@@ -2716,7 +2738,7 @@ function showShareLink(url) {
 
       document.getElementById("status").textContent = "Creating share link…";
 
-      callBackend("createSharedGuide", {
+      postJson("/api/create-shared-guide", {
         sourceType: lastSourceType,
         queryOrGps: lastQueryOrGps,
         radius: selectedRadius,
@@ -3297,7 +3319,6 @@ function showShareLink(url) {
     }
 
     async function initializeApp() {
-      renderTriangleComplexes();
       renderRecentSearches();
       updateInstallTipForMode();
       setupFieldMatchResults();
@@ -3354,28 +3375,26 @@ function showShareLink(url) {
       initializeApp();
     });
   </script>
-<div style="
-  text-align:center;
-  font-size:12px;
-  color:#777;
-  margin-top:18px;
-  margin-bottom:10px;
-">
-  GameDayGuide • 
-  <a href="https://docs.google.com/document/d/1bwmplZL1IHLNu7HpeP1Zp93HMN7qjUDOLDLKJ83Ty50/edit?usp=sharing"
-     target="_blank"
-     style="color:#777;text-decoration:underline;">
-     About
-  </a>
-  •
-  <a href="https://docs.google.com/document/d/1wmBtll4xLHe6XPiddzYJgCSXQq8-5OYtXrebpB7edao/edit?usp=sharing"
-     target="_blank"
-     style="color:#777;text-decoration:underline;">
-     Privacy
-  </a>
-</div>
-  </a>
-</div>
-  
+
+  <div style="
+    text-align:center;
+    font-size:12px;
+    color:#777;
+    margin-top:18px;
+    margin-bottom:10px;
+  ">
+    GameDayGuide •
+    <a href="https://docs.google.com/document/d/1bwmplZL1IHLNu7HpeP1Zp93HMN7qjUDOLDLKJ83Ty50/edit?usp=sharing"
+       target="_blank"
+       style="color:#777;text-decoration:underline;">
+       About
+    </a>
+    •
+    <a href="https://docs.google.com/document/d/1wmBtll4xLHe6XPiddzYJgCSXQq8-5OYtXrebpB7edao/edit?usp=sharing"
+       target="_blank"
+       style="color:#777;text-decoration:underline;">
+       Privacy
+    </a>
+  </div>
 </body>
 </html>
