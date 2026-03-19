@@ -2117,67 +2117,76 @@ triggerNativeShare();
       box.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
-    function shareSpot(name, address, buttonEl) {
-      name = String(name || "").trim();
-      address = String(address || "").trim();
+function shareSpot(name, address, buttonEl) {
+  name = String(name || "").trim();
+  address = String(address || "").trim();
 
-      var btn = buttonEl || null;
-
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = "Creating link...";
-      }
-
-      if (!name && !address) {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = "Share This Spot";
-        }
-        document.getElementById("status").textContent = "No location available to share.";
-        return;
-      }
-
-      document.getElementById("status").textContent = "Creating spot share link…";
-
-    var cacheKey = name + "|" + address;
-
-if (spotShareCache[cacheKey]) {
-  var cachedUrl = spotShareCache[cacheKey];
+  var btn = buttonEl || null;
 
   if (btn) {
-    btn.disabled = false;
-    btn.textContent = "Share This Spot";
+    btn.disabled = true;
+    btn.textContent = "Creating link...";
   }
 
-  latestShareUrl = cachedUrl;
-
-  if (navigator.share) {
-    triggerNativeShare();
-    document.getElementById("status").textContent = "Opening share options…";
+  if (!name && !address) {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Share This Spot";
+    }
+    document.getElementById("status").textContent = "No location available to share.";
     return;
   }
-}
 
-createSpotShareUrl(name, address)
-  .then(function(shareUrl) {
-    spotShareCache[cacheKey] = shareUrl;
+  document.getElementById("status").textContent = "Creating spot share link…";
+
+  var cacheKey = name + "|" + address;
+
+  if (spotShareCache && spotShareCache[cacheKey]) {
+    var cachedUrl = spotShareCache[cacheKey];
 
     if (btn) {
       btn.disabled = false;
       btn.textContent = "Share This Spot";
     }
 
-    latestShareUrl = shareUrl;
+    latestShareUrl = cachedUrl;
 
     if (navigator.share) {
       triggerNativeShare();
       document.getElementById("status").textContent = "Opening share options…";
-    } else {
-      showSpotShareBox(name, address, shareUrl);
-      document.getElementById("status").textContent = "Spot share link ready.";
+      return;
     }
-  })
-        })
+  }
+
+  createSpotShareUrl(name, address)
+    .then(function(shareUrl) {
+      if (!spotShareCache) spotShareCache = {};
+      spotShareCache[cacheKey] = shareUrl;
+
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Share This Spot";
+      }
+
+      latestShareUrl = shareUrl;
+
+      if (navigator.share) {
+        triggerNativeShare();
+        document.getElementById("status").textContent = "Opening share options…";
+      } else {
+        showSpotShareBox(name, address, shareUrl);
+        document.getElementById("status").textContent = "Spot share link ready.";
+      }
+    })
+    .catch(function(err) {
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Share This Spot";
+      }
+      document.getElementById("status").textContent =
+        "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+    });
+})
         .catch(function(err) {
           if (btn) {
             btn.disabled = false;
