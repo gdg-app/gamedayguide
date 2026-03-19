@@ -1364,10 +1364,7 @@
         <div id="fieldMatchResults" class="match-results"></div>
         <div class="helper-text">Paste a field name, field number, court number, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
 
-        <div class="quick-row-wrap" id="triangleComplexWrap">
-          <div class="quick-row-label">Triangle Baseball Complexes</div>
-          <div class="quick-row" id="triangleComplexRow"></div>
-        </div>
+        
 
         <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
@@ -1449,7 +1446,6 @@
     let lastResults = [];
     let lastSourceType = "";
     let lastQueryOrGps = "";
-    let triangleExpanded = false;
     let visibleSuggestions = [];
     let currentSharedGuide = null;
     let latestShareUrl = "";
@@ -1483,25 +1479,9 @@
     const CURATED_SUGGESTION_LIMIT = 6;
     const AUTO_RUN_RANK_THRESHOLD = 800;
 
-    const TRIANGLE_COMPLEXES = [
-      { label: "USA Baseball Complex", query: "USA Baseball National Training Complex, Cary NC" },
-      { label: "Thomas Brooks Park", query: "Thomas Brooks Park Baseball Complex, Cary NC" },
-      { label: "Ting Stadium", query: "Ting Stadium, Holly Springs NC" },
-      { label: "Walnut Creek Athletic Complex", query: "Walnut Creek Athletic Complex, Raleigh NC" },
-      { label: "Middle Creek Athletic Complex", query: "Middle Creek Athletic Complex, Apex NC" },
-      { label: "Optimist Park", query: "Optimist Park, Holly Springs NC" },
-      { label: "Hunter Street Park", query: "Hunter Street Park, Apex NC" },
-      { label: "Green Hope High School", query: "Green Hope High School Baseball Field, Cary NC" },
-      { label: "Cary High School", query: "Cary High School Baseball Field, Cary NC" },
-      { label: "Athens Drive High School", query: "Athens Drive High School Baseball Field, Raleigh NC" },
-      { label: "Eastern Carolina Athletic Park", query: "Eastern Carolina Athletic Park, 871 Buck Swamp Rd, Goldsboro NC" },
-      { label: "Clayton Civitan Club", query: "Clayton Civitan Club, 340 McCullers Dr, Clayton NC" },
-      { label: "Granville Athletic Park", query: "Granville Athletic Park, 4615 Belltown Rd, Oxford NC" },
-      { label: "The Factory", query: "The Factory, 1845 Grandmark St, Wake Forest NC" },
-      { label: "DPC Baseball", query: "DPC Baseball, 3901 E Garner Rd, Clayton NC" }
-    ];
+   
 
-    const TRIANGLE_COMPLEXES_VISIBLE_COUNT = 8;
+  
 
     const TOP_STOP_CONFIG = [
       { label: "🏥 Closest Medical", category: BACKEND_MEDICAL_LABEL },
@@ -2214,62 +2194,9 @@
       return actions;
     }
 
-    function scoreCuratedSuggestion(item, searchText) {
-      var q = normalizeForMatch(searchText);
-      var labelNorm = normalizeForMatch(item.label);
-      var queryNorm = normalizeForMatch(item.query);
-      var terms = q.split(" ").filter(Boolean);
-      var score = 0;
-
-      if (!q) return 0;
-
-      if (labelNorm === q) score += 300;
-      if (labelNorm.indexOf(q) === 0) score += 180;
-      if (labelNorm.indexOf(q) !== -1) score += 120;
-      if (queryNorm.indexOf(q) !== -1) score += 60;
-
-      terms.forEach(function(term) {
-        if (labelNorm.indexOf(term) !== -1) score += 18;
-        if (queryNorm.indexOf(term) !== -1) score += 8;
-      });
-
-      if (labelNorm.indexOf("baseball") !== -1) score += 12;
-      if (labelNorm.indexOf("athletic") !== -1) score += 8;
-      if (labelNorm.indexOf("stadium") !== -1) score += 8;
-      if (labelNorm.indexOf("park") !== -1) score += 5;
-      if (labelNorm.indexOf("field") !== -1) score += 5;
-
-      return score;
-    }
-
     function getCuratedSuggestions(searchText) {
-      var q = normalizeForMatch(searchText);
-      if (!q) return [];
-
-      return TRIANGLE_COMPLEXES
-        .map(function(item) {
-          var score = scoreCuratedSuggestion(item, q);
-          if (score <= 0) return null;
-
-          return {
-            source: "curated",
-            subtype: "curated",
-            label: item.label,
-            secondaryText: item.query,
-            query: item.query,
-            displayValue: item.label,
-            score: score
-          };
-        })
-        .filter(function(item) {
-          return !!item;
-        })
-        .sort(function(a, b) {
-          if (b.score !== a.score) return b.score - a.score;
-          return a.label.localeCompare(b.label);
-        })
-        .slice(0, CURATED_SUGGESTION_LIMIT);
-    }
+  return [];
+}
 
     function scoreMergedSuggestion_(item, searchText) {
       var q = normalizeForMatch(searchText);
@@ -2515,49 +2442,7 @@
       }, 150);
     }
 
-    function renderTriangleComplexes() {
-      var row = document.getElementById("triangleComplexRow");
-      row.innerHTML = "";
 
-      var visible = triangleExpanded
-        ? TRIANGLE_COMPLEXES
-        : TRIANGLE_COMPLEXES.slice(0, TRIANGLE_COMPLEXES_VISIBLE_COUNT);
-
-      visible.forEach(function(item) {
-        var btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "chip-btn";
-        btn.textContent = item.label;
-        btn.onclick = function() {
-          runPresetFacilityGuide(item.query, item.label);
-        };
-        row.appendChild(btn);
-      });
-
-      if (!triangleExpanded && TRIANGLE_COMPLEXES.length > TRIANGLE_COMPLEXES_VISIBLE_COUNT) {
-        var moreBtn = document.createElement("button");
-        moreBtn.type = "button";
-        moreBtn.className = "chip-btn expand-chip";
-        moreBtn.textContent = "More Triangle Fields";
-        moreBtn.onclick = function() {
-          triangleExpanded = true;
-          renderTriangleComplexes();
-        };
-        row.appendChild(moreBtn);
-      }
-
-      if (triangleExpanded && TRIANGLE_COMPLEXES.length > TRIANGLE_COMPLEXES_VISIBLE_COUNT) {
-        var lessBtn = document.createElement("button");
-        lessBtn.type = "button";
-        lessBtn.className = "chip-btn expand-chip";
-        lessBtn.textContent = "Show Less";
-        lessBtn.onclick = function() {
-          triangleExpanded = false;
-          renderTriangleComplexes();
-        };
-        row.appendChild(lessBtn);
-      }
-    }
 
     function renderRecentSearches() {
       var wrap = document.getElementById("recentSearchWrap");
@@ -2593,12 +2478,7 @@
       runGuideWithQuery(query, "query");
     }
 
-    function findExactCuratedMatch(query) {
-      var q = String(query || "").trim().toLowerCase();
-      return TRIANGLE_COMPLEXES.find(function(item) {
-        return item.label.toLowerCase() === q || item.query.toLowerCase() === q;
-      }) || null;
-    }
+
 
     function runGuide() {
       var rawQuery = (document.getElementById("address").value || "").trim();
@@ -2611,12 +2491,7 @@
 
       hideFieldMatchResults();
 
-      var exactMatch = findExactCuratedMatch(query);
-      if (exactMatch) {
-        runGuideWithQuery(exactMatch.query, "query");
-        return;
-      }
-
+var exactMatch = null;
       runGuideWithQuery(query, "query");
     }
 
@@ -3443,7 +3318,6 @@
     }
 
     async function initializeApp() {
-      renderTriangleComplexes();
       renderRecentSearches();
       updateInstallTipForMode();
       setupFieldMatchResults();
