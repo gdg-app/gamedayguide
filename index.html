@@ -2105,7 +2105,8 @@
       if (shareBtn) {
         if (navigator.share) {
           shareBtn.onclick = function() {
-            triggerNativeSpotShare(name, address, shareUrl);
+           latestShareUrl = shareUrl;
+triggerNativeShare();
           };
         } else {
           shareBtn.style.display = "none";
@@ -2147,7 +2148,6 @@
           showSpotShareBox(name, address, shareUrl);
 
 if (navigator.share) {
-  triggerNativeSpotShare(name, address, shareUrl);
   document.getElementById("status").textContent = "Spot share options ready.";
 } else {
   document.getElementById("status").textContent = "Spot share link ready.";
