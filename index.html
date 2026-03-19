@@ -1449,6 +1449,7 @@
     let visibleSuggestions = [];
     let currentSharedGuide = null;
     let latestShareUrl = "";
+    let spotShareCache = {};
     let loadingRotateTimer = null;
     let loadingRotateIndex = 0;
 
@@ -2138,20 +2139,44 @@ triggerNativeShare();
 
       document.getElementById("status").textContent = "Creating spot share link…";
 
-      createSpotShareUrl(name, address)
-        .then(function(shareUrl) {
-          if (btn) {
-            btn.disabled = false;
-            btn.textContent = "Share This Spot";
-          }
+    var cacheKey = name + "|" + address;
 
-          showSpotShareBox(name, address, shareUrl);
+if (spotShareCache[cacheKey]) {
+  var cachedUrl = spotShareCache[cacheKey];
 
-if (navigator.share) {
-  document.getElementById("status").textContent = "Spot share options ready.";
-} else {
-  document.getElementById("status").textContent = "Spot share link ready.";
+  if (btn) {
+    btn.disabled = false;
+    btn.textContent = "Share This Spot";
+  }
+
+  latestShareUrl = cachedUrl;
+
+  if (navigator.share) {
+    triggerNativeShare();
+    document.getElementById("status").textContent = "Opening share options…";
+    return;
+  }
 }
+
+createSpotShareUrl(name, address)
+  .then(function(shareUrl) {
+    spotShareCache[cacheKey] = shareUrl;
+
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Share This Spot";
+    }
+
+    latestShareUrl = shareUrl;
+
+    if (navigator.share) {
+      triggerNativeShare();
+      document.getElementById("status").textContent = "Opening share options…";
+    } else {
+      showSpotShareBox(name, address, shareUrl);
+      document.getElementById("status").textContent = "Spot share link ready.";
+    }
+  })
         })
         .catch(function(err) {
           if (btn) {
