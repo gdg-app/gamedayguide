@@ -2146,11 +2146,12 @@
 
           showSpotShareBox(name, address, shareUrl);
 
-          if (navigator.share) {
-            document.getElementById("status").textContent = "Spot share options ready.";
-          } else {
-            document.getElementById("status").textContent = "Spot share link ready.";
-          }
+if (navigator.share) {
+  triggerNativeSpotShare(name, address, shareUrl);
+  document.getElementById("status").textContent = "Spot share options ready.";
+} else {
+  document.getElementById("status").textContent = "Spot share link ready.";
+}
         })
         .catch(function(err) {
           if (btn) {
