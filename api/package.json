@@ -1,0 +1,7 @@
+{
+  "name": "gamedayguide",
+  "private": true,
+  "dependencies": {
+    "googleapis": "^137.0.1"
+  }
+}
