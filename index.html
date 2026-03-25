@@ -715,6 +715,36 @@
       gap: 12px;
     }
 
+    .load-more-wrap {
+      display: none;
+      margin: 14px 0 18px;
+    }
+
+    .load-more-card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
+      border-radius: 20px;
+      box-shadow: var(--shadow-card);
+      padding: 16px;
+      border: var(--border-soft);
+      backdrop-filter: blur(12px);
+    }
+
+    .load-more-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #1c2a35;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .load-more-text {
+      font-size: 14px;
+      color: #5f6d79;
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+
     .share-link-input {
       width: 100%;
       padding: 14px 16px;
@@ -1285,6 +1315,7 @@
 
       body.home-mode #shareTools,
       body.home-mode #shareLinkBox,
+      body.home-mode #loadMoreWrap,
       body.home-mode #topStops,
       body.home-mode #categoryJumpBar,
       body.home-mode #results,
@@ -1451,6 +1482,15 @@
       </div>
 
       <div id="shareLinkBox" style="display:none;"></div>
+
+      <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
+        <div class="load-more-card">
+          <div class="load-more-title">Need more categories?</div>
+          <div class="load-more-text">Load pharmacy, grocery, hotels, ATM, sporting goods, emergency dentist, and more.</div>
+          <button type="button" class="action-btn build-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More Categories</button>
+        </div>
+      </div>
+
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
       <div id="results"></div>
@@ -1497,6 +1537,9 @@
     let loadingRotateIndex = 0;
     let selectedPlacesMap = {};
     let selectedPlacesOrder = [];
+    let lastBuildParams = null;
+    let hasLoadedFullCategories = false;
+    let isLoadingMoreCategories = false;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
@@ -1518,6 +1561,14 @@
     ];
 
     const BREWERIES_AND_BARS = [
+      "🍺 Breweries/Bars"
+    ];
+
+    const CORE_CATEGORY_LABELS = [
+      "🍔 Food",
+      "☕ Coffee",
+      "⛽ Gas",
+      BACKEND_MEDICAL_LABEL,
       "🍺 Breweries/Bars"
     ];
 
@@ -1643,37 +1694,181 @@
         .filter(Boolean);
     }
 
-   function togglePlaceSelection(row) {
-  var key = makePlaceKey(row);
-  if (!key) return;
+    function togglePlaceSelection(row) {
+      var key = makePlaceKey(row);
+      if (!key) return;
 
-  if (selectedPlacesMap[key]) {
-    delete selectedPlacesMap[key];
-    selectedPlacesOrder = selectedPlacesOrder.filter(function(item) {
-      return item !== key;
-    });
-  } else {
-    selectedPlacesMap[key] = row.slice();
-    selectedPlacesOrder.push(key);
-  }
+      if (selectedPlacesMap[key]) {
+        delete selectedPlacesMap[key];
+        selectedPlacesOrder = selectedPlacesOrder.filter(function(item) {
+          return item !== key;
+        });
+      } else {
+        selectedPlacesMap[key] = row.slice();
+        selectedPlacesOrder.push(key);
+      }
 
-  updateShareSelectedButton();
-}
+      updateShareSelectedButton();
+    }
 
-  function updateShareSelectedButton() {
-  var btn = document.getElementById("shareSelectedBtn");
-  if (!btn) return;
+    function updateShareSelectedButton() {
+      var btn = document.getElementById("shareSelectedBtn");
+      if (!btn) return;
 
-  var count = getSelectedPlaces().length;
-  if (!count || currentSharedGuide) {
-    btn.style.display = "none";
-    btn.textContent = "Share Selected Places";
-    return;
-  }
+      var count = getSelectedPlaces().length;
+      if (!count || currentSharedGuide) {
+        btn.style.display = "none";
+        btn.textContent = "Share Selected Places";
+        return;
+      }
 
-  btn.style.display = "inline-flex";
-  btn.textContent = "Share Selected Places";
-}
+      btn.style.display = "inline-flex";
+      btn.textContent = "Share Selected Places";
+    }
+
+    function getBaseBuildParamsSnapshot() {
+      if (!lastBuildParams) return null;
+
+      var snapshot = {};
+      Object.keys(lastBuildParams).forEach(function(key) {
+        snapshot[key] = lastBuildParams[key];
+      });
+      return snapshot;
+    }
+
+    function hideLoadMoreControls() {
+      var wrap = document.getElementById("loadMoreWrap");
+      var btn = document.getElementById("loadMoreBtn");
+
+      if (wrap) wrap.style.display = "none";
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Load More Categories";
+      }
+    }
+
+    function updateLoadMoreControls() {
+      var wrap = document.getElementById("loadMoreWrap");
+      var btn = document.getElementById("loadMoreBtn");
+
+      if (!wrap || !btn) return;
+
+      if (
+        currentSharedGuide ||
+        !lastResults.length ||
+        !lastBuildParams ||
+        hasLoadedFullCategories
+      ) {
+        wrap.style.display = "none";
+        btn.disabled = false;
+        btn.textContent = "Load More Categories";
+        return;
+      }
+
+      wrap.style.display = "block";
+      btn.disabled = !!isLoadingMoreCategories;
+      btn.textContent = isLoadingMoreCategories ? "Loading More Categories..." : "Load More Categories";
+    }
+
+    function resetLoadMoreState() {
+      lastBuildParams = null;
+      hasLoadedFullCategories = false;
+      isLoadingMoreCategories = false;
+      hideLoadMoreControls();
+    }
+
+    function mergeGuideResults(existingRows, incomingRows) {
+      var merged = [];
+      var seen = {};
+
+      (existingRows || []).forEach(function(row) {
+        var key = makePlaceKey(row);
+        if (!key || seen[key]) return;
+        seen[key] = true;
+        merged.push(row);
+      });
+
+      (incomingRows || []).forEach(function(row) {
+        var key = makePlaceKey(row);
+        if (!key || seen[key]) return;
+        seen[key] = true;
+        merged.push(row);
+      });
+
+      return merged;
+    }
+
+    function getOpenCategoryState() {
+      var state = {};
+
+      document.querySelectorAll(".category-section").forEach(function(section) {
+        var content = section.querySelector(".accordion-content");
+        if (content && content.classList.contains("open")) {
+          state[section.id] = true;
+        }
+      });
+
+      return state;
+    }
+
+    function restoreOpenCategoryState(state) {
+      if (!state) return;
+
+      Object.keys(state).forEach(function(sectionId) {
+        var section = document.getElementById(sectionId);
+        if (!section) return;
+
+        var content = section.querySelector(".accordion-content");
+        var chevron = section.querySelector(".accordion-chevron");
+
+        if (content) content.classList.add("open");
+        if (chevron) chevron.textContent = "▼";
+      });
+    }
+
+    async function loadMoreCategories() {
+      if (isLoadingMoreCategories || !lastBuildParams || currentSharedGuide) return;
+
+      var params = getBaseBuildParamsSnapshot();
+      if (!params) return;
+
+      isLoadingMoreCategories = true;
+      updateLoadMoreControls();
+
+      document.getElementById("status").textContent = "Loading more categories…";
+      document.getElementById("shareLinkBox").style.display = "none";
+      document.getElementById("shareLinkBox").innerHTML = "";
+      latestShareUrl = "";
+
+      try {
+        params.mode = "full";
+
+        var data = await fetchBuildGuide(params);
+        var incoming = Array.isArray(data) ? data : [];
+        var beforeCount = lastResults.length;
+        var openState = getOpenCategoryState();
+
+        lastResults = mergeGuideResults(lastResults, incoming);
+        hasLoadedFullCategories = true;
+        render(lastResults, { preserveOpenState: true, openState: openState });
+
+        document.getElementById("status").textContent = "More categories loaded.";
+        trackEvent("load_more_categories", {
+          sourceType: lastSourceType || "",
+          queryOrGps: lastQueryOrGps || "",
+          radius: selectedRadius,
+          previousResultCount: beforeCount,
+          resultCount: lastResults.length,
+          platform: detectSourceContext()
+        });
+      } catch (err) {
+        document.getElementById("status").textContent =
+          "Error loading more categories: " + (err && err.message ? err.message : JSON.stringify(err));
+      } finally {
+        isLoadingMoreCategories = false;
+        updateLoadMoreControls();
+      }
+    }
 
     function categorySortKey(label) {
       var foodOrder = [
@@ -2617,6 +2812,7 @@
       currentSharedGuide = null;
       latestShareUrl = "";
       resetSelectedPlaces();
+      resetLoadMoreState();
 
       stopLoadingState();
       document.getElementById("sharedBanner").style.display = "none";
@@ -2658,6 +2854,7 @@
       var radius = getRadiusMiles();
 
       resetSelectedPlaces();
+      resetLoadMoreState();
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
@@ -2667,15 +2864,19 @@
       latestShareUrl = "";
       startLoadingState();
 
-      fetchBuildGuide({
+      lastBuildParams = {
         query: query,
-        radiusMiles: radius
-      })
+        radiusMiles: radius,
+        mode: "core"
+      };
+
+      fetchBuildGuide(lastBuildParams)
         .then(function(data) {
           stopLoadingState();
           lastResults = Array.isArray(data) ? data : [];
           lastSourceType = sourceType;
           lastQueryOrGps = query;
+          hasLoadedFullCategories = false;
           saveRecentSearch(query);
           renderRecentSearches();
           document.getElementById("status").textContent = "Done.";
@@ -2688,11 +2889,13 @@
           stopLoadingState();
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+          resetLoadMoreState();
         });
     }
 
     function useMyLocation() {
       resetSelectedPlaces();
+      resetLoadMoreState();
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
@@ -2715,16 +2918,20 @@
           var lng = pos.coords.longitude;
           var radius = getRadiusMiles();
 
-          fetchBuildGuide({
+          lastBuildParams = {
             lat: lat,
             lng: lng,
-            radiusMiles: radius
-          })
+            radiusMiles: radius,
+            mode: "core"
+          };
+
+          fetchBuildGuide(lastBuildParams)
             .then(function(data) {
               stopLoadingState();
               lastResults = Array.isArray(data) ? data : [];
               lastSourceType = "gps";
               lastQueryOrGps = "GPS:" + lat + "," + lng;
+              hasLoadedFullCategories = false;
               document.getElementById("status").textContent = "Done.";
               document.body.classList.remove("home-mode");
               render(lastResults);
@@ -2735,6 +2942,7 @@
               stopLoadingState();
               document.getElementById("status").textContent =
                 "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+              resetLoadMoreState();
             });
         },
         function(err) {
@@ -2744,6 +2952,7 @@
           if (err && err.code === 2) msg = "Location unavailable. Try again outside or with better signal.";
           if (err && err.code === 3) msg = "Location timed out. Try again.";
           document.getElementById("status").textContent = msg;
+          resetLoadMoreState();
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
       );
@@ -3296,29 +3505,29 @@
           var selectBtn = document.createElement("button");
           selectBtn.type = "button";
           selectBtn.className = "select-place-btn" + (isSelected ? " selected" : "");
-         selectBtn.textContent = isSelected ? "Selected ✓" : "Select";
+          selectBtn.textContent = isSelected ? "Selected ✓" : "Select";
           selectBtn.onclick = function(rowCopy, buttonEl, cardEl) {
-  return function(e) {
-    var key;
+            return function(e) {
+              var key;
 
-    e.preventDefault();
-    e.stopPropagation();
+              e.preventDefault();
+              e.stopPropagation();
 
-    togglePlaceSelection(rowCopy);
+              togglePlaceSelection(rowCopy);
 
-    key = makePlaceKey(rowCopy);
+              key = makePlaceKey(rowCopy);
 
-    if (isPlaceSelectedByKey(key)) {
-      buttonEl.textContent = "Selected ✓";
-      buttonEl.classList.add("selected");
-      cardEl.classList.add("selected-card");
-    } else {
-      buttonEl.textContent = "Select";
-      buttonEl.classList.remove("selected");
-      cardEl.classList.remove("selected-card");
-    }
-  };
-}(r.slice(), selectBtn, card);
+              if (isPlaceSelectedByKey(key)) {
+                buttonEl.textContent = "Selected ✓";
+                buttonEl.classList.add("selected");
+                cardEl.classList.add("selected-card");
+              } else {
+                buttonEl.textContent = "Select";
+                buttonEl.classList.remove("selected");
+                cardEl.classList.remove("selected-card");
+              }
+            };
+          }(r.slice(), selectBtn, card);
 
           topRow.appendChild(nameEl);
           topRow.appendChild(selectBtn);
@@ -3400,11 +3609,14 @@
       });
     }
 
-    function render(data) {
+    function render(data, options) {
+      options = options || {};
+
       var container = document.getElementById("results");
       var shareTools = document.getElementById("shareTools");
       var topStopsContainer = document.getElementById("topStops");
       var jumpBarContainer = document.getElementById("categoryJumpBar");
+      var openState = options.preserveOpenState ? (options.openState || getOpenCategoryState()) : null;
 
       container.innerHTML = "";
       topStopsContainer.innerHTML = "";
@@ -3415,6 +3627,7 @@
       updateShareSelectedButton();
 
       if (!lastResults.length) {
+        hideLoadMoreControls();
         container.innerHTML =
           "<div class='card'>" +
             "<div class='card-name'>No results found</div>" +
@@ -3453,6 +3666,9 @@
       renderSection(container, "Food & Drink", FOOD_AND_DRINK, grouped);
       renderSection(container, "Breweries/Bars", BREWERIES_AND_BARS, grouped);
       renderSection(container, "Other", otherCategories, grouped);
+
+      updateLoadMoreControls();
+      restoreOpenCategoryState(openState);
     }
 
     function getShareIdFromUrl() {
@@ -3476,6 +3692,7 @@
     function showSharedGuide(sharedGuide) {
       currentSharedGuide = sharedGuide || null;
       resetSelectedPlaces();
+      resetLoadMoreState();
       stopLoadingState();
       document.body.classList.remove("home-mode");
       document.getElementById("pageTitle").textContent = "GameDayGuide";
@@ -3509,6 +3726,7 @@
       stopLoadingState();
       currentSharedGuide = null;
       resetSelectedPlaces();
+      resetLoadMoreState();
       document.body.classList.remove("home-mode");
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
