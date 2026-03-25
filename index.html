@@ -913,7 +913,7 @@
       padding: 16px;
       border-radius: 20px;
       box-shadow: var(--shadow-card);
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
       border: var(--border-soft);
       backdrop-filter: blur(12px);
     }
@@ -927,8 +927,23 @@
       transform: scale(0.99);
     }
 
+    .card.selected-card {
+      border: 2px solid rgba(123,31,162,0.45);
+      box-shadow: 0 14px 28px rgba(123,31,162,0.16);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.99), rgba(248,243,252,0.96));
+    }
+
     .urgent-card {
       border-left: 5px solid #d32f2f;
+    }
+
+    .card-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
     }
 
     .card-name {
@@ -937,6 +952,11 @@
       margin-bottom: 8px;
       line-height: 1.3;
       letter-spacing: -0.01em;
+    }
+
+    .card-top-row .card-name {
+      margin-bottom: 0;
+      flex: 1 1 auto;
     }
 
     .card-meta {
@@ -951,6 +971,27 @@
       margin-bottom: 12px;
       line-height: 1.45;
       word-break: break-word;
+    }
+
+    .select-place-btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 12px;
+      min-height: 40px;
+      white-space: nowrap;
+      background: #f2e8f8;
+      color: var(--purple);
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(123,31,162,0.08);
+      flex: 0 0 auto;
+    }
+
+    .select-place-btn.selected {
+      background: linear-gradient(180deg, #9340b7 0%, var(--purple) 100%);
+      color: white;
+      box-shadow: 0 8px 16px rgba(123,31,162,0.2);
     }
 
     .card-actions {
@@ -1318,6 +1359,10 @@
         grid-template-columns: 1fr 1fr;
       }
 
+      .share-tools-row {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
       .top-stop-card {
         min-width: 280px;
       }
@@ -1364,8 +1409,6 @@
         <div id="fieldMatchResults" class="match-results"></div>
         <div class="helper-text">Paste a field name, field number, court number, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
 
-        
-
         <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
           <div class="quick-row" id="recentSearchRow"></div>
@@ -1402,6 +1445,7 @@
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
           <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share This Guide With Your Team</button>
+          <button type="button" class="action-btn share-btn" id="shareSelectedBtn" onclick="shareSelectedPlaces()" style="display:none;">Share Selected Places</button>
           <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
         </div>
       </div>
@@ -1451,6 +1495,8 @@
     let latestShareUrl = "";
     let loadingRotateTimer = null;
     let loadingRotateIndex = 0;
+    let selectedPlacesMap = {};
+    let selectedPlacesOrder = [];
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
@@ -1476,12 +1522,7 @@
     ];
 
     const DEFAULT_VISIBLE_COUNT = 3;
-    const CURATED_SUGGESTION_LIMIT = 6;
     const AUTO_RUN_RANK_THRESHOLD = 800;
-
-   
-
-  
 
     const TOP_STOP_CONFIG = [
       { label: "🏥 Closest Medical", category: BACKEND_MEDICAL_LABEL },
@@ -1555,6 +1596,84 @@
       } catch (e) {
         return "u_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
       }
+    }
+
+    function detectSourceContext() {
+      try {
+        var ua = navigator.userAgent || "";
+        if (/iPhone|iPad|iPod/i.test(ua) && !/Safari/i.test(ua)) return "ios_webview";
+        if (/Android/i.test(ua) && /wv/i.test(ua)) return "android_webview";
+      } catch (e) {}
+      return "web_app";
+    }
+
+    function trackEvent(eventType, payload) {
+      try {
+        var basePayload = payload || {};
+        postJson("/api/log-usage", Object.assign({}, basePayload, {
+          eventType: eventType,
+          sessionId: getAnonId(),
+          sourceContext: detectSourceContext()
+        })).catch(function() {});
+      } catch (e) {}
+    }
+
+    function makePlaceKey(row) {
+      var category = String((row && row[0]) || "");
+      var name = String((row && row[1]) || "");
+      var address = String((row && row[3]) || "");
+      return normalizeForMatch(category + "|" + name + "|" + address);
+    }
+
+    function resetSelectedPlaces() {
+      selectedPlacesMap = {};
+      selectedPlacesOrder = [];
+      updateShareSelectedButton();
+    }
+
+    function isPlaceSelectedByKey(placeKey) {
+      return !!selectedPlacesMap[placeKey];
+    }
+
+    function getSelectedPlaces() {
+      return selectedPlacesOrder
+        .map(function(key) {
+          return selectedPlacesMap[key] || null;
+        })
+        .filter(Boolean);
+    }
+
+    function togglePlaceSelection(row) {
+      var key = makePlaceKey(row);
+      if (!key) return;
+
+      if (selectedPlacesMap[key]) {
+        delete selectedPlacesMap[key];
+        selectedPlacesOrder = selectedPlacesOrder.filter(function(item) {
+          return item !== key;
+        });
+      } else {
+        selectedPlacesMap[key] = row.slice();
+        selectedPlacesOrder.push(key);
+      }
+
+      updateShareSelectedButton();
+      render(lastResults);
+    }
+
+    function updateShareSelectedButton() {
+      var btn = document.getElementById("shareSelectedBtn");
+      if (!btn) return;
+
+      var count = getSelectedPlaces().length;
+      if (!count || currentSharedGuide) {
+        btn.style.display = "none";
+        btn.textContent = "Share Selected Places";
+        return;
+      }
+
+      btn.style.display = "inline-flex";
+      btn.textContent = count === 1 ? "Share 1 Selected Place" : "Share " + count + " Selected Places";
     }
 
     function categorySortKey(label) {
@@ -1812,18 +1931,18 @@
       return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(query || address || name || "");
     }
 
-   function buildAppleMapsLink(name, address) {
-  var label = String(name || "").trim();
-  var destination = String(address || "").trim();
-  var full = [label, destination].filter(Boolean).join(", ");
+    function buildAppleMapsLink(name, address) {
+      var label = String(name || "").trim();
+      var destination = String(address || "").trim();
+      var full = [label, destination].filter(Boolean).join(", ");
 
-  if (!full) {
-    return "https://maps.apple.com/";
-  }
+      if (!full) {
+        return "https://maps.apple.com/";
+      }
 
-  return "https://maps.apple.com/?address=" + encodeURIComponent(destination || full) +
-         "&q=" + encodeURIComponent(full);
-}
+      return "https://maps.apple.com/?address=" + encodeURIComponent(destination || full) +
+             "&q=" + encodeURIComponent(full);
+    }
 
     function buildSmsShareLink(name, address, shareUrl) {
       var body = [name, address, shareUrl].filter(Boolean).join("\n");
@@ -1992,68 +2111,69 @@
     }
 
     function copyTextToClipboard(text, successMessage, failureMessage) {
-  text = String(text || "").trim();
+      text = String(text || "").trim();
 
-  if (!text) {
-    document.getElementById("status").textContent = failureMessage || "Nothing to copy.";
-    return;
-  }
+      if (!text) {
+        document.getElementById("status").textContent = failureMessage || "Nothing to copy.";
+        return;
+      }
 
-  function selectShareInputIfPresent() {
-    var input = document.getElementById("shareLinkInput");
-    if (input) {
-      input.focus();
-      input.select();
-      input.setSelectionRange(0, input.value.length);
+      function selectShareInputIfPresent() {
+        var input = document.getElementById("shareLinkInput");
+        if (input) {
+          input.focus();
+          input.select();
+          input.setSelectionRange(0, input.value.length);
+        }
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text)
+          .then(function() {
+            document.getElementById("status").textContent = successMessage || "Copied.";
+          })
+          .catch(function() {
+            tryLegacyCopy();
+          });
+        return;
+      }
+
+      tryLegacyCopy();
+
+      function tryLegacyCopy() {
+        var temp = document.createElement("textarea");
+        temp.value = text;
+        temp.setAttribute("readonly", "readonly");
+        temp.style.position = "fixed";
+        temp.style.top = "-1000px";
+        temp.style.left = "-1000px";
+        temp.style.opacity = "0";
+        document.body.appendChild(temp);
+
+        temp.focus();
+        temp.select();
+        temp.setSelectionRange(0, temp.value.length);
+
+        var copied = false;
+
+        try {
+          copied = document.execCommand("copy");
+        } catch (e) {
+          copied = false;
+        }
+
+        document.body.removeChild(temp);
+
+        if (copied) {
+          document.getElementById("status").textContent = successMessage || "Copied.";
+        } else {
+          selectShareInputIfPresent();
+          document.getElementById("status").textContent =
+            failureMessage || "Copy failed. The link is highlighted so you can copy it manually.";
+        }
+      }
     }
-  }
 
-  if (navigator.clipboard && window.isSecureContext) {
-    navigator.clipboard.writeText(text)
-      .then(function() {
-        document.getElementById("status").textContent = successMessage || "Copied.";
-      })
-      .catch(function() {
-        tryLegacyCopy();
-      });
-    return;
-  }
-
-  tryLegacyCopy();
-
-  function tryLegacyCopy() {
-    var temp = document.createElement("textarea");
-    temp.value = text;
-    temp.setAttribute("readonly", "readonly");
-    temp.style.position = "fixed";
-    temp.style.top = "-1000px";
-    temp.style.left = "-1000px";
-    temp.style.opacity = "0";
-    document.body.appendChild(temp);
-
-    temp.focus();
-    temp.select();
-    temp.setSelectionRange(0, temp.value.length);
-
-    var copied = false;
-
-    try {
-      copied = document.execCommand("copy");
-    } catch (e) {
-      copied = false;
-    }
-
-    document.body.removeChild(temp);
-
-    if (copied) {
-      document.getElementById("status").textContent = successMessage || "Copied.";
-    } else {
-      selectShareInputIfPresent();
-      document.getElementById("status").textContent =
-        failureMessage || "Copy failed. The link is highlighted so you can copy it manually.";
-    }
-  }
-}
     function showSpotShareBox(name, address, shareUrl) {
       latestShareUrl = shareUrl || "";
 
@@ -2105,8 +2225,8 @@
       if (shareBtn) {
         if (navigator.share) {
           shareBtn.onclick = function() {
-           latestShareUrl = shareUrl;
-           triggerNativeShare();
+            latestShareUrl = shareUrl;
+            triggerNativeShare();
           };
         } else {
           shareBtn.style.display = "none";
@@ -2116,52 +2236,53 @@
       box.scrollIntoView({ behavior: "smooth", block: "start" });
     }
 
-function shareSpot(name, address, buttonEl) {
-  name = String(name || "").trim();
-  address = String(address || "").trim();
+    function shareSpot(name, address, buttonEl) {
+      name = String(name || "").trim();
+      address = String(address || "").trim();
 
-  var btn = buttonEl || null;
+      var btn = buttonEl || null;
 
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = "Creating link...";
-  }
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = "Creating link...";
+      }
 
-  if (!name && !address) {
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "Share This Spot";
+      if (!name && !address) {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Share This Spot";
+        }
+        document.getElementById("status").textContent = "No location available to share.";
+        return;
+      }
+
+      document.getElementById("status").textContent = "Creating spot share link…";
+
+      createSpotShareUrl(name, address)
+        .then(function(shareUrl) {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Share This Spot";
+          }
+
+          showSpotShareBox(name, address, shareUrl);
+
+          if (navigator.share) {
+            document.getElementById("status").textContent = "Spot share options ready.";
+          } else {
+            document.getElementById("status").textContent = "Spot share link ready.";
+          }
+        })
+        .catch(function(err) {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "Share This Spot";
+          }
+          document.getElementById("status").textContent =
+            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+        });
     }
-    document.getElementById("status").textContent = "No location available to share.";
-    return;
-  }
 
-  document.getElementById("status").textContent = "Creating spot share link…";
-
-  createSpotShareUrl(name, address)
-    .then(function(shareUrl) {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "Share This Spot";
-      }
-
-      showSpotShareBox(name, address, shareUrl);
-
-      if (navigator.share) {
-        document.getElementById("status").textContent = "Spot share options ready.";
-      } else {
-        document.getElementById("status").textContent = "Spot share link ready.";
-      }
-    })
-    .catch(function(err) {
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "Share This Spot";
-      }
-      document.getElementById("status").textContent =
-        "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-    });
-}
     function createLocationActions(name, address) {
       var actions = document.createElement("div");
       actions.className = "card-actions";
@@ -2196,8 +2317,8 @@ function shareSpot(name, address, buttonEl) {
     }
 
     function getCuratedSuggestions(searchText) {
-  return [];
-}
+      return [];
+    }
 
     function scoreMergedSuggestion_(item, searchText) {
       var q = normalizeForMatch(searchText);
@@ -2443,8 +2564,6 @@ function shareSpot(name, address, buttonEl) {
       }, 150);
     }
 
-
-
     function renderRecentSearches() {
       var wrap = document.getElementById("recentSearchWrap");
       var row = document.getElementById("recentSearchRow");
@@ -2479,8 +2598,6 @@ function shareSpot(name, address, buttonEl) {
       runGuideWithQuery(query, "query");
     }
 
-
-
     function runGuide() {
       var rawQuery = (document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
@@ -2491,8 +2608,6 @@ function shareSpot(name, address, buttonEl) {
       }
 
       hideFieldMatchResults();
-
-var exactMatch = null;
       runGuideWithQuery(query, "query");
     }
 
@@ -2502,6 +2617,7 @@ var exactMatch = null;
       lastQueryOrGps = "";
       currentSharedGuide = null;
       latestShareUrl = "";
+      resetSelectedPlaces();
 
       stopLoadingState();
       document.getElementById("sharedBanner").style.display = "none";
@@ -2521,6 +2637,16 @@ var exactMatch = null;
       focusAddressField();
     }
 
+    function trackSuccessfulGuideBuild(sourceType, queryOrGps, resultCount) {
+      trackEvent("guide_build", {
+        sourceType: sourceType || "",
+        queryOrGps: queryOrGps || "",
+        radius: selectedRadius,
+        resultCount: Number(resultCount || 0),
+        platform: detectSourceContext()
+      });
+    }
+
     function runGuideWithQuery(query, sourceType) {
       query = String(query || "").trim();
       sourceType = sourceType || "query";
@@ -2532,6 +2658,7 @@ var exactMatch = null;
 
       var radius = getRadiusMiles();
 
+      resetSelectedPlaces();
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
@@ -2555,6 +2682,7 @@ var exactMatch = null;
           document.getElementById("status").textContent = "Done.";
           document.body.classList.remove("home-mode");
           render(lastResults);
+          trackSuccessfulGuideBuild(sourceType, query, lastResults.length);
           maybeOfferInstallPrompt(500);
         })
         .catch(function(err) {
@@ -2565,6 +2693,7 @@ var exactMatch = null;
     }
 
     function useMyLocation() {
+      resetSelectedPlaces();
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
@@ -2600,6 +2729,7 @@ var exactMatch = null;
               document.getElementById("status").textContent = "Done.";
               document.body.classList.remove("home-mode");
               render(lastResults);
+              trackSuccessfulGuideBuild("gps", lastQueryOrGps, lastResults.length);
               maybeOfferInstallPrompt(500);
             })
             .catch(function(err) {
@@ -2671,16 +2801,20 @@ var exactMatch = null;
       });
     }
 
-    function showShareLink(url) {
+    function showShareLink(url, customTitle, customMeta) {
       latestShareUrl = url || "";
 
-      var shareLabel = lastQueryOrGps
-        ? "Field guide ready for " + esc(lastQueryOrGps)
-        : "Field guide ready to share";
+      var shareLabel = customTitle || (
+        lastQueryOrGps
+          ? "Field guide ready for " + esc(lastQueryOrGps)
+          : "Field guide ready to share"
+      );
 
-      var shareMeta = lastQueryOrGps
-        ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
-        : "Send this to your team chat so everyone can open the same GameDayGuide.";
+      var shareMeta = customMeta || (
+        lastQueryOrGps
+          ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
+          : "Send this to your team chat so everyone can open the same GameDayGuide."
+      );
 
       var smsLink = buildGuideSmsShareLink(url);
       var emailLink = buildGuideEmailShareLink(url);
@@ -2758,6 +2892,47 @@ var exactMatch = null;
 
           showShareLink(url);
           document.getElementById("status").textContent = "Share link ready.";
+        })
+        .catch(function(err) {
+          document.getElementById("status").textContent =
+            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+        });
+    }
+
+    function shareSelectedPlaces() {
+      var selectedResults = getSelectedPlaces();
+
+      if (!selectedResults.length) {
+        document.getElementById("status").textContent = "Select at least one place first.";
+        return;
+      }
+
+      document.getElementById("status").textContent = "Creating selected places share link…";
+
+      postJson("/api/create-shared-guide", {
+        sourceType: lastSourceType,
+        queryOrGps: lastQueryOrGps,
+        radius: selectedRadius,
+        results: selectedResults,
+        userId: getAnonId()
+      })
+        .then(function(res) {
+          var shareId = res && res.shareId ? res.shareId : "";
+          var url = shareId
+            ? (window.location.origin + window.location.pathname + "?share=" + encodeURIComponent(shareId))
+            : "";
+
+          if (!url) {
+            document.getElementById("status").textContent = "Unable to create share link.";
+            return;
+          }
+
+          var count = selectedResults.length;
+          var title = count === 1 ? "1 selected place ready to share" : (count + " selected places ready to share");
+          var meta = "Send this mini GameDayGuide list to your team chat.";
+
+          showShareLink(url, title, meta);
+          document.getElementById("status").textContent = "Selected places share link ready.";
         })
         .catch(function(err) {
           document.getElementById("status").textContent =
@@ -3097,6 +3272,12 @@ var exactMatch = null;
 
           var displayName = esc(name);
           var cardClass = "card";
+          var rowKey = makePlaceKey(r);
+          var isSelected = isPlaceSelectedByKey(rowKey);
+
+          if (isSelected) {
+            cardClass += " selected-card";
+          }
 
           if (isMedicalCategory(cat)) {
             displayName = "🚑 " + displayName;
@@ -3105,10 +3286,39 @@ var exactMatch = null;
 
           var card = document.createElement("div");
           card.className = cardClass;
-          card.innerHTML =
-            "<div class='card-name'>" + displayName + "</div>" +
-            "<div class='card-meta'>" + metaParts.join(" • ") + "</div>" +
-            "<div class='card-address'>" + esc(addr || "") + "</div>";
+
+          var topRow = document.createElement("div");
+          topRow.className = "card-top-row";
+
+          var nameEl = document.createElement("div");
+          nameEl.className = "card-name";
+          nameEl.innerHTML = displayName;
+
+          var selectBtn = document.createElement("button");
+          selectBtn.type = "button";
+          selectBtn.className = "select-place-btn" + (isSelected ? " selected" : "");
+          selectBtn.textContent = isSelected ? "Selected" : "Select";
+          selectBtn.onclick = function(rowCopy) {
+            return function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              togglePlaceSelection(rowCopy);
+            };
+          }(r.slice());
+
+          topRow.appendChild(nameEl);
+          topRow.appendChild(selectBtn);
+          card.appendChild(topRow);
+
+          var metaEl = document.createElement("div");
+          metaEl.className = "card-meta";
+          metaEl.innerHTML = metaParts.join(" • ");
+          card.appendChild(metaEl);
+
+          var addressEl = document.createElement("div");
+          addressEl.className = "card-address";
+          addressEl.innerHTML = esc(addr || "");
+          card.appendChild(addressEl);
 
           card.appendChild(createLocationActions(name, addr));
           grid.appendChild(card);
@@ -3187,7 +3397,8 @@ var exactMatch = null;
       jumpBarContainer.innerHTML = "";
 
       lastResults = Array.isArray(data) ? data : [];
-      shareTools.style.display = lastResults.length ? "block" : "none";
+      shareTools.style.display = lastResults.length && !currentSharedGuide ? "block" : "none";
+      updateShareSelectedButton();
 
       if (!lastResults.length) {
         container.innerHTML =
@@ -3250,6 +3461,7 @@ var exactMatch = null;
 
     function showSharedGuide(sharedGuide) {
       currentSharedGuide = sharedGuide || null;
+      resetSelectedPlaces();
       stopLoadingState();
       document.body.classList.remove("home-mode");
       document.getElementById("pageTitle").textContent = "GameDayGuide";
@@ -3282,6 +3494,7 @@ var exactMatch = null;
     function showSharedSpot(sharedSpot) {
       stopLoadingState();
       currentSharedGuide = null;
+      resetSelectedPlaces();
       document.body.classList.remove("home-mode");
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
