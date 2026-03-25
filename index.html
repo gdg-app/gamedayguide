@@ -1661,20 +1661,20 @@
       render(lastResults);
     }
 
-    function updateShareSelectedButton() {
-      var btn = document.getElementById("shareSelectedBtn");
-      if (!btn) return;
+  function updateShareSelectedButton() {
+  var btn = document.getElementById("shareSelectedBtn");
+  if (!btn) return;
 
-      var count = getSelectedPlaces().length;
-      if (!count || currentSharedGuide) {
-        btn.style.display = "none";
-        btn.textContent = "Share Selected Places";
-        return;
-      }
+  var count = getSelectedPlaces().length;
+  if (!count || currentSharedGuide) {
+    btn.style.display = "none";
+    btn.textContent = "Share Selected Places";
+    return;
+  }
 
-      btn.style.display = "inline-flex";
-      btn.textContent = count === 1 ? "Share 1 Selected Place" : "Share " + count + " Selected Places";
-    }
+  btn.style.display = "inline-flex";
+  btn.textContent = "Share Selected Places";
+}
 
     function categorySortKey(label) {
       var foodOrder = [
@@ -3297,7 +3297,7 @@
           var selectBtn = document.createElement("button");
           selectBtn.type = "button";
           selectBtn.className = "select-place-btn" + (isSelected ? " selected" : "");
-          selectBtn.textContent = isSelected ? "Selected" : "Select";
+         selectBtn.textContent = isSelected ? "Selected ✓" : "Select";
           selectBtn.onclick = function(rowCopy) {
             return function(e) {
               e.preventDefault();
