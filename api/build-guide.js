@@ -579,8 +579,7 @@ function buildEmergencyDentistTextSearchRequests(loc, radiusMeters, apiKey) {
   return [
     { category: "🦷 Emergency Dentist", queryText: "emergency dentist", specialType: "dentist", url: buildTextSearchUrl(loc, radiusMeters, "emergency dentist", apiKey) },
     { category: "🦷 Emergency Dentist", queryText: "urgent dental care", specialType: "dentist", url: buildTextSearchUrl(loc, radiusMeters, "urgent dental care", apiKey) },
-    { category: "🦷 Emergency Dentist", queryText: "24 hour dentist", specialType: "dentist", url: buildTextSearchUrl(loc, radiusMeters, "24 hour dentist", apiKey) },
-    { category: "🦷 Emergency Dentist", queryText: "dental emergency", specialType: "dentist", url: buildTextSearchUrl(loc, radiusMeters, "dental emergency", apiKey) }
+    { category: "🦷 Emergency Dentist", queryText: "24 hour dentist", specialType: "dentist", url: buildTextSearchUrl(loc, radiusMeters, "24 hour dentist", apiKey) }
   ];
 }
 
@@ -589,15 +588,7 @@ function buildSportingGoodsTextSearchRequests(loc, radiusMeters, apiKey) {
     { category: "⚾ Sporting Goods", queryText: "sporting goods", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "sporting goods", apiKey) },
     { category: "⚾ Sporting Goods", queryText: "sports store", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "sports store", apiKey) },
     { category: "⚾ Sporting Goods", queryText: "Dick's Sporting Goods", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Dick's Sporting Goods", apiKey) },
-    { category: "⚾ Sporting Goods", queryText: "Dicks Sporting Goods", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Dicks Sporting Goods", apiKey) },
-    { category: "⚾ Sporting Goods", queryText: "Dick's House of Sport", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Dick's House of Sport", apiKey) },
-    { category: "⚾ Sporting Goods", queryText: "Dicks House of Sport", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Dicks House of Sport", apiKey) },
-    { category: "⚾ Sporting Goods", queryText: "House of Sport", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "House of Sport", apiKey) },
-    { category: "⚾ Sporting Goods", queryText: "Academy Sports", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Academy Sports", apiKey) },
-    { category: "⚾ Sporting Goods", queryText: "Play It Again Sports", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Play It Again Sports", apiKey) },
-    { category: "⚾ Sporting Goods", queryText: "Hibbett Sports", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Hibbett Sports", apiKey) },
-    { category: "⚾ Sporting Goods", queryText: "REI", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "REI", apiKey) },
-    { category: "⚾ Sporting Goods", queryText: "Golf Galaxy", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Golf Galaxy", apiKey) }
+    { category: "⚾ Sporting Goods", queryText: "Academy Sports", specialType: "sporting", url: buildTextSearchUrl(loc, radiusMeters, "Academy Sports", apiKey) }
   ];
 }
 
@@ -606,12 +597,7 @@ function buildGroceryTextSearchRequests(loc, radiusMeters, apiKey) {
     { category: "🛒 Grocery", queryText: "grocery store", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "grocery store", apiKey) },
     { category: "🛒 Grocery", queryText: "supermarket", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "supermarket", apiKey) },
     { category: "🛒 Grocery", queryText: "Harris Teeter", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Harris Teeter", apiKey) },
-    { category: "🛒 Grocery", queryText: "Food Lion", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Food Lion", apiKey) },
-    { category: "🛒 Grocery", queryText: "Publix", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Publix", apiKey) },
-    { category: "🛒 Grocery", queryText: "Lowe's Foods", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Lowe's Foods", apiKey) },
-    { category: "🛒 Grocery", queryText: "Aldi", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Aldi", apiKey) },
-    { category: "🛒 Grocery", queryText: "Wegmans", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Wegmans", apiKey) },
-    { category: "🛒 Grocery", queryText: "Whole Foods", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Whole Foods", apiKey) }
+    { category: "🛒 Grocery", queryText: "Publix", specialType: "grocery", url: buildTextSearchUrl(loc, radiusMeters, "Publix", apiKey) }
   ];
 }
 
@@ -619,22 +605,9 @@ function buildFoodSearchRequests(loc, radiusMeters, apiKey) {
   return [
     { category: "🍔 Food", type: "restaurant", keyword: "", specialType: "food", queryText: "", url: buildNearbyUrl(loc, radiusMeters, "restaurant", "", apiKey) },
     { category: "🍔 Food", type: "meal_takeaway", keyword: "", specialType: "food", queryText: "", url: buildNearbyUrl(loc, radiusMeters, "meal_takeaway", "", apiKey) },
-    { category: "🍔 Food", type: "meal_delivery", keyword: "", specialType: "food", queryText: "", url: buildNearbyUrl(loc, radiusMeters, "meal_delivery", "", apiKey) },
     { category: "🍔 Food", queryText: "fast food", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "fast food", apiKey) },
-    { category: "🍔 Food", queryText: "burger restaurant", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "burger restaurant", apiKey) },
-    { category: "🍔 Food", queryText: "chicken restaurant", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "chicken restaurant", apiKey) },
-    { category: "🍔 Food", queryText: "sandwich shop", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "sandwich shop", apiKey) },
-    { category: "🍔 Food", queryText: "burrito restaurant", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "burrito restaurant", apiKey) },
     { category: "🍔 Food", queryText: "pizza restaurant", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "pizza restaurant", apiKey) },
-    { category: "🍔 Food", queryText: "McDonald's", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "McDonald's", apiKey) },
-    { category: "🍔 Food", queryText: "Chick-fil-A", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Chick-fil-A", apiKey) },
-    { category: "🍔 Food", queryText: "Wendy's", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Wendy's", apiKey) },
-    { category: "🍔 Food", queryText: "Cook Out", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Cook Out", apiKey) },
-    { category: "🍔 Food", queryText: "Zaxby's", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Zaxby's", apiKey) },
-    { category: "🍔 Food", queryText: "Five Guys", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Five Guys", apiKey) },
-    { category: "🍔 Food", queryText: "Chipotle", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Chipotle", apiKey) },
-    { category: "🍔 Food", queryText: "Panera Bread", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Panera Bread", apiKey) },
-    { category: "🍔 Food", queryText: "Subway", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "Subway", apiKey) }
+    { category: "🍔 Food", queryText: "sandwich shop", specialType: "food", url: buildTextSearchUrl(loc, radiusMeters, "sandwich shop", apiKey) }
   ];
 }
 
