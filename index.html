@@ -3297,13 +3297,28 @@
           selectBtn.type = "button";
           selectBtn.className = "select-place-btn" + (isSelected ? " selected" : "");
          selectBtn.textContent = isSelected ? "Selected ✓" : "Select";
-          selectBtn.onclick = function(rowCopy) {
-            return function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              togglePlaceSelection(rowCopy);
-            };
-          }(r.slice());
+          selectBtn.onclick = function(rowCopy, buttonEl, cardEl) {
+  return function(e) {
+    var key;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    togglePlaceSelection(rowCopy);
+
+    key = makePlaceKey(rowCopy);
+
+    if (isPlaceSelectedByKey(key)) {
+      buttonEl.textContent = "Selected ✓";
+      buttonEl.classList.add("selected");
+      cardEl.classList.add("selected-card");
+    } else {
+      buttonEl.textContent = "Select";
+      buttonEl.classList.remove("selected");
+      cardEl.classList.remove("selected-card");
+    }
+  };
+}(r.slice(), selectBtn, card);
 
           topRow.appendChild(nameEl);
           topRow.appendChild(selectBtn);
