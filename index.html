@@ -1643,23 +1643,22 @@
         .filter(Boolean);
     }
 
-    function togglePlaceSelection(row) {
-      var key = makePlaceKey(row);
-      if (!key) return;
+   function togglePlaceSelection(row) {
+  var key = makePlaceKey(row);
+  if (!key) return;
 
-      if (selectedPlacesMap[key]) {
-        delete selectedPlacesMap[key];
-        selectedPlacesOrder = selectedPlacesOrder.filter(function(item) {
-          return item !== key;
-        });
-      } else {
-        selectedPlacesMap[key] = row.slice();
-        selectedPlacesOrder.push(key);
-      }
+  if (selectedPlacesMap[key]) {
+    delete selectedPlacesMap[key];
+    selectedPlacesOrder = selectedPlacesOrder.filter(function(item) {
+      return item !== key;
+    });
+  } else {
+    selectedPlacesMap[key] = row.slice();
+    selectedPlacesOrder.push(key);
+  }
 
-      updateShareSelectedButton();
-      render(lastResults);
-    }
+  updateShareSelectedButton();
+}
 
   function updateShareSelectedButton() {
   var btn = document.getElementById("shareSelectedBtn");
