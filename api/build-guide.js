@@ -9,6 +9,7 @@ export default async function handler(req, res) {
     const lat = toFiniteNumber(req.query && req.query.lat);
     const lng = toFiniteNumber(req.query && req.query.lng);
     const radiusMiles = normalizeRadius((req.query && req.query.radiusMiles) || 5);
+    const mode = normalizeMode(req.query && req.query.mode);
 
     let loc = null;
 
@@ -20,7 +21,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing query or lat/lng" });
     }
 
-    const rows = await collectAllRows(loc, radiusMiles, apiKey);
+    const rows = await collectAllRows(loc, radiusMiles, apiKey, mode);
     return res.status(200).json(rows);
   } catch (err) {
     return res.status(500).json({
@@ -51,6 +52,40 @@ function normalizeRadius(radiusMiles) {
   if (!Number.isFinite(n) || n <= 0) return 5;
   if (n > 50) return 50;
   return n;
+}
+
+function normalizeMode(mode) {
+  const value = String(mode || "").trim().toLowerCase();
+  return value === "full" ? "full" : "core";
+}
+
+function getActiveCategories(mode) {
+  const coreCategories = [
+    "🍔 Food",
+    "☕ Coffee",
+    "🍺 Breweries/Bars",
+    "⛽ Gas",
+    "🏥 Urgent Care / ER"
+  ];
+
+  if (mode === "full") {
+    return [
+      "🍔 Food",
+      "☕ Coffee",
+      "🍦 Ice Cream",
+      "🏧 ATM",
+      "🍺 Breweries/Bars",
+      "⛽ Gas",
+      "🛒 Grocery",
+      "🏨 Hotels",
+      "💊 Pharmacy",
+      "⚾ Sporting Goods",
+      "🏥 Urgent Care / ER",
+      "🦷 Emergency Dentist"
+    ];
+  }
+
+  return coreCategories;
 }
 
 async function fetchJson(url) {
@@ -528,12 +563,15 @@ function buildNearbyUrl(loc, radiusMeters, type, keyword, apiKey) {
   );
 }
 
-function buildStandardCategoryRequests(loc, radiusMeters, apiKey) {
+function buildStandardCategoryRequests(loc, radiusMeters, apiKey, activeCategories) {
   const cats = categories();
   const requests = [];
 
   for (let i = 0; i < cats.length; i++) {
     const c = cats[i];
+
+    if (!activeCategories.includes(c[0])) continue;
+
     if (
       isUrgentCareCategory(c[0]) ||
       isSportingGoodsCategory(c[0]) ||
@@ -849,15 +887,26 @@ function sortRows(rows) {
   return rows;
 }
 
-async function collectAllRows(loc, radiusMiles, apiKey) {
+async function collectAllRows(loc, radiusMiles, apiKey, mode) {
   const radiusMeters = Math.round(radiusMiles * 1609.34);
+  const activeCategories = getActiveCategories(mode);
 
-  const standardRequests = buildStandardCategoryRequests(loc, radiusMeters, apiKey);
-  const urgentRequests = buildUrgentCareTextSearchRequests(loc, radiusMeters, apiKey);
-  const dentistRequests = buildEmergencyDentistTextSearchRequests(loc, radiusMeters, apiKey);
-  const sportingRequests = buildSportingGoodsTextSearchRequests(loc, radiusMeters, apiKey);
-  const groceryRequests = buildGroceryTextSearchRequests(loc, radiusMeters, apiKey);
-  const foodRequests = buildFoodSearchRequests(loc, radiusMeters, apiKey);
+  const standardRequests = buildStandardCategoryRequests(loc, radiusMeters, apiKey, activeCategories);
+  const urgentRequests = activeCategories.includes("🏥 Urgent Care / ER")
+    ? buildUrgentCareTextSearchRequests(loc, radiusMeters, apiKey)
+    : [];
+  const dentistRequests = activeCategories.includes("🦷 Emergency Dentist")
+    ? buildEmergencyDentistTextSearchRequests(loc, radiusMeters, apiKey)
+    : [];
+  const sportingRequests = activeCategories.includes("⚾ Sporting Goods")
+    ? buildSportingGoodsTextSearchRequests(loc, radiusMeters, apiKey)
+    : [];
+  const groceryRequests = activeCategories.includes("🛒 Grocery")
+    ? buildGroceryTextSearchRequests(loc, radiusMeters, apiKey)
+    : [];
+  const foodRequests = activeCategories.includes("🍔 Food")
+    ? buildFoodSearchRequests(loc, radiusMeters, apiKey)
+    : [];
 
   const allRequests = standardRequests
     .concat(urgentRequests)
@@ -920,18 +969,30 @@ async function collectAllRows(loc, radiusMiles, apiKey) {
     }
   }
 
-  const urgentRows = buildSpecialCategoryRows("🏥 Urgent Care / ER", urgentPlaces, loc, radiusMiles, 15);
-  const dentistRows = buildSpecialCategoryRows("🦷 Emergency Dentist", dentistPlaces, loc, radiusMiles, 15);
-  const sportingRows = buildSpecialCategoryRows("⚾ Sporting Goods", sportingPlaces, loc, radiusMiles, 15);
-  const groceryRows = buildSpecialCategoryRows("🛒 Grocery", groceryPlaces, loc, radiusMiles, 15);
-  const foodRows = buildSpecialCategoryRows("🍔 Food", foodPlaces, loc, radiusMiles, 25);
+  if (activeCategories.includes("🏥 Urgent Care / ER")) {
+    const urgentRows = buildSpecialCategoryRows("🏥 Urgent Care / ER", urgentPlaces, loc, radiusMiles, 15);
+    allRows = allRows.concat(urgentRows);
+  }
 
-  allRows = allRows
-    .concat(urgentRows)
-    .concat(dentistRows)
-    .concat(sportingRows)
-    .concat(groceryRows)
-    .concat(foodRows);
+  if (activeCategories.includes("🦷 Emergency Dentist")) {
+    const dentistRows = buildSpecialCategoryRows("🦷 Emergency Dentist", dentistPlaces, loc, radiusMiles, 15);
+    allRows = allRows.concat(dentistRows);
+  }
+
+  if (activeCategories.includes("⚾ Sporting Goods")) {
+    const sportingRows = buildSpecialCategoryRows("⚾ Sporting Goods", sportingPlaces, loc, radiusMiles, 15);
+    allRows = allRows.concat(sportingRows);
+  }
+
+  if (activeCategories.includes("🛒 Grocery")) {
+    const groceryRows = buildSpecialCategoryRows("🛒 Grocery", groceryPlaces, loc, radiusMiles, 15);
+    allRows = allRows.concat(groceryRows);
+  }
+
+  if (activeCategories.includes("🍔 Food")) {
+    const foodRows = buildSpecialCategoryRows("🍔 Food", foodPlaces, loc, radiusMiles, 25);
+    allRows = allRows.concat(foodRows);
+  }
 
   return sortRows(allRows);
 }
