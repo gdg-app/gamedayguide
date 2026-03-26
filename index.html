@@ -245,6 +245,7 @@
     }
 
     .search-panel {
+  gap: 18px;
       width: 100%;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.93));
@@ -489,6 +490,8 @@
     }
 
     .radius-section {
+  margin-top: 14px;
+  margin-bottom: 14px;
       margin-top: 8px;
       margin-bottom: 18px;
     }
@@ -527,6 +530,11 @@
     }
 
     .action-btn {
+  height: 50px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
       width: 100%;
       border: 0;
       border-radius: 18px;
@@ -551,6 +559,7 @@
     }
 
     .action-btn:active {
+  transform: scale(0.97);
       transform: translateY(0);
       box-shadow: 0 8px 16px rgba(0,0,0,0.14);
     }
@@ -624,6 +633,8 @@
     }
 
     #status {
+  font-size: 14px;
+  opacity: 0.85;
       margin: 12px 0 6px;
       color: rgba(255,255,255,0.88);
       font-size: 13px;
@@ -1525,6 +1536,7 @@
       }
 
       body.home-mode .search-panel {
+  gap: 18px;
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
@@ -1549,6 +1561,8 @@
       }
 
       body.home-mode .radius-section {
+  margin-top: 14px;
+  margin-bottom: 14px;
         margin-bottom: 0;
       }
 
@@ -1558,6 +1572,11 @@
       }
 
       body.home-mode .action-btn {
+  height: 50px;
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
         min-height: 60px;
         font-size: 18px;
       }
