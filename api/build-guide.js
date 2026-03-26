@@ -11,6 +11,21 @@ export default async function handler(req, res) {
     const radiusMiles = normalizeRadius((req.query && req.query.radiusMiles) || 5);
     const mode = normalizeMode(req.query && req.query.mode);
 
+    const cacheContext = buildGuideCacheContext({
+      query,
+      lat,
+      lng,
+      radiusMiles,
+      mode
+    });
+
+    if (cacheContext.eligible) {
+      const cachedRows = await tryGetCachedGuideRows(cacheContext.key);
+      if (Array.isArray(cachedRows)) {
+        return res.status(200).json(cachedRows);
+      }
+    }
+
     let loc = null;
 
     if (isValidLatLng(lat, lng)) {
@@ -22,6 +37,11 @@ export default async function handler(req, res) {
     }
 
     const rows = await collectAllRows(loc, radiusMiles, apiKey, mode);
+
+    if (cacheContext.eligible) {
+      await trySetCachedGuideRows(cacheContext.key, rows, getGuideCacheTtlSeconds(mode));
+    }
+
     return res.status(200).json(rows);
   } catch (err) {
     return res.status(500).json({
@@ -995,4 +1015,150 @@ async function collectAllRows(loc, radiusMiles, apiKey, mode) {
   }
 
   return sortRows(allRows);
+}
+
+function buildGuideCacheContext(params) {
+  const query = String((params && params.query) || "").trim();
+  const lat = params ? params.lat : null;
+  const lng = params ? params.lng : null;
+  const radiusMiles = normalizeRadius(params && params.radiusMiles);
+  const mode = normalizeMode(params && params.mode);
+
+  const eligible =
+    isGuideCacheEnabled() &&
+    !!query &&
+    !isValidLatLng(lat, lng) &&
+    mode === "core";
+
+  if (!eligible) {
+    return { eligible: false, key: "" };
+  }
+
+  const normalizedQuery = normalizeCacheText(query);
+  if (!normalizedQuery) {
+    return { eligible: false, key: "" };
+  }
+
+  const key = [
+    "guide:v1",
+    normalizedQuery,
+    String(radiusMiles),
+    mode
+  ].join(":");
+
+  return { eligible: true, key };
+}
+
+function isGuideCacheEnabled() {
+  const value = String(process.env.ENABLE_GUIDE_CACHE || "").trim().toLowerCase();
+  return value === "true" || value === "1" || value === "yes" || value === "on";
+}
+
+function hasGuideCacheConfig() {
+  return !!getGuideCacheBaseUrl() && !!getGuideCacheToken();
+}
+
+function getGuideCacheBaseUrl() {
+  return String(process.env.UPSTASH_REDIS_REST_URL || "").trim().replace(/\/+$/, "");
+}
+
+function getGuideCacheToken() {
+  return String(process.env.UPSTASH_REDIS_REST_TOKEN || "").trim();
+}
+
+function normalizeCacheText(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\s/g, "-");
+}
+
+function getGuideCacheTtlSeconds(mode) {
+  if (normalizeMode(mode) === "full") {
+    return 6 * 60 * 60;
+  }
+  return 12 * 60 * 60;
+}
+
+async function tryGetCachedGuideRows(cacheKey) {
+  if (!cacheKey || !hasGuideCacheConfig()) return null;
+
+  try {
+    const result = await callUpstashRedis(["GET", cacheKey]);
+    const value = result && Object.prototype.hasOwnProperty.call(result, "result")
+      ? result.result
+      : null;
+
+    if (!value) return null;
+
+    let parsed = value;
+
+    if (typeof value === "string") {
+      parsed = JSON.parse(value);
+    }
+
+    return Array.isArray(parsed) ? parsed : null;
+  } catch (_err) {
+    return null;
+  }
+}
+
+async function trySetCachedGuideRows(cacheKey, rows, ttlSeconds) {
+  if (!cacheKey || !Array.isArray(rows) || !hasGuideCacheConfig()) return false;
+
+  try {
+    const payload = JSON.stringify(rows);
+    await callUpstashRedis(["SET", cacheKey, payload, "EX", String(ttlSeconds)]);
+    return true;
+  } catch (_err) {
+    return false;
+  }
+}
+
+async function callUpstashRedis(commandParts) {
+  const baseUrl = getGuideCacheBaseUrl();
+  const token = getGuideCacheToken();
+
+  if (!baseUrl || !token) {
+    throw new Error("Missing Upstash Redis configuration");
+  }
+
+  const safeParts = [];
+  for (let i = 0; i < commandParts.length; i++) {
+    safeParts.push(encodeURIComponent(String(commandParts[i])));
+  }
+
+  const url = baseUrl + "/" + safeParts.join("/");
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token
+    }
+  });
+
+  const text = await response.text();
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (_err) {
+    throw new Error("Invalid Upstash response");
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      "Upstash request failed: " +
+        response.status +
+        (data && data.error ? " - " + data.error : "")
+    );
+  }
+
+  if (data && data.error) {
+    throw new Error(String(data.error));
+  }
+
+  return data;
 }
