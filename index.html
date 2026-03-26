@@ -23,7 +23,7 @@
   <meta name="apple-mobile-web-app-title" content="GameDayGuide">
   <meta name="application-name" content="GameDayGuide">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#081722">
+  <meta name="theme-color" content="#10261d">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <style>
@@ -33,16 +33,16 @@
       --bg-light: #132742;
       --bg-accent: #1b3657;
       --panel: rgba(255,255,255,0.94);
-      --panel-strong: #ffffff;
+      --panel-strong: #fbfaf7;
       --panel-soft: rgba(255,255,255,0.84);
       --text: #112033;
       --muted: #687587;
       --muted-strong: #435164;
-      --blue: #153a63;
-      --blue-dark: #0d2744;
+      --blue: #173a67;
+      --blue-dark: #102b4d;
       --green: #2d7a52;
       --green-dark: #21593c;
-      --purple: #1c456f;
+      --purple: #69408d;
       --shadow: 0 18px 44px rgba(5,12,24,0.2);
       --shadow-soft: 0 10px 28px rgba(7,16,31,0.1);
       --shadow-card: 0 14px 34px rgba(8,18,35,0.12);
@@ -60,7 +60,10 @@
       min-height: 100%;
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
-      background: #081722;
+      background:
+        radial-gradient(circle at 14% 10%, rgba(255,255,255,0.08), transparent 22%),
+        radial-gradient(circle at 88% 16%, rgba(71,118,174,0.16), transparent 24%),
+        linear-gradient(180deg, #17304f 0%, var(--bg-mid) 44%, var(--bg-dark) 100%);
       background-attachment: fixed;
     }
 
@@ -82,7 +85,10 @@
       line-height: 1.45;
       overflow-x: hidden;
       position: relative;
-      background: #081722;
+      background:
+        radial-gradient(circle at top center, rgba(255,255,255,0.06), transparent 22%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0) 20%),
+        linear-gradient(180deg, #183253 0%, var(--bg-mid) 42%, var(--bg-dark) 100%);
       background-attachment: fixed;
     }
 
@@ -91,8 +97,10 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background: transparent;
-      opacity: 0;
+      background:
+        radial-gradient(circle at 50% -12%, rgba(255,255,255,0.05), transparent 24%),
+        radial-gradient(circle at 18% 10%, rgba(255,255,255,0.035), transparent 18%);
+      opacity: 0.9;
     }
 
     body::after {
@@ -100,8 +108,8 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background: transparent;
-      opacity: 0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.01) 28%, rgba(0,0,0,0.12) 100%);
+      opacity: 1;
     }
 
     button,
@@ -293,7 +301,7 @@
       line-height: 1.05;
       letter-spacing: -0.045em;
       font-weight: 800;
-      color: #15263a;
+      color: #1f2823;
       margin: 0 0 8px;
       max-width: 14ch;
     }
@@ -353,7 +361,7 @@
       display: none;
       margin-top: 12px;
       margin-bottom: 14px;
-      background: #fff;
+      background: #fbfaf7;
       border: 1px solid #d8dde4;
       border-radius: 18px;
       box-shadow: var(--shadow-soft);
@@ -365,7 +373,7 @@
       font-size: 12px;
       font-weight: 800;
       color: #66717d;
-      background: #f8fafc;
+      background: #f6f4ef;
       border-bottom: 1px solid #eef2f6;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -375,7 +383,7 @@
       width: 100%;
       border: 0;
       border-bottom: 1px solid #eef2f6;
-      background: #fff;
+      background: #fbfaf7;
       text-align: left;
       padding: 14px;
       cursor: pointer;
@@ -495,7 +503,7 @@
     }
 
     .chip-btn.expand-chip {
-      background: #fff;
+      background: #fbfaf7;
       color: #555;
       border: 1px solid #d8dde4;
     }
@@ -513,7 +521,7 @@
     }
 
     .radius-btn {
-      background: #eef3f8;
+      background: #e9ede8;
       color: var(--blue);
       border: 0;
       border-radius: 999px;
@@ -571,11 +579,11 @@
     }
 
     .location-btn {
-      background: linear-gradient(180deg, #3f8f66 0%, var(--green) 100%);
+      background: linear-gradient(180deg, #42976b 0%, var(--green) 100%);
     }
 
     .share-btn {
-      background: linear-gradient(180deg, #24517f 0%, var(--purple) 100%);
+      background: linear-gradient(180deg, #8052a4 0%, var(--purple) 100%);
     }
 
     .match-btn {
@@ -628,9 +636,9 @@
     }
 
     .location-action-btn.share-action {
-      background: linear-gradient(180deg, #24517f 0%, var(--purple) 100%);
+      background: linear-gradient(180deg, #9340b7 0%, var(--purple) 100%);
       color: white;
-      box-shadow: 0 8px 16px rgba(28,69,111,0.18);
+      box-shadow: 0 8px 16px rgba(123,31,162,0.2);
     }
 
     #status {
@@ -699,7 +707,7 @@
     .loading-title {
       font-size: 21px;
       font-weight: 800;
-      color: #1c2a35;
+      color: #1f2823;
       letter-spacing: -0.03em;
       margin-bottom: 6px;
     }
@@ -766,7 +774,7 @@
     .load-more-title {
       font-size: 18px;
       font-weight: 800;
-      color: #1c2a35;
+      color: #1f2823;
       margin-bottom: 6px;
       letter-spacing: -0.02em;
     }
@@ -786,7 +794,7 @@
       border-radius: 16px;
       margin: 10px 0 0;
       min-height: 52px;
-      background: #f8fbff;
+      background: #f7f5f1;
       color: var(--text);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.75),
@@ -926,7 +934,7 @@
 
     body.selected-share-mode .share-action {
       opacity: 0.86;
-      box-shadow: 0 5px 12px rgba(28,69,111,0.10);
+      box-shadow: 0 5px 12px rgba(123,31,162,0.12);
     }
 
     @media (max-width: 640px) {
@@ -1187,10 +1195,10 @@
     }
 
     .card.selected-card {
-      border: 2px solid rgba(21,58,99,0.28);
-      box-shadow: 0 14px 28px rgba(21,58,99,0.12);
+      border: 2px solid rgba(123,31,162,0.45);
+      box-shadow: 0 14px 28px rgba(123,31,162,0.16);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.99), rgba(240,246,252,0.96));
+        linear-gradient(180deg, rgba(255,255,255,0.99), rgba(248,243,252,0.96));
     }
 
     .urgent-card {
@@ -1238,19 +1246,19 @@
       padding: 10px 12px;
       min-height: 40px;
       white-space: nowrap;
-      background: #eaf1f7;
-      color: var(--blue);
+      background: #f3ebf8;
+      color: var(--purple);
       font-size: 13px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 6px 14px rgba(21,58,99,0.08);
+      box-shadow: 0 6px 14px rgba(105,64,141,0.08);
       flex: 0 0 auto;
     }
 
     .select-place-btn.selected {
-      background: linear-gradient(180deg, #24517f 0%, var(--purple) 100%);
+      background: linear-gradient(180deg, #9340b7 0%, var(--purple) 100%);
       color: white;
-      box-shadow: 0 8px 16px rgba(28,69,111,0.18);
+      box-shadow: 0 8px 16px rgba(123,31,162,0.2);
     }
 
     .card-actions {
@@ -1406,7 +1414,7 @@
       font-size: 20px;
       font-weight: 800;
       line-height: 1.2;
-      color: #1c2a35;
+      color: #1f2823;
       letter-spacing: -0.02em;
     }
 
@@ -1425,7 +1433,7 @@
     }
 
     .install-step-card {
-      background: #f7fafc;
+      background: #f6f4ef;
       border: 1px solid #e4ebf1;
       border-radius: 18px;
       padding: 14px;
