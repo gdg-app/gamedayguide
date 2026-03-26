@@ -28,30 +28,30 @@
 
   <style>
     :root {
-      --bg-dark: #0b1713;
-      --bg-mid: #10261d;
-      --bg-light: #173529;
-      --bg-accent: #214536;
-      --panel: rgba(255,255,255,0.95);
+      --bg-dark: #07111f;
+      --bg-mid: #0d1b2d;
+      --bg-light: #132742;
+      --bg-accent: #1b3657;
+      --panel: rgba(255,255,255,0.94);
       --panel-strong: #ffffff;
       --panel-soft: rgba(255,255,255,0.84);
-      --text: #16212a;
-      --muted: #66717d;
-      --muted-strong: #4d5a66;
-      --blue: #1976d2;
-      --blue-dark: #1565c0;
-      --green: #2e7d32;
-      --green-dark: #256628;
-      --purple: #7b1fa2;
-      --shadow: 0 16px 40px rgba(0,0,0,0.24);
-      --shadow-soft: 0 8px 24px rgba(0,0,0,0.14);
-      --shadow-card: 0 10px 26px rgba(0,0,0,0.12);
-      --shadow-app: 0 26px 60px rgba(0,0,0,0.2);
+      --text: #112033;
+      --muted: #687587;
+      --muted-strong: #435164;
+      --blue: #173a67;
+      --blue-dark: #102b4d;
+      --green: #2d7a52;
+      --green-dark: #21593c;
+      --purple: #69408d;
+      --shadow: 0 18px 44px rgba(5,12,24,0.2);
+      --shadow-soft: 0 10px 28px rgba(7,16,31,0.1);
+      --shadow-card: 0 14px 34px rgba(8,18,35,0.12);
+      --shadow-app: 0 28px 70px rgba(0,0,0,0.22);
       --radius-xxl: 30px;
       --radius-xl: 24px;
       --radius-lg: 18px;
       --radius-md: 14px;
-      --border-soft: 1px solid rgba(255,255,255,0.48);
+      --border-soft: 1px solid rgba(255,255,255,0.52);
     }
 
     html {
@@ -61,11 +61,9 @@
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
       background:
-        radial-gradient(circle at 15% 12%, rgba(255,255,255,0.12), transparent 18%),
-        radial-gradient(circle at 86% 18%, rgba(76,175,80,0.08), transparent 22%),
-        linear-gradient(135deg, rgba(255,255,255,0.045) 0 2px, transparent 2px),
-        linear-gradient(180deg, var(--bg-light) 0%, var(--bg-mid) 48%, var(--bg-dark) 100%);
-      background-size: auto, auto, 24px 24px, 100% 100%;
+        radial-gradient(circle at 14% 10%, rgba(255,255,255,0.08), transparent 22%),
+        radial-gradient(circle at 88% 16%, rgba(71,118,174,0.16), transparent 24%),
+        linear-gradient(180deg, #17304f 0%, var(--bg-mid) 44%, var(--bg-dark) 100%);
       background-attachment: fixed;
     }
 
@@ -88,9 +86,9 @@
       overflow-x: hidden;
       position: relative;
       background:
-        radial-gradient(circle at top center, rgba(255,255,255,0.08), transparent 24%),
-        linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0) 16%),
-        linear-gradient(180deg, var(--bg-light) 0%, var(--bg-mid) 48%, var(--bg-dark) 100%);
+        radial-gradient(circle at top center, rgba(255,255,255,0.06), transparent 22%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0) 20%),
+        linear-gradient(180deg, #183253 0%, var(--bg-mid) 42%, var(--bg-dark) 100%);
       background-attachment: fixed;
     }
 
@@ -100,11 +98,9 @@
       inset: 0;
       pointer-events: none;
       background:
-        radial-gradient(circle at 50% -10%, rgba(255,255,255,0.1), transparent 30%),
-        linear-gradient(90deg, transparent 0, transparent 7%, rgba(255,255,255,0.045) 7.2%, transparent 7.4%, transparent 100%),
-        linear-gradient(140deg, transparent 0 68%, rgba(255,255,255,0.08) 68.2%, rgba(255,255,255,0.08) 68.8%, transparent 69.2%),
-        linear-gradient(160deg, transparent 0 74%, rgba(255,255,255,0.04) 74.2%, rgba(255,255,255,0.04) 74.7%, transparent 75.1%);
-      opacity: 0.9;
+        radial-gradient(circle at 50% -10%, rgba(255,255,255,0.08), transparent 30%),
+        linear-gradient(160deg, transparent 0 72%, rgba(255,255,255,0.05) 72.2%, rgba(255,255,255,0.05) 72.8%, transparent 73.2%);
+      opacity: 0.72;
     }
 
     body::after {
@@ -127,37 +123,37 @@
     .app {
       width: min(100%, 980px);
       margin: 0 auto;
-      padding: calc(env(safe-area-inset-top, 0px) + 14px) 12px calc(env(safe-area-inset-bottom, 0px) + 28px);
+      padding: calc(env(safe-area-inset-top, 0px) + 22px) 14px calc(env(safe-area-inset-bottom, 0px) + 36px);
       position: relative;
       z-index: 1;
     }
 
     .app-card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
-      border: 1px solid rgba(255,255,255,0.1);
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      border: 1px solid rgba(255,255,255,0.12);
       border-radius: 34px;
-      padding: 14px 12px 18px;
+      padding: 18px 16px 22px;
       box-shadow: var(--shadow-app);
-      backdrop-filter: blur(14px);
+      backdrop-filter: blur(18px);
     }
 
     .header {
-      margin-bottom: 18px;
+      margin-bottom: 14px;
       color: white;
-      padding: 8px 6px 4px;
+      padding: 8px 8px 2px;
     }
 
     .brand-row {
       display: flex;
       align-items: center;
       gap: 14px;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       flex-wrap: wrap;
     }
 
     .brand-icon {
-      width: 52px;
-      height: 52px;
+      width: 50px;
+      height: 50px;
       border-radius: 18px;
       display: flex;
       align-items: center;
@@ -165,9 +161,9 @@
       font-size: 27px;
       line-height: 1;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.11));
-      border: 1px solid rgba(255,255,255,0.18);
-      box-shadow: 0 10px 22px rgba(0,0,0,0.22);
+        linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.1));
+      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 12px 26px rgba(0,0,0,0.2);
       backdrop-filter: blur(12px);
     }
 
@@ -185,20 +181,20 @@
     }
 
     .title {
-      font-size: 31px;
+      font-size: 32px;
       font-weight: 800;
       margin: 0;
-      line-height: 1.03;
-      letter-spacing: -0.04em;
+      line-height: 1.02;
+      letter-spacing: -0.045em;
       text-shadow: 0 2px 12px rgba(0,0,0,0.24);
     }
 
     .subtitle {
-      color: rgba(255,255,255,0.9);
+      color: rgba(255,255,255,0.88);
       font-size: 15px;
-      line-height: 1.45;
-      margin-top: 1px;
-      text-shadow: 0 1px 8px rgba(0,0,0,0.2);
+      line-height: 1.4;
+      margin-top: 0;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.18);
       max-width: 38ch;
       font-weight: 500;
     }
@@ -258,13 +254,13 @@
     .search-panel {
       width: 100%;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
-      padding: 20px 14px 20px;
+        linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.93));
+      padding: 22px 18px 20px;
       border-radius: var(--radius-xxl);
       box-shadow: var(--shadow);
-      margin-bottom: 22px;
+      margin-bottom: 20px;
       border: var(--border-soft);
-      backdrop-filter: blur(14px);
+      backdrop-filter: blur(16px);
       position: relative;
       overflow: hidden;
     }
@@ -273,8 +269,8 @@
       content: "";
       position: absolute;
       inset: 0 0 auto 0;
-      height: 78px;
-      background: linear-gradient(180deg, rgba(25,118,210,0.06), rgba(25,118,210,0));
+      height: 110px;
+      background: linear-gradient(180deg, rgba(23,58,103,0.07), rgba(23,58,103,0));
       pointer-events: none;
     }
 
@@ -282,31 +278,67 @@
       position: relative;
       z-index: 1;
     }
+    .search-intro {
+      margin-bottom: 16px;
+    }
+
+    .search-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 28px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(23,58,103,0.08);
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 10px;
+    }
+
+    .search-title {
+      font-size: 30px;
+      line-height: 1.05;
+      letter-spacing: -0.045em;
+      font-weight: 800;
+      color: #15263a;
+      margin: 0 0 8px;
+      max-width: 14ch;
+    }
+
+    .search-subtitle {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #526274;
+      margin: 0;
+      max-width: 34ch;
+    }
 
     label {
       display: block;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
       margin-bottom: 8px;
-      margin-top: 10px;
-      color: #30404f;
-      letter-spacing: 0.04em;
+      margin-top: 12px;
+      color: #485a6c;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
     input {
       width: 100%;
       padding: 18px 16px;
-      font-size: 18px;
-      border: 1px solid #d7e0e7;
-      border-radius: 16px;
-      margin-bottom: 10px;
+      font-size: 17px;
+      border: 1px solid #d6e0ea;
+      border-radius: 18px;
+      margin-bottom: 8px;
       min-height: 58px;
-      background: #fff;
+      background: rgba(255,255,255,0.96);
       color: var(--text);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.75),
-        0 2px 8px rgba(8,25,18,0.04);
+        0 6px 18px rgba(8,25,18,0.04);
     }
 
     input::placeholder {
@@ -320,9 +352,9 @@
     }
 
     .helper-text {
-      font-size: 14px;
+      font-size: 13px;
       color: var(--muted);
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       line-height: 1.5;
     }
 
@@ -419,7 +451,8 @@
     }
 
     .quick-row-wrap {
-      margin-bottom: 16px;
+      margin-bottom: 18px;
+      padding-top: 2px;
     }
 
     .quick-row-label {
@@ -449,7 +482,7 @@
 
     .chip-btn {
       border: 0;
-      background: #eaf3ff;
+      background: #edf3fa;
       color: var(--blue);
       border-radius: 999px;
       padding: 11px 15px;
@@ -458,7 +491,7 @@
       cursor: pointer;
       white-space: nowrap;
       flex: 0 0 auto;
-      box-shadow: 0 4px 12px rgba(25,118,210,0.08);
+      box-shadow: 0 6px 16px rgba(16,43,77,0.06);
     }
 
     .chip-btn:hover {
@@ -477,7 +510,7 @@
     }
 
     .radius-section {
-      margin-top: 12px;
+      margin-top: 8px;
       margin-bottom: 18px;
     }
 
@@ -489,26 +522,26 @@
     }
 
     .radius-btn {
-      background: #edf3f8;
+      background: #eef3f8;
       color: var(--blue);
       border: 0;
       border-radius: 999px;
-      padding: 11px 15px;
+      padding: 11px 16px;
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+      box-shadow: 0 4px 12px rgba(8,18,35,0.05);
     }
 
     .radius-btn.active {
       background: var(--blue);
       color: white;
-      box-shadow: 0 8px 16px rgba(25,118,210,0.22);
+      box-shadow: 0 10px 22px rgba(16,43,77,0.22);
     }
 
     .button-row {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 1.3fr 1fr;
       gap: 12px;
       margin-top: 10px;
     }
@@ -517,9 +550,9 @@
       width: 100%;
       border: 0;
       border-radius: 18px;
-      padding: 17px 16px;
-      min-height: 58px;
-      font-size: 18px;
+      padding: 16px 16px;
+      min-height: 56px;
+      font-size: 17px;
       font-weight: 700;
       color: white;
       cursor: pointer;
@@ -528,7 +561,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 12px 24px rgba(0,0,0,0.16);
+      box-shadow: 0 14px 24px rgba(8,18,35,0.14);
       transition: transform 0.16s ease, box-shadow 0.16s ease, opacity 0.16s ease;
     }
 
@@ -543,32 +576,32 @@
     }
 
     .build-btn {
-      background: linear-gradient(180deg, #2b93ef 0%, var(--blue) 100%);
+      background: linear-gradient(180deg, #224a7a 0%, var(--blue) 100%);
     }
 
     .location-btn {
-      background: linear-gradient(180deg, #46ad4d 0%, var(--green) 100%);
+      background: linear-gradient(180deg, #3f8f66 0%, var(--green) 100%);
     }
 
     .share-btn {
-      background: linear-gradient(180deg, #9340b7 0%, var(--purple) 100%);
+      background: linear-gradient(180deg, #8052a4 0%, var(--purple) 100%);
     }
 
     .match-btn {
       width: 100%;
       margin-top: 4px;
-      background: linear-gradient(180deg, #2b82dc 0%, var(--blue-dark) 100%);
+      background: linear-gradient(180deg, #274c77 0%, var(--blue-dark) 100%);
     }
 
     .secondary-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: #eef4f8;
+      background: #edf2f7;
       color: var(--blue);
       text-decoration: none;
       border: 0;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 12px 14px;
       font-size: 14px;
       font-weight: 700;
@@ -582,11 +615,11 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: #eef4f8;
+      background: #eef2f7;
       color: var(--blue);
       text-decoration: none;
       border: 0;
-      border-radius: 14px;
+      border-radius: 16px;
       padding: 12px 14px;
       font-size: 14px;
       font-weight: 700;
@@ -610,11 +643,11 @@
     }
 
     #status {
-      margin: 14px 0 8px;
-      color: rgba(255,255,255,0.96);
-      font-size: 14px;
-      min-height: 20px;
-      text-shadow: 0 1px 5px rgba(0,0,0,0.22);
+      margin: 12px 0 6px;
+      color: rgba(255,255,255,0.88);
+      font-size: 13px;
+      min-height: 18px;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.18);
       padding: 0 4px;
       font-weight: 600;
     }
@@ -707,6 +740,15 @@
     #shareTools,
     #shareLinkBox {
       margin: 14px 0 18px;
+    }
+
+    #shareTools {
+      padding: 14px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.9));
+      border: var(--border-soft);
+      box-shadow: var(--shadow-card);
+      backdrop-filter: blur(12px);
     }
 
     .share-tools-row {
@@ -914,21 +956,49 @@
       }
     }
 
+    .results-context {
+      display: none;
+      margin: 6px 0 14px;
+      padding: 16px 18px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.08));
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 14px 28px rgba(6,14,28,0.12);
+      backdrop-filter: blur(16px);
+      color: white;
+    }
+
+    .results-context-title {
+      font-size: 23px;
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      font-weight: 800;
+      margin: 0 0 5px;
+      color: white;
+    }
+
+    .results-context-subtitle {
+      font-size: 14px;
+      line-height: 1.45;
+      color: rgba(255,255,255,0.84);
+      margin: 0;
+    }
+
     .section-heading {
-      margin-top: 30px;
+      margin-top: 22px;
       margin-bottom: 12px;
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 800;
       color: white;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.18);
       padding: 0 4px;
-      letter-spacing: -0.02em;
+      letter-spacing: -0.03em;
     }
 
     .top-stops-wrap,
     .jump-bar-wrap {
-      margin-top: 18px;
-      margin-bottom: 18px;
+      margin-top: 12px;
+      margin-bottom: 16px;
     }
 
     .top-stops-row,
@@ -954,10 +1024,10 @@
 
     .top-stop-card {
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.92));
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.94));
       border-radius: 22px;
-      box-shadow: var(--shadow);
-      padding: 16px;
+      box-shadow: var(--shadow-card);
+      padding: 18px;
       min-width: 92%;
       flex: 0 0 auto;
       border: var(--border-soft);
@@ -996,7 +1066,7 @@
 
     .jump-chip {
       border: 0;
-      background: rgba(255,255,255,0.95);
+      background: rgba(255,255,255,0.94);
       color: var(--blue);
       border-radius: 999px;
       padding: 11px 14px;
@@ -1009,18 +1079,18 @@
     }
 
     .category-section {
-      margin-top: 20px;
+      margin-top: 18px;
       scroll-margin-top: 16px;
     }
 
     .accordion-header {
       width: 100%;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.92));
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.94));
       border: 0;
-      border-radius: 20px;
+      border-radius: 22px;
       box-shadow: var(--shadow-card);
-      padding: 16px;
+      padding: 18px 18px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -1028,7 +1098,7 @@
       font-weight: 700;
       cursor: pointer;
       text-align: left;
-      color: #222;
+      color: #1a2a3d;
       transition: transform 0.18s ease, box-shadow 0.18s ease;
       border: var(--border-soft);
       backdrop-filter: blur(12px);
@@ -1050,7 +1120,7 @@
     .accordion-left {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
 
     .accordion-count {
@@ -1081,18 +1151,39 @@
 
     .results-grid {
       display: grid;
-      gap: 14px;
+      gap: 16px;
     }
 
     .card {
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.92));
-      padding: 16px;
-      border-radius: 20px;
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.94));
+      padding: 18px;
+      border-radius: 22px;
       box-shadow: var(--shadow-card);
       transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
       border: var(--border-soft);
       backdrop-filter: blur(12px);
+    }
+
+    .search-panel,
+    .results-context,
+    .jump-bar-wrap,
+    .category-section,
+    .card,
+    .shared-banner,
+    .load-more-card {
+      animation: gdgFadeUp 0.32s ease;
+    }
+
+    @keyframes gdgFadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     .card:hover {
@@ -1124,11 +1215,11 @@
     }
 
     .card-name {
-      font-size: 21px;
+      font-size: 20px;
       font-weight: 700;
       margin-bottom: 8px;
-      line-height: 1.3;
-      letter-spacing: -0.01em;
+      line-height: 1.28;
+      letter-spacing: -0.02em;
     }
 
     .card-top-row .card-name {
@@ -1137,16 +1228,16 @@
     }
 
     .card-meta {
-      color: #444;
+      color: #465463;
       font-size: 14px;
       margin-bottom: 10px;
     }
 
     .card-address {
-      color: #666;
+      color: #607080;
       font-size: 14px;
-      margin-bottom: 12px;
-      line-height: 1.45;
+      margin-bottom: 14px;
+      line-height: 1.5;
       word-break: break-word;
     }
 
@@ -1156,12 +1247,12 @@
       padding: 10px 12px;
       min-height: 40px;
       white-space: nowrap;
-      background: #f2e8f8;
+      background: #f3ebf8;
       color: var(--purple);
       font-size: 13px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 4px 10px rgba(123,31,162,0.08);
+      box-shadow: 0 6px 14px rgba(105,64,141,0.08);
       flex: 0 0 auto;
     }
 
@@ -1184,15 +1275,15 @@
       width: 100%;
       text-decoration: none;
       padding: 12px 14px;
-      border-radius: 14px;
+      border-radius: 16px;
       font-size: 15px;
       font-weight: 700;
       border: 0;
       cursor: pointer;
-      background: linear-gradient(180deg, #2b93ef 0%, var(--blue) 100%);
+      background: linear-gradient(180deg, #224a7a 0%, var(--blue) 100%);
       color: white;
       min-height: 48px;
-      box-shadow: 0 8px 16px rgba(25,118,210,0.2);
+      box-shadow: 0 10px 18px rgba(16,43,77,0.18);
     }
 
     .toggle-row {
@@ -1456,13 +1547,14 @@
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
-        min-height: calc(100dvh - 154px);
-        padding: 22px 14px 24px;
+        min-height: calc(100dvh - 160px);
+        padding: 24px 20px 24px;
       }
 
       body.home-mode #shareTools,
       body.home-mode #shareLinkBox,
       body.home-mode #loadMoreWrap,
+      body.home-mode #resultsContext,
       body.home-mode #topStops,
       body.home-mode #categoryJumpBar,
       body.home-mode #results,
@@ -1513,7 +1605,7 @@
       }
 
       .button-row {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1.3fr 1fr;
       }
 
       .shared-banner-actions {
@@ -1575,17 +1667,22 @@
         <div class="shared-banner-title">Shared guide</div>
         <div class="muted" id="sharedBannerText"></div>
         <div class="shared-banner-actions">
-          <a id="openFullAppBtn" class="action-btn build-btn" href="/">Create Your Own Guide</a>
+          <a id="openFullAppBtn" class="action-btn build-btn" href="/">Build Your Own Guide</a>
           <a class="secondary-btn" href="/">Open Full App</a>
         </div>
       </div>
 
       <div class="search-panel" id="searchPanel">
+        <div class="search-intro">
+          <div class="search-kicker">Game Day, Made Easier.</div>
+          <h2 class="search-title">Find what you need near the game</h2>
+          <p class="search-subtitle">Search by field, facility, or current location for food, coffee, gas, pharmacies, and more.</p>
+        </div>
         <label>Field Address or Field/Facility Name</label>
         <input id="address" placeholder="Enter field address or facility name" value="" />
         <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
         <div id="fieldMatchResults" class="match-results"></div>
-        <div class="helper-text">Paste a field name, field number, court number, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
+        <div class="helper-text">Try a field name, field number, court, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
 
         <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
@@ -1622,8 +1719,8 @@
 
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
-          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share This Guide With Your Team</button>
-          <button type="button" class="action-btn share-btn" id="shareSelectedBtn" onclick="shareSelectedPlaces()" style="display:none;">Share Selected Places</button>
+          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share Guide</button>
+          <button type="button" class="action-btn share-btn" id="shareSelectedBtn" onclick="shareSelectedPlaces()" style="display:none;">Share Picks</button>
           <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
         </div>
       </div>
@@ -1633,12 +1730,13 @@
 
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
         <div class="load-more-card">
-          <div class="load-more-title">Need more categories?</div>
-          <div class="load-more-text">Load pharmacy, grocery, hotels, ATM, sporting goods, emergency dentist, and more.</div>
+          <div class="load-more-title">Need more nearby?</div>
+          <div class="load-more-text">Add pharmacy, grocery, hotels, ATM, sporting goods, emergency dentist, and more.</div>
           <button type="button" class="action-btn build-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More Categories</button>
         </div>
       </div>
 
+      <div id="resultsContext" class="results-context" style="display:none;"></div>
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
       <div id="results"></div>
@@ -1649,7 +1747,7 @@
     <div class="sticky-share-inner">
       <div class="sticky-share-copy">
         <div id="stickyShareCount" class="sticky-share-count">1 place selected</div>
-        <div class="sticky-share-text">Share your picks with the team without scrolling back up.</div>
+        <div class="sticky-share-text">Share your picks without scrolling back up.</div>
       </div>
       <button type="button" class="action-btn share-btn sticky-share-btn" onclick="shareSelectedPlaces()">Share with Team</button>
     </div>
@@ -1746,6 +1844,63 @@
       "Building your guide for this field...",
       "Almost ready for game day..."
     ];
+
+    function getResultsContextText() {
+      var title = "Near Your Game";
+      var source = "";
+      var radiusText = selectedRadius ? selectedRadius + " mile radius" : "";
+
+      if (currentSharedGuide && currentSharedGuide.shareType === "selected_places") {
+        return {
+          title: "Shared Picks",
+          subtitle: "A few places someone picked out for game day."
+        };
+      }
+
+      if (currentSharedGuide) {
+        source = String((currentSharedGuide && currentSharedGuide.queryOrGps) || "").trim();
+      } else if (lastSourceType === "gps") {
+        source = "Current location";
+      } else {
+        source = String(lastQueryOrGps || "").trim();
+      }
+
+      if (!source && !radiusText) {
+        return {
+          title: title,
+          subtitle: "Nearby places for game day."
+        };
+      }
+
+      return {
+        title: title,
+        subtitle: [source, radiusText].filter(Boolean).join(" • ")
+      };
+    }
+
+    function updateResultsContext() {
+      var el = document.getElementById("resultsContext");
+      if (!el) return;
+
+      if (!lastResults || !lastResults.length) {
+        el.style.display = "none";
+        el.innerHTML = "";
+        return;
+      }
+
+      var copy = getResultsContextText();
+      el.innerHTML =
+        "<div class='results-context-title'>" + esc(copy.title) + "</div>" +
+        "<div class='results-context-subtitle'>" + esc(copy.subtitle) + "</div>";
+      el.style.display = "block";
+    }
+
+    function clearResultsContext() {
+      var el = document.getElementById("resultsContext");
+      if (!el) return;
+      el.style.display = "none";
+      el.innerHTML = "";
+    }
 
     function esc(s) {
       return String(s || "")
@@ -1880,7 +2035,7 @@
       if (btn) {
         if (!count || currentSharedGuide) {
           btn.style.display = "none";
-          btn.textContent = "Share Selected Places";
+          btn.textContent = "Share Picks";
         } else {
           btn.style.display = "inline-flex";
           btn.textContent = count === 1 ? "Share 1 Selected Place" : ("Share " + count + " Selected Places");
@@ -1897,7 +2052,7 @@
             "<div class='selection-nudge-card'>" +
               "<div class='selection-nudge-copy'>" +
                 "<div class='selection-nudge-title'>✔ " + esc(countLabel) + "</div>" +
-                "<div class='selection-nudge-text'>Share these picks with your team any time. You can also use the sticky share bar at the bottom.</div>" +
+                "<div class='selection-nudge-text'>Share these picks with your team any time.</div>" +
               "</div>" +
               "<button type='button' class='secondary-btn' onclick='shareSelectedPlaces()'>Share with Team</button>" +
             "</div>";
@@ -3012,6 +3167,7 @@
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
+      clearResultsContext();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
@@ -3048,6 +3204,7 @@
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
+      clearResultsContext();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
@@ -3089,6 +3246,7 @@
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
+      clearResultsContext();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
@@ -3530,7 +3688,7 @@
 
       var wrap = document.createElement("div");
       wrap.className = "top-stops-wrap";
-      wrap.appendChild(createSectionHeading("Closest Stops"));
+      wrap.appendChild(createSectionHeading("Near Your Game"));
 
       var row = document.createElement("div");
       row.className = "top-stops-row";
@@ -3574,7 +3732,7 @@
 
       var wrap = document.createElement("div");
       wrap.className = "jump-bar-wrap";
-      wrap.appendChild(createSectionHeading("Jump to Category"));
+      wrap.appendChild(createSectionHeading("Browse by Category"));
 
       var row = document.createElement("div");
       row.className = "jump-bar-row";
@@ -3819,6 +3977,7 @@
 
       if (!lastResults.length) {
         hideLoadMoreControls();
+        clearResultsContext();
         container.innerHTML =
           "<div class='card'>" +
             "<div class='card-name'>No results found</div>" +
@@ -3834,7 +3993,8 @@
         grouped[cat].push(row);
       });
 
-      renderTopStops(grouped);
+      document.getElementById("topStops").innerHTML = "";
+      updateResultsContext();
       renderCategoryJumpBar(grouped);
 
       var allCategories = Object.keys(grouped);
@@ -3853,7 +4013,7 @@
           return ka < kb ? -1 : ka > kb ? 1 : 0;
         });
 
-      renderSection(container, "Game Day Essentials", GAME_DAY_ESSENTIALS, grouped);
+      renderSection(container, "Essentials", GAME_DAY_ESSENTIALS, grouped);
       renderSection(container, "Food & Drink", FOOD_AND_DRINK, grouped);
       renderSection(container, "Breweries/Bars", BREWERIES_AND_BARS, grouped);
       renderSection(container, "Other", otherCategories, grouped);
@@ -3948,6 +4108,7 @@
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
       document.getElementById("searchPanel").style.display = "none";
+      clearResultsContext();
 
       var banner = document.getElementById("sharedBanner");
       var bannerText = document.getElementById("sharedBannerText");
@@ -4005,6 +4166,7 @@
 
       var results = document.getElementById("results");
       results.innerHTML = "";
+      updateResultsContext();
 
       if (!lastResults.length) {
         results.innerHTML =
