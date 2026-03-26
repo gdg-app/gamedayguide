@@ -3118,6 +3118,7 @@
       document.getElementById("status").textContent = "Creating selected places share link…";
 
       postJson("/api/create-shared-guide", {
+        shareType: "selected_places",
         sourceType: lastSourceType,
         queryOrGps: lastQueryOrGps,
         radius: selectedRadius,
@@ -3690,6 +3691,11 @@
     }
 
     function showSharedGuide(sharedGuide) {
+      if (sharedGuide && String(sharedGuide.shareType || "").toLowerCase() === "selected_places") {
+        showSharedSelectedPlaces(sharedGuide);
+        return;
+      }
+
       currentSharedGuide = sharedGuide || null;
       resetSelectedPlaces();
       resetLoadMoreState();
@@ -3702,6 +3708,7 @@
       var banner = document.getElementById("sharedBanner");
       var bannerText = document.getElementById("sharedBannerText");
       banner.style.display = "block";
+      banner.querySelector(".shared-banner-title").textContent = "Shared guide";
 
       var line = "";
       if (sharedGuide && sharedGuide.queryOrGps) {
@@ -3722,6 +3729,106 @@
       maybeOfferInstallPrompt(700);
     }
 
+    function showSharedSelectedPlaces(sharedGuide) {
+      stopLoadingState();
+      currentSharedGuide = sharedGuide || { shareType: "selected_places" };
+      resetSelectedPlaces();
+      resetLoadMoreState();
+      document.body.classList.remove("home-mode");
+      document.getElementById("pageTitle").textContent = "GameDayGuide";
+      document.getElementById("pageSubtitle").textContent = "A few game day stops, shared with you.";
+      document.getElementById("searchPanel").style.display = "none";
+      document.getElementById("shareTools").style.display = "none";
+      document.getElementById("shareLinkBox").style.display = "none";
+      document.getElementById("topStops").innerHTML = "";
+      document.getElementById("categoryJumpBar").innerHTML = "";
+      hideLoadMoreControls();
+
+      var banner = document.getElementById("sharedBanner");
+      var bannerText = document.getElementById("sharedBannerText");
+      banner.style.display = "block";
+      banner.querySelector(".shared-banner-title").textContent = "Selected places";
+      bannerText.textContent = "A few places someone picked out for game day.";
+
+      lastResults = Array.isArray(sharedGuide && sharedGuide.results) ? sharedGuide.results : [];
+      lastSourceType = (sharedGuide && sharedGuide.sourceType) || "";
+      lastQueryOrGps = (sharedGuide && sharedGuide.queryOrGps) || "";
+      selectedRadius = Number((sharedGuide && sharedGuide.radius) || 5);
+
+      var results = document.getElementById("results");
+      results.innerHTML = "";
+
+      results.appendChild(createSectionHeading("Shared Picks"));
+
+      if (!lastResults.length) {
+        results.innerHTML +=
+          "<div class='card'>" +
+            "<div class='card-name'>No shared places found</div>" +
+            "<div class='card-address'>This selected places link does not contain any places.</div>" +
+          "</div>";
+        document.getElementById("status").textContent = "Selected places not found.";
+        updateInstallTipForMode();
+        maybeOfferInstallPrompt(700);
+        return;
+      }
+
+      var intro = document.createElement("div");
+      intro.className = "card";
+      intro.innerHTML =
+        "<div class='card-name'>Shared with your group</div>" +
+        "<div class='card-address'>These are the places someone selected to send over. Want your own nearby options too?</div>" +
+        "<div class='card-actions'>" +
+          "<a class='action-btn build-btn' href='" + esc(window.location.origin + window.location.pathname) + "'>Create Your Own Guide</a>" +
+          "<a class='secondary-btn' href='" + esc(window.location.origin + window.location.pathname) + "'>Open Full App</a>" +
+        "</div>";
+      results.appendChild(intro);
+
+      var grid = document.createElement("div");
+      grid.className = "results-grid";
+      results.appendChild(grid);
+
+      for (var i = 0; i < lastResults.length; i++) {
+        var r = lastResults[i] || [];
+        var category = String(r[0] || "Place").trim();
+        var name = String(r[1] || "").trim();
+        var minutes = String(r[5] || "").trim();
+        var miles = (typeof r[6] === "number") ? r[6] : Number(r[6]);
+        var address = String(r[7] || "").trim();
+
+        var metaParts = [];
+        if (category) metaParts.push(esc(category));
+        if (minutes) metaParts.push(esc(minutes));
+        if (Number.isFinite(miles)) metaParts.push(esc(miles.toFixed(1) + " mi"));
+
+        var card = document.createElement("div");
+        card.className = "card";
+
+        var nameEl = document.createElement("div");
+        nameEl.className = "card-name";
+        nameEl.textContent = name || "Shared Place";
+        card.appendChild(nameEl);
+
+        if (metaParts.length) {
+          var metaEl = document.createElement("div");
+          metaEl.className = "card-meta";
+          metaEl.innerHTML = metaParts.join(" • ");
+          card.appendChild(metaEl);
+        }
+
+        var addressEl = document.createElement("div");
+        addressEl.className = "card-address";
+        addressEl.innerHTML = esc(address || "");
+        card.appendChild(addressEl);
+
+        card.appendChild(createLocationActions(name, address));
+        grid.appendChild(card);
+      }
+
+      document.getElementById("status").textContent = "Selected places shared with you.";
+      updateInstallTipForMode();
+      maybeOfferInstallPrompt(700);
+    }
+
     function showSharedSpot(sharedSpot) {
       stopLoadingState();
       currentSharedGuide = null;
@@ -3732,12 +3839,14 @@
       document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
       document.getElementById("searchPanel").style.display = "none";
       document.getElementById("sharedBanner").style.display = "block";
+      document.querySelector("#sharedBanner .shared-banner-title").textContent = "Shared guide";
       document.getElementById("shareTools").style.display = "none";
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
 
       var bannerText = document.getElementById("sharedBannerText");
+      document.querySelector("#sharedBanner .shared-banner-title").textContent = "Shared spot";
       bannerText.textContent = "Shared meeting spot";
 
       var name = String((sharedSpot && sharedSpot.name) || "").trim();
@@ -3797,6 +3906,11 @@
           var sharedGuide = await getSharedGuideFromBackend(shareId);
 
           if (sharedGuide && sharedGuide.results && sharedGuide.results.length) {
+            showSharedGuide(sharedGuide);
+            return;
+          }
+
+          if (sharedGuide && String(sharedGuide.shareType || "").toLowerCase() === "selected_places") {
             showSharedGuide(sharedGuide);
             return;
           }
