@@ -1108,8 +1108,8 @@ function buildGuideCacheContext(params) {
     return { eligible: false, key: "", reason: "lat-lng-request" };
   }
 
-  if (mode !== "core") {
-    return { eligible: false, key: "", reason: "non-core-mode" };
+  if (mode !== "core" && mode !== "full") {
+    return { eligible: false, key: "", reason: "invalid-mode" };
   }
 
   const normalizedQuery = normalizeCacheText(query);
