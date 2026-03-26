@@ -26,10 +26,11 @@ export default async function handler(req, res) {
 
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: `${SHARED_GUIDES_SHEET_NAME}!A:F`
+      range: `${SHARED_GUIDES_SHEET_NAME}!A:G`
     });
 
     const rows = (response.data && response.data.values) || [];
+
     if (rows.length <= 1) {
       return res.status(200).json({
         ok: true,
@@ -39,16 +40,22 @@ export default async function handler(req, res) {
 
     for (let i = rows.length - 1; i >= 1; i--) {
       const row = rows[i] || [];
+
       if (String(row[0] || "").trim() === shareId) {
+        const isNewFormat = row.length >= 7;
+
         return res.status(200).json({
           ok: true,
           data: {
             shareId: String(row[0] || "").trim(),
             createdAt: row[1] || "",
-            sourceType: row[2] || "",
-            queryOrGps: row[3] || "",
-            radius: Number(row[4] || 5),
-            results: safeJsonParseArray(row[5])
+            sourceType: isNewFormat ? row[2] : row[2],
+            queryOrGps: isNewFormat ? row[3] : row[3],
+            radius: Number(isNewFormat ? row[4] : row[4] || 5),
+            results: safeJsonParseArray(isNewFormat ? row[5] : row[5]),
+            shareType: isNewFormat
+              ? normalizeShareType(row[6])
+              : "full_guide"
           }
         });
       }
@@ -64,6 +71,12 @@ export default async function handler(req, res) {
       error: err && err.message ? err.message : String(err)
     });
   }
+}
+
+function normalizeShareType(value) {
+  var v = String(value || "").trim().toLowerCase();
+  if (v === "selected_places") return "selected_places";
+  return "full_guide";
 }
 
 function safeJsonParseArray(value) {
