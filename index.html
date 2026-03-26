@@ -28,30 +28,32 @@
 
   <style>
     :root {
-      --bg-dark: #07111f;
-      --bg-mid: #0d1b2d;
-      --bg-light: #132742;
-      --bg-accent: #1b3657;
-      --panel: rgba(255,255,255,0.94);
+      --bg-dark: #10261d;
+      --bg-mid: #173527;
+      --bg-light: #214430;
+      --bg-accent: #2a5139;
+      --panel: rgba(251,250,247,0.95);
       --panel-strong: #fbfaf7;
-      --panel-soft: rgba(255,255,255,0.84);
-      --text: #112033;
-      --muted: #687587;
-      --muted-strong: #435164;
-      --blue: #173a67;
-      --blue-dark: #102b4d;
+      --panel-soft: rgba(251,250,247,0.9);
+      --text: #1c2420;
+      --muted: #687066;
+      --muted-strong: #465047;
+      --blue: #24313d;
+      --blue-dark: #1b252d;
       --green: #2d7a52;
       --green-dark: #21593c;
-      --purple: #69408d;
-      --shadow: 0 18px 44px rgba(5,12,24,0.2);
-      --shadow-soft: 0 10px 28px rgba(7,16,31,0.1);
-      --shadow-card: 0 14px 34px rgba(8,18,35,0.12);
+      --purple: #24313d;
+      --share: #31414f;
+      --share-dark: #26333f;
+      --shadow: 0 18px 44px rgba(10,22,14,0.18);
+      --shadow-soft: 0 10px 28px rgba(10,22,14,0.08);
+      --shadow-card: 0 14px 34px rgba(10,22,14,0.1);
       --shadow-app: 0 28px 70px rgba(0,0,0,0.22);
       --radius-xxl: 30px;
       --radius-xl: 24px;
       --radius-lg: 18px;
       --radius-md: 14px;
-      --border-soft: 1px solid rgba(255,255,255,0.52);
+      --border-soft: 1px solid rgba(255,255,255,0.48);
     }
 
     html {
@@ -60,10 +62,7 @@
       min-height: 100%;
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
-      background:
-        radial-gradient(circle at 14% 10%, rgba(255,255,255,0.08), transparent 22%),
-        radial-gradient(circle at 88% 16%, rgba(71,118,174,0.16), transparent 24%),
-        linear-gradient(180deg, #17304f 0%, var(--bg-mid) 44%, var(--bg-dark) 100%);
+      background: linear-gradient(180deg, #1b3a2c 0%, #173527 42%, #10261d 100%);
       background-attachment: fixed;
     }
 
@@ -85,10 +84,7 @@
       line-height: 1.45;
       overflow-x: hidden;
       position: relative;
-      background:
-        radial-gradient(circle at top center, rgba(255,255,255,0.06), transparent 22%),
-        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0) 20%),
-        linear-gradient(180deg, #183253 0%, var(--bg-mid) 42%, var(--bg-dark) 100%);
+      background: linear-gradient(180deg, #1b3a2c 0%, #173527 42%, #10261d 100%);
       background-attachment: fixed;
     }
 
@@ -97,10 +93,8 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background:
-        radial-gradient(circle at 50% -12%, rgba(255,255,255,0.05), transparent 24%),
-        radial-gradient(circle at 18% 10%, rgba(255,255,255,0.035), transparent 18%);
-      opacity: 0.9;
+      background: radial-gradient(circle at 50% -10%, rgba(255,255,255,0.05), transparent 30%);
+      opacity: 0.65;
     }
 
     body::after {
@@ -108,7 +102,7 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background: linear-gradient(180deg, rgba(0,0,0,0.05), rgba(0,0,0,0.01) 28%, rgba(0,0,0,0.12) 100%);
+      background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.01) 24%, rgba(0,0,0,0.14) 100%);
       opacity: 1;
     }
 
@@ -128,7 +122,7 @@
     }
 
     .app-card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 34px;
       padding: 18px 16px 22px;
@@ -301,7 +295,7 @@
       line-height: 1.05;
       letter-spacing: -0.045em;
       font-weight: 800;
-      color: #1f2823;
+      color: #15263a;
       margin: 0 0 8px;
       max-width: 14ch;
     }
@@ -373,7 +367,7 @@
       font-size: 12px;
       font-weight: 800;
       color: #66717d;
-      background: #f6f4ef;
+      background: #f5f4ef;
       border-bottom: 1px solid #eef2f6;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -481,7 +475,7 @@
 
     .chip-btn {
       border: 0;
-      background: #edf3fa;
+      background: #e8eeea;
       color: var(--blue);
       border-radius: 999px;
       padding: 11px 15px;
@@ -521,7 +515,7 @@
     }
 
     .radius-btn {
-      background: #e9ede8;
+      background: #e7ece8;
       color: var(--blue);
       border: 0;
       border-radius: 999px;
@@ -575,28 +569,28 @@
     }
 
     .build-btn {
-      background: linear-gradient(180deg, #224a7a 0%, var(--blue) 100%);
+      background: linear-gradient(180deg, #344350 0%, var(--blue) 100%);
     }
 
     .location-btn {
-      background: linear-gradient(180deg, #42976b 0%, var(--green) 100%);
+      background: linear-gradient(180deg, #3f8f66 0%, var(--green) 100%);
     }
 
     .share-btn {
-      background: linear-gradient(180deg, #8052a4 0%, var(--purple) 100%);
+      background: linear-gradient(180deg, #3a4a57 0%, var(--share) 100%);
     }
 
     .match-btn {
       width: 100%;
       margin-top: 4px;
-      background: linear-gradient(180deg, #274c77 0%, var(--blue-dark) 100%);
+      background: linear-gradient(180deg, #2e3c47 0%, var(--blue-dark) 100%);
     }
 
     .secondary-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: #edf2f7;
+      background: #e8eeea;
       color: var(--blue);
       text-decoration: none;
       border: 0;
@@ -636,9 +630,9 @@
     }
 
     .location-action-btn.share-action {
-      background: linear-gradient(180deg, #9340b7 0%, var(--purple) 100%);
+      background: linear-gradient(180deg, #3a4a57 0%, var(--share) 100%);
       color: white;
-      box-shadow: 0 8px 16px rgba(123,31,162,0.2);
+      box-shadow: 0 8px 16px rgba(36,49,61,0.18);
     }
 
     #status {
@@ -707,7 +701,7 @@
     .loading-title {
       font-size: 21px;
       font-weight: 800;
-      color: #1f2823;
+      color: #1c2a35;
       letter-spacing: -0.03em;
       margin-bottom: 6px;
     }
@@ -774,7 +768,7 @@
     .load-more-title {
       font-size: 18px;
       font-weight: 800;
-      color: #1f2823;
+      color: #1c2a35;
       margin-bottom: 6px;
       letter-spacing: -0.02em;
     }
@@ -934,7 +928,7 @@
 
     body.selected-share-mode .share-action {
       opacity: 0.86;
-      box-shadow: 0 5px 12px rgba(123,31,162,0.12);
+      box-shadow: 0 5px 12px rgba(36,49,61,0.12);
     }
 
     @media (max-width: 640px) {
@@ -1195,10 +1189,10 @@
     }
 
     .card.selected-card {
-      border: 2px solid rgba(123,31,162,0.45);
-      box-shadow: 0 14px 28px rgba(123,31,162,0.16);
+      border: 2px solid rgba(36,49,61,0.22);
+      box-shadow: 0 14px 28px rgba(36,49,61,0.12);
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.99), rgba(248,243,252,0.96));
+        linear-gradient(180deg, rgba(251,250,247,0.99), rgba(244,246,242,0.96));
     }
 
     .urgent-card {
@@ -1246,19 +1240,19 @@
       padding: 10px 12px;
       min-height: 40px;
       white-space: nowrap;
-      background: #f3ebf8;
-      color: var(--purple);
+      background: #e8eeea;
+      color: var(--blue);
       font-size: 13px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 6px 14px rgba(105,64,141,0.08);
+      box-shadow: 0 6px 14px rgba(36,49,61,0.08);
       flex: 0 0 auto;
     }
 
     .select-place-btn.selected {
-      background: linear-gradient(180deg, #9340b7 0%, var(--purple) 100%);
+      background: linear-gradient(180deg, #3a4a57 0%, var(--share) 100%);
       color: white;
-      box-shadow: 0 8px 16px rgba(123,31,162,0.2);
+      box-shadow: 0 8px 16px rgba(36,49,61,0.18);
     }
 
     .card-actions {
@@ -1279,7 +1273,7 @@
       font-weight: 700;
       border: 0;
       cursor: pointer;
-      background: linear-gradient(180deg, #224a7a 0%, var(--blue) 100%);
+      background: linear-gradient(180deg, #344350 0%, var(--blue) 100%);
       color: white;
       min-height: 48px;
       box-shadow: 0 10px 18px rgba(16,43,77,0.18);
@@ -1414,7 +1408,7 @@
       font-size: 20px;
       font-weight: 800;
       line-height: 1.2;
-      color: #1f2823;
+      color: #1c2a35;
       letter-spacing: -0.02em;
     }
 
@@ -1433,7 +1427,7 @@
     }
 
     .install-step-card {
-      background: #f6f4ef;
+      background: #f5f4ef;
       border: 1px solid #e4ebf1;
       border-radius: 18px;
       padding: 14px;
