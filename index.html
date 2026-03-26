@@ -609,20 +609,6 @@
       box-shadow: 0 8px 16px rgba(123,31,162,0.2);
     }
 
-    .location-action-btn.light-action {
-      min-height: 42px;
-      padding: 10px 12px;
-      font-size: 13px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(11,61,145,0.08);
-    }
-
-    .location-action-btn.share-action.light-action {
-      background: #f2e8f8;
-      color: var(--purple);
-      box-shadow: 0 4px 10px rgba(123,31,162,0.08);
-    }
-
     #status {
       margin: 14px 0 8px;
       color: rgba(255,255,255,0.96);
@@ -779,6 +765,124 @@
       color: #555;
       line-height: 1.45;
       margin-top: 8px;
+    }
+
+
+    .selection-nudge {
+      display: none;
+      margin: 10px 0 14px;
+    }
+
+    .selection-nudge-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.92);
+      border: var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(10px);
+    }
+
+    .selection-nudge-copy {
+      min-width: 0;
+    }
+
+    .selection-nudge-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #15324a;
+      line-height: 1.25;
+      margin-bottom: 2px;
+    }
+
+    .selection-nudge-text {
+      font-size: 13px;
+      color: #5f6d79;
+      line-height: 1.35;
+    }
+
+    .selection-nudge .secondary-btn {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+
+    .sticky-share-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      z-index: 90;
+      display: none;
+      padding: 0 12px;
+      pointer-events: none;
+    }
+
+    .sticky-share-inner {
+      max-width: 760px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 22px;
+      background: rgba(18, 37, 56, 0.94);
+      color: white;
+      box-shadow: 0 16px 36px rgba(8, 19, 34, 0.28);
+      border: 1px solid rgba(255,255,255,0.16);
+      backdrop-filter: blur(14px);
+      pointer-events: auto;
+    }
+
+    .sticky-share-copy {
+      min-width: 0;
+    }
+
+    .sticky-share-count {
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.2;
+      color: white;
+    }
+
+    .sticky-share-text {
+      font-size: 13px;
+      line-height: 1.35;
+      color: rgba(255,255,255,0.82);
+      margin-top: 2px;
+    }
+
+    .sticky-share-btn {
+      flex: 0 0 auto;
+      min-height: 46px;
+      padding: 12px 16px;
+      white-space: nowrap;
+      box-shadow: none;
+    }
+
+    body.has-sticky-share .container {
+      padding-bottom: 120px;
+    }
+
+    @media (max-width: 640px) {
+      .selection-nudge-card,
+      .sticky-share-inner {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .selection-nudge .secondary-btn,
+      .sticky-share-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .sticky-share-bar {
+        padding: 0 10px;
+      }
     }
 
     .section-heading {
@@ -1009,24 +1113,12 @@
       margin-bottom: 10px;
     }
 
-    .card-meta.subtle-meta {
-      color: #5c6672;
-      font-size: 13px;
-      margin-bottom: 6px;
-    }
-
     .card-address {
       color: #666;
       font-size: 14px;
       margin-bottom: 12px;
       line-height: 1.45;
       word-break: break-word;
-    }
-
-    .card-address.compact-address {
-      font-size: 13px;
-      margin-bottom: 10px;
-      color: #6a7280;
     }
 
     .select-place-btn {
@@ -1054,20 +1146,6 @@
       display: grid;
       gap: 8px;
       grid-template-columns: 1fr;
-    }
-
-    .card-actions.compact-actions {
-      gap: 6px;
-      margin-top: 2px;
-    }
-
-    .card.compact-card {
-      padding: 18px 18px 16px;
-    }
-
-    .card.compact-card .card-name {
-      font-size: 18px;
-      margin-bottom: 6px;
     }
 
     .directions-btn {
@@ -1521,6 +1599,7 @@
         </div>
       </div>
 
+      <div id="selectionNudge" class="selection-nudge" style="display:none;"></div>
       <div id="shareLinkBox" style="display:none;"></div>
 
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
@@ -1534,6 +1613,16 @@
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
       <div id="results"></div>
+    </div>
+  </div>
+
+  <div id="stickyShareBar" class="sticky-share-bar" style="display:none;">
+    <div class="sticky-share-inner">
+      <div class="sticky-share-copy">
+        <div id="stickyShareCount" class="sticky-share-count">1 place selected</div>
+        <div class="sticky-share-text">Share your picks with the team without scrolling back up.</div>
+      </div>
+      <button type="button" class="action-btn share-btn sticky-share-btn" onclick="shareSelectedPlaces()">Share with Team</button>
     </div>
   </div>
 
@@ -1753,17 +1842,49 @@
 
     function updateShareSelectedButton() {
       var btn = document.getElementById("shareSelectedBtn");
-      if (!btn) return;
-
+      var nudge = document.getElementById("selectionNudge");
+      var stickyBar = document.getElementById("stickyShareBar");
+      var stickyCount = document.getElementById("stickyShareCount");
       var count = getSelectedPlaces().length;
-      if (!count || currentSharedGuide) {
-        btn.style.display = "none";
-        btn.textContent = "Share Selected Places";
-        return;
+      var countLabel = count === 1 ? "1 place selected" : (count + " places selected");
+
+      if (btn) {
+        if (!count || currentSharedGuide) {
+          btn.style.display = "none";
+          btn.textContent = "Share Selected Places";
+        } else {
+          btn.style.display = "inline-flex";
+          btn.textContent = count === 1 ? "Share 1 Selected Place" : ("Share " + count + " Selected Places");
+        }
       }
 
-      btn.style.display = "inline-flex";
-      btn.textContent = "Share Selected Places";
+      if (nudge) {
+        if (!count || currentSharedGuide) {
+          nudge.style.display = "none";
+          nudge.innerHTML = "";
+        } else {
+          nudge.style.display = "block";
+          nudge.innerHTML =
+            "<div class='selection-nudge-card'>" +
+              "<div class='selection-nudge-copy'>" +
+                "<div class='selection-nudge-title'>✔ " + esc(countLabel) + "</div>" +
+                "<div class='selection-nudge-text'>Share these picks with your team any time. You can also use the sticky share bar at the bottom.</div>" +
+              "</div>" +
+              "<button type='button' class='secondary-btn' onclick='shareSelectedPlaces()'>Share with Team</button>" +
+            "</div>";
+        }
+      }
+
+      if (stickyBar && stickyCount) {
+        if (!count || currentSharedGuide) {
+          stickyBar.style.display = "none";
+          document.body.classList.remove("has-sticky-share");
+        } else {
+          stickyCount.textContent = countLabel;
+          stickyBar.style.display = "block";
+          document.body.classList.add("has-sticky-share");
+        }
+      }
     }
 
     function getBaseBuildParamsSnapshot() {
@@ -2548,89 +2669,6 @@
       actions.appendChild(shareBtn);
 
       return actions;
-    }
-
-    function createSelectedShareLocationActions(name, address) {
-      var actions = document.createElement("div");
-      actions.className = "card-actions compact-actions";
-
-      var googleLink = document.createElement("a");
-      googleLink.className = "location-action-btn google-btn light-action";
-      googleLink.href = buildGoogleMapsLink(name, address);
-      googleLink.target = "_blank";
-      googleLink.rel = "noopener";
-      googleLink.textContent = "Open in Google Maps";
-
-      var appleLink = document.createElement("a");
-      appleLink.className = "location-action-btn light-action";
-      appleLink.href = buildAppleMapsLink(name, address);
-      appleLink.target = "_blank";
-      appleLink.rel = "noopener";
-      appleLink.textContent = "Open in Apple Maps";
-
-      var shareBtn = document.createElement("button");
-      shareBtn.type = "button";
-      shareBtn.className = "location-action-btn share-action light-action";
-      shareBtn.textContent = "Share This Spot";
-      shareBtn.onclick = function() {
-        shareSpot(name, address, shareBtn);
-      };
-
-      actions.appendChild(googleLink);
-      actions.appendChild(appleLink);
-      actions.appendChild(shareBtn);
-
-      return actions;
-    }
-
-    function normalizeSharedPlaceAddress(sharedRow) {
-      var candidates = [
-        sharedRow && sharedRow[7],
-        sharedRow && sharedRow[3],
-        sharedRow && sharedRow[5],
-        sharedRow && sharedRow[4]
-      ];
-
-      for (var i = 0; i < candidates.length; i++) {
-        var value = String(candidates[i] || "").trim();
-        if (!value) continue;
-        if (isLikelyUrl(value)) continue;
-        if (value.toLowerCase() === "open now" || value.toLowerCase() === "closed") continue;
-        return value;
-      }
-
-      return "";
-    }
-
-    function normalizeSharedPlaceMeta(sharedRow) {
-      var category = String(sharedRow && sharedRow[0] || "Place").trim();
-      var dist = (typeof (sharedRow && sharedRow[6]) === "number")
-        ? sharedRow[6]
-        : Number(sharedRow && sharedRow[6]);
-      var openNow = String(sharedRow && sharedRow[4] || "").trim();
-      var minutes = String(sharedRow && sharedRow[5] || "").trim();
-      var rating = String(sharedRow && sharedRow[2] || "").trim();
-      var parts = [];
-
-      if (category) parts.push(esc(category));
-      if (Number.isFinite(dist)) {
-        parts.push(esc(dist.toFixed(1) + " mi"));
-      } else if (minutes && !isLikelyUrl(minutes)) {
-        parts.push(esc(minutes));
-      }
-
-      if (openNow && !isLikelyUrl(openNow) && openNow.length <= 40) {
-        parts.push(esc(openNow));
-      } else if (rating && !isLikelyUrl(rating) && /^\d(\.\d)?$/.test(rating)) {
-        parts.push("⭐ " + esc(rating));
-      }
-
-      return parts;
-    }
-
-    function isLikelyUrl(value) {
-      var v = String(value || "").trim().toLowerCase();
-      return !!v && (v.indexOf("http://") === 0 || v.indexOf("https://") === 0 || v.indexOf("www.") === 0);
     }
 
     function getCuratedSuggestions(searchText) {
@@ -3912,12 +3950,19 @@
 
       for (var i = 0; i < lastResults.length; i++) {
         var r = lastResults[i] || [];
+        var category = String(r[0] || "Place").trim();
         var name = String(r[1] || "").trim();
-        var address = normalizeSharedPlaceAddress(r);
-        var metaParts = normalizeSharedPlaceMeta(r);
+        var minutes = String(r[5] || "").trim();
+        var miles = (typeof r[6] === "number") ? r[6] : Number(r[6]);
+        var address = String(r[7] || "").trim();
+
+        var metaParts = [];
+        if (category) metaParts.push(esc(category));
+        if (minutes) metaParts.push(esc(minutes));
+        if (Number.isFinite(miles)) metaParts.push(esc(miles.toFixed(1) + " mi"));
 
         var card = document.createElement("div");
-        card.className = "card compact-card";
+        card.className = "card";
 
         var nameEl = document.createElement("div");
         nameEl.className = "card-name";
@@ -3926,19 +3971,17 @@
 
         if (metaParts.length) {
           var metaEl = document.createElement("div");
-          metaEl.className = "card-meta subtle-meta";
+          metaEl.className = "card-meta";
           metaEl.innerHTML = metaParts.join(" • ");
           card.appendChild(metaEl);
         }
 
-        if (address) {
-          var addressEl = document.createElement("div");
-          addressEl.className = "card-address compact-address";
-          addressEl.innerHTML = esc(address);
-          card.appendChild(addressEl);
-        }
+        var addressEl = document.createElement("div");
+        addressEl.className = "card-address";
+        addressEl.innerHTML = esc(address || "");
+        card.appendChild(addressEl);
 
-        card.appendChild(createSelectedShareLocationActions(name, address));
+        card.appendChild(createLocationActions(name, address));
         grid.appendChild(card);
       }
 
