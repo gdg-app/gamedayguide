@@ -38,15 +38,15 @@
       --text: #16212a;
       --muted: #66717d;
       --muted-strong: #4d5a66;
-      --blue: #1f4f8f;
-      --blue-dark: #173a67;
+      --blue: #1976d2;
+      --blue-dark: #1565c0;
       --green: #2e7d32;
       --green-dark: #256628;
       --purple: #7b1fa2;
-      --shadow: 0 16px 40px rgba(0,0,0,0.18);
-      --shadow-soft: 0 8px 24px rgba(0,0,0,0.12);
-      --shadow-card: 0 10px 26px rgba(0,0,0,0.1);
-      --shadow-app: 0 26px 60px rgba(0,0,0,0.18);
+      --shadow: 0 16px 40px rgba(0,0,0,0.24);
+      --shadow-soft: 0 8px 24px rgba(0,0,0,0.14);
+      --shadow-card: 0 10px 26px rgba(0,0,0,0.12);
+      --shadow-app: 0 26px 60px rgba(0,0,0,0.2);
       --radius-xxl: 30px;
       --radius-xl: 24px;
       --radius-lg: 18px;
@@ -136,38 +136,38 @@
       background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.04));
       border: 1px solid rgba(255,255,255,0.1);
       border-radius: 34px;
-      padding: 12px 12px 18px;
+      padding: 14px 12px 18px;
       box-shadow: var(--shadow-app);
       backdrop-filter: blur(14px);
     }
 
     .header {
-      margin-bottom: 12px;
+      margin-bottom: 18px;
       color: white;
-      padding: 6px 6px 2px;
+      padding: 8px 6px 4px;
     }
 
     .brand-row {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 6px;
+      gap: 14px;
+      margin-bottom: 8px;
       flex-wrap: wrap;
     }
 
     .brand-icon {
-      width: 46px;
-      height: 46px;
-      border-radius: 16px;
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 27px;
       line-height: 1;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.16), rgba(255,255,255,0.08));
-      border: 1px solid rgba(255,255,255,0.14);
-      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+        linear-gradient(180deg, rgba(255,255,255,0.2), rgba(255,255,255,0.11));
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow: 0 10px 22px rgba(0,0,0,0.22);
       backdrop-filter: blur(12px);
     }
 
@@ -185,22 +185,22 @@
     }
 
     .title {
-      font-size: 29px;
+      font-size: 31px;
       font-weight: 800;
       margin: 0;
       line-height: 1.03;
       letter-spacing: -0.04em;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.22);
+      text-shadow: 0 2px 12px rgba(0,0,0,0.24);
     }
 
     .subtitle {
       color: rgba(255,255,255,0.9);
-      font-size: 14px;
-      line-height: 1.4;
-      margin-top: 0;
-      text-shadow: 0 1px 8px rgba(0,0,0,0.18);
+      font-size: 15px;
+      line-height: 1.45;
+      margin-top: 1px;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.2);
       max-width: 38ch;
-      font-weight: 600;
+      font-weight: 500;
     }
 
     .tip-banner {
@@ -258,9 +258,9 @@
     .search-panel {
       width: 100%;
       background:
-        linear-gradient(180deg, rgba(255,255,255,0.985), rgba(255,255,255,0.95));
-      padding: 18px 14px 18px;
-      border-radius: 26px;
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
+      padding: 20px 14px 20px;
+      border-radius: var(--radius-xxl);
       box-shadow: var(--shadow);
       margin-bottom: 22px;
       border: var(--border-soft);
@@ -320,10 +320,10 @@
     }
 
     .helper-text {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--muted);
       margin-bottom: 14px;
-      line-height: 1.45;
+      line-height: 1.5;
     }
 
     .match-results {
@@ -543,7 +543,7 @@
     }
 
     .build-btn {
-      background: linear-gradient(180deg, #2b629d 0%, var(--blue) 100%);
+      background: linear-gradient(180deg, #2b93ef 0%, var(--blue) 100%);
     }
 
     .location-btn {
@@ -557,7 +557,7 @@
     .match-btn {
       width: 100%;
       margin-top: 4px;
-      background: linear-gradient(180deg, #28598d 0%, var(--blue-dark) 100%);
+      background: linear-gradient(180deg, #2b82dc 0%, var(--blue-dark) 100%);
     }
 
     .secondary-btn {
@@ -766,6 +766,7 @@
       line-height: 1.45;
       margin-top: 8px;
     }
+
 
     .selection-nudge {
       display: none;
@@ -1544,237 +1545,21 @@
         min-width: 280px;
       }
     }
-
-    .hero-shell {
-      position: relative;
-      padding: 2px 2px 0;
-    }
-
-    .hero-topline {
-      display: inline-flex;
-      align-items: center;
-      min-height: 24px;
-      padding: 0 10px;
-      border-radius: 999px;
-      margin-bottom: 10px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: rgba(255,255,255,0.8);
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-    }
-
-    .hero-note {
-      max-width: 40ch;
-      margin-top: 8px;
-      color: rgba(255,255,255,0.78);
-      font-size: 14px;
-      line-height: 1.45;
-      font-weight: 500;
-      text-shadow: 0 1px 8px rgba(0,0,0,0.14);
-    }
-
-    .hero-chip-row,
-    .input-tips-row {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .hero-chip-row {
-      margin-top: 10px;
-    }
-
-    .hero-chip,
-    .input-tip-pill {
-      display: inline-flex;
-      align-items: center;
-      min-height: 34px;
-      padding: 0 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    .hero-chip {
-      color: rgba(255,255,255,0.84);
-      background: transparent;
-      border: 0;
-      box-shadow: none;
-      backdrop-filter: none;
-      padding: 0;
-      min-height: auto;
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .panel-kicker {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #617284;
-      margin-bottom: 6px;
-    }
-
-    .panel-title {
-      font-size: 24px;
-      line-height: 1.06;
-      letter-spacing: -0.04em;
-      font-weight: 800;
-      color: #13202a;
-      margin-bottom: 8px;
-      max-width: 16ch;
-    }
-
-    .panel-subtitle {
-      color: #5f6f7f;
-      font-size: 15px;
-      line-height: 1.45;
-      margin-bottom: 14px;
-      max-width: 36ch;
-    }
-
-    .input-tips-row {
-      margin: 0 0 8px;
-    }
-
-    .input-tip-pill {
-      background: #f4f7fb;
-      color: #4e6172;
-      border: 1px solid #e1e8ef;
-    }
-
-    .search-panel {
-      box-shadow: 0 20px 54px rgba(0,0,0,0.18);
-    }
-
-    #resultsContext {
-      margin-top: 8px;
-      margin-bottom: 18px;
-    }
-
-    .results-context-card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
-      border-radius: 24px;
-      padding: 18px 16px;
-      border: var(--border-soft);
-      box-shadow: var(--shadow-card);
-      backdrop-filter: blur(12px);
-    }
-
-    .results-context-kicker {
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #607181;
-      margin-bottom: 10px;
-    }
-
-    .results-context-title {
-      font-size: 26px;
-      line-height: 1.08;
-      letter-spacing: -0.04em;
-      font-weight: 800;
-      color: #111d27;
-      margin-bottom: 12px;
-    }
-
-    .results-context-copy {
-      color: #5f6f7f;
-      font-size: 15px;
-      line-height: 1.5;
-      margin-bottom: 14px;
-      max-width: 46ch;
-    }
-
-    .results-context-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .results-meta-chip {
-      display: inline-flex;
-      align-items: center;
-      min-height: 36px;
-      padding: 0 12px;
-      border-radius: 999px;
-      background: #f4f7fb;
-      border: 1px solid #e2e9f0;
-      color: #425464;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-    }
-
-    .share-tools-row {
-      margin-top: 2px;
-    }
-
-    .load-more-card,
-    .selection-nudge-card,
-    .shared-banner,
-    #shareLinkBox .card {
-      box-shadow: 0 16px 38px rgba(0,0,0,0.14);
-    }
-
-    .top-stop-card {
-      min-width: 88%;
-      padding: 18px;
-      box-shadow: 0 18px 42px rgba(0,0,0,0.15);
-    }
-
-    .top-stop-label {
-      color: #4f6272;
-    }
-
-    .jump-chip {
-      background: rgba(255,255,255,0.98);
-      color: #183246;
-      border: 1px solid rgba(221,229,237,0.92);
-    }
-
-    @media (min-width: 768px) {
-      .panel-title {
-        max-width: none;
-      }
-
-      .top-stop-card {
-        min-width: 320px;
-      }
-    }
-
-    @media (max-width: 520px) {
-      .panel-title,
-      .results-context-title {
-        font-size: 24px;
-      }
-    }
-
   </style>
 </head>
 <body>
   <div class="app">
     <div class="app-card">
       <div class="header">
-        <div class="hero-shell">
-          <div class="hero-topline">Game day companion</div>
-          <div class="brand-row">
-            <div class="brand-icon">
-              <img src="gdg-icon.png?v=3" alt="GameDayGuide Logo">
-            </div>
-            <div class="brand-text">
-              <div class="title" id="pageTitle">GameDayGuide</div>
-            </div>
+        <div class="brand-row">
+          <div class="brand-icon">
+            <img src="gdg-icon.png?v=3" alt="GameDayGuide Logo">
           </div>
-          <div class="subtitle" id="pageSubtitle">Game Day, Made Easier.</div>
-          <div class="hero-note">Food, coffee, gas, and essentials near your game.</div>
-                  </div>
+          <div class="brand-text">
+            <div class="title" id="pageTitle">GameDayGuide</div>
+          </div>
+        </div>
+        <div class="subtitle" id="pageSubtitle">Game Day, Made Easier.</div>
       </div>
 
       <div id="homeScreenTip" class="tip-banner" style="display:none;">
@@ -1796,14 +1581,11 @@
       </div>
 
       <div class="search-panel" id="searchPanel">
-        <div class="panel-kicker">Start here</div>
-        <div class="panel-title">Find what you need near the game</div>
-        <div class="panel-subtitle">Search by field, facility, or your current location.</div>
         <label>Field Address or Field/Facility Name</label>
         <input id="address" placeholder="Enter field address or facility name" value="" />
         <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
         <div id="fieldMatchResults" class="match-results"></div>
-        <div class="helper-text">Field names work too. Example: Field 4 USA Baseball Complex.</div>
+        <div class="helper-text">Paste a field name, field number, court number, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
 
         <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
@@ -1840,8 +1622,8 @@
 
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
-          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share Full Guide</button>
-          <button type="button" class="action-btn share-btn" id="shareSelectedBtn" onclick="shareSelectedPlaces()" style="display:none;">Share Selected Picks</button>
+          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share This Guide With Your Team</button>
+          <button type="button" class="action-btn share-btn" id="shareSelectedBtn" onclick="shareSelectedPlaces()" style="display:none;">Share Selected Places</button>
           <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
         </div>
       </div>
@@ -1852,12 +1634,11 @@
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
         <div class="load-more-card">
           <div class="load-more-title">Need more categories?</div>
-          <div class="load-more-text">Load pharmacy, grocery, hotels, ATM, sporting goods, and more.</div>
+          <div class="load-more-text">Load pharmacy, grocery, hotels, ATM, sporting goods, emergency dentist, and more.</div>
           <button type="button" class="action-btn build-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More Categories</button>
         </div>
       </div>
 
-      <div id="resultsContext"></div>
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
       <div id="results"></div>
@@ -1868,7 +1649,7 @@
     <div class="sticky-share-inner">
       <div class="sticky-share-copy">
         <div id="stickyShareCount" class="sticky-share-count">1 place selected</div>
-        <div class="sticky-share-text">Your team-ready picks are waiting. Share them without scrolling back up.</div>
+        <div class="sticky-share-text">Share your picks with the team without scrolling back up.</div>
       </div>
       <button type="button" class="action-btn share-btn sticky-share-btn" onclick="shareSelectedPlaces()">Share with Team</button>
     </div>
@@ -1953,10 +1734,10 @@
     const AUTO_RUN_RANK_THRESHOLD = 800;
 
     const TOP_STOP_CONFIG = [
-      { label: "🏥 Top Medical Pick", category: BACKEND_MEDICAL_LABEL },
-      { label: "⛽ Top Gas Pick", category: "⛽ Gas" },
-      { label: "☕ Top Coffee Pick", category: "☕ Coffee" },
-      { label: "💊 Top Pharmacy Pick", category: "💊 Pharmacy" }
+      { label: "🏥 Closest Medical", category: BACKEND_MEDICAL_LABEL },
+      { label: "⛽ Closest Gas", category: "⛽ Gas" },
+      { label: "☕ Closest Coffee", category: "☕ Coffee" },
+      { label: "💊 Closest Pharmacy", category: "💊 Pharmacy" }
     ];
 
     const LOADING_MESSAGES = [
@@ -2099,10 +1880,10 @@
       if (btn) {
         if (!count || currentSharedGuide) {
           btn.style.display = "none";
-          btn.textContent = "Share Selected Picks";
+          btn.textContent = "Share Selected Places";
         } else {
           btn.style.display = "inline-flex";
-          btn.textContent = count === 1 ? "Share 1 Pick" : ("Share " + count + " Picks");
+          btn.textContent = count === 1 ? "Share 1 Selected Place" : ("Share " + count + " Selected Places");
         }
       }
 
@@ -2116,7 +1897,7 @@
             "<div class='selection-nudge-card'>" +
               "<div class='selection-nudge-copy'>" +
                 "<div class='selection-nudge-title'>✔ " + esc(countLabel) + "</div>" +
-                "<div class='selection-nudge-text'>These picks are ready for the team chat. You can share from here or use the sticky bar at the bottom.</div>" +
+                "<div class='selection-nudge-text'>Share these picks with your team any time. You can also use the sticky share bar at the bottom.</div>" +
               "</div>" +
               "<button type='button' class='secondary-btn' onclick='shareSelectedPlaces()'>Share with Team</button>" +
             "</div>";
@@ -3231,7 +3012,6 @@
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
-      document.getElementById("resultsContext").innerHTML = "";
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
@@ -3268,7 +3048,6 @@
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
-      document.getElementById("resultsContext").innerHTML = "";
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
@@ -3310,7 +3089,6 @@
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
-      document.getElementById("resultsContext").innerHTML = "";
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
@@ -3446,9 +3224,9 @@
           "<div class='card-name'>" + shareLabel + "</div>" +
           "<div class='card-meta'>" + shareMeta + "</div>" +
           "<input id='shareLinkInput' class='share-link-input' type='text' readonly value='" + esc(url) + "' />" +
-          "<div class='share-link-help'>Share it right away, copy the link, send it by text or email, or open it first to make sure it looks right.</div>" +
+          "<div class='share-link-help'>You can share it directly, copy the link, send by text or email, or open it first to confirm it looks right.</div>" +
           "<div class='share-action-row'>" +
-            "<button type='button' class='action-btn share-btn' id='nativeShareBtn'>Open Share Sheet</button>" +
+            "<button type='button' class='action-btn share-btn' id='nativeShareBtn'>Share With Team</button>" +
             "<button type='button' class='secondary-btn' id='copyShareAgainBtn'>Copy Link</button>" +
             "<a class='secondary-btn' id='textGuideBtn' href='" + esc(smsLink) + "'>Text</a>" +
             "<a class='secondary-btn' id='emailGuideBtn' href='" + esc(emailLink) + "'>Email</a>" +
@@ -3726,74 +3504,6 @@
       return items[0];
     }
 
-    function getDisplayContextTitle() {
-      if (currentSharedGuide && String(currentSharedGuide.shareType || "").toLowerCase() === "selected_places") {
-        return lastQueryOrGps ? ("Shared picks for " + lastQueryOrGps) : "Shared game day picks";
-      }
-
-      if (currentSharedGuide) {
-        return lastQueryOrGps ? ("Shared guide for " + lastQueryOrGps) : "Shared game day guide";
-      }
-
-      if (lastSourceType === "gps") {
-        return "Nearby game day picks";
-      }
-
-      if (lastQueryOrGps) {
-        return lastQueryOrGps;
-      }
-
-      return "Your game day guide";
-    }
-
-    function renderResultsContext() {
-      var container = document.getElementById("resultsContext");
-      var meta = [];
-      var kicker = "Guide ready";
-      var copy = "Open a category below, share the full guide, or send a few hand-picked spots to your team chat.";
-
-      if (!container) return;
-      container.innerHTML = "";
-
-      if (!lastResults.length && !currentSharedGuide) return;
-
-      if (currentSharedGuide && String(currentSharedGuide.shareType || "").toLowerCase() === "selected_places") {
-        kicker = "Shared picks";
-        copy = "Someone picked out a few stops for game day. Open any place below for directions or pass it along.";
-      } else if (currentSharedGuide) {
-        kicker = "Shared guide";
-        copy = "This guide was shared with you. Jump into the best nearby stops and open directions with one tap.";
-      } else if (lastSourceType === "gps") {
-        kicker = "Near you";
-        copy = "These are the strongest nearby options for game day. Share the full guide or trim it down to just the best picks.";
-      } else if (lastQueryOrGps) {
-        kicker = "Venue mode";
-        copy = "Built around your field or facility so parents and coaches can get where they need to go faster.";
-      }
-
-      meta.push("" + lastResults.length + (lastResults.length === 1 ? " result" : " results"));
-
-      if (selectedRadius) {
-        meta.push(selectedRadius + " mi radius");
-      }
-
-      if (!currentSharedGuide) {
-        meta.push(hasLoadedFullCategories ? "Full category view" : "Core essentials first");
-      }
-
-      container.innerHTML =
-        "<div class='results-context-card'>" +
-          "<div class='results-context-kicker'>" + esc(kicker) + "</div>" +
-          "<div class='results-context-title'>" + esc(getDisplayContextTitle()) + "</div>" +
-          "<div class='results-context-copy'>" + esc(copy) + "</div>" +
-          "<div class='results-context-meta'>" +
-            meta.map(function(item) {
-              return "<div class='results-meta-chip'>" + esc(item) + "</div>";
-            }).join("") +
-          "</div>" +
-        "</div>";
-    }
-
     function renderTopStops(grouped) {
       var container = document.getElementById("topStops");
       container.innerHTML = "";
@@ -3820,7 +3530,7 @@
 
       var wrap = document.createElement("div");
       wrap.className = "top-stops-wrap";
-      wrap.appendChild(createSectionHeading("Near Your Game"));
+      wrap.appendChild(createSectionHeading("Closest Stops"));
 
       var row = document.createElement("div");
       row.className = "top-stops-row";
@@ -4102,7 +3812,6 @@
       container.innerHTML = "";
       topStopsContainer.innerHTML = "";
       jumpBarContainer.innerHTML = "";
-      renderResultsContext();
 
       lastResults = Array.isArray(data) ? data : [];
       shareTools.style.display = lastResults.length && !currentSharedGuide ? "block" : "none";
@@ -4117,8 +3826,6 @@
           "</div>";
         return;
       }
-
-      renderResultsContext();
 
       var grouped = {};
       lastResults.forEach(function(row) {
@@ -4283,7 +3990,6 @@
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
-      document.getElementById("resultsContext").innerHTML = "";
       hideLoadMoreControls();
 
       var banner = document.getElementById("sharedBanner");
@@ -4299,7 +4005,6 @@
 
       var results = document.getElementById("results");
       results.innerHTML = "";
-      renderResultsContext();
 
       if (!lastResults.length) {
         results.innerHTML =
@@ -4380,7 +4085,6 @@
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
-      document.getElementById("resultsContext").innerHTML = "";
 
       var bannerText = document.getElementById("sharedBannerText");
       document.querySelector("#sharedBanner .shared-banner-title").textContent = "Shared spot";
@@ -4392,12 +4096,6 @@
       var appleMapsUrl = String((sharedSpot && sharedSpot.appleMapsUrl) || buildAppleMapsLink(name, address)).trim();
 
       var results = document.getElementById("results");
-      document.getElementById("resultsContext").innerHTML =
-        "<div class='results-context-card'>" +
-          "<div class='results-context-kicker'>Shared spot</div>" +
-          "<div class='results-context-title'>" + esc(name || "Shared location") + "</div>" +
-          "<div class='results-context-copy'>Open this location in your preferred maps app or jump back into the full GDG experience.</div>" +
-        "</div>";
       results.innerHTML =
         "<div class='section-heading'>Shared Spot</div>" +
         "<div class='card'>" +
