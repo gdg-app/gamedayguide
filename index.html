@@ -245,7 +245,6 @@
     }
 
     .search-panel {
-  gap: 18px;
       width: 100%;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.93));
@@ -431,22 +430,23 @@
     }
 
     .quick-row-wrap {
-      margin-bottom: 18px;
-      padding-top: 2px;
+      margin-bottom: 22px;
+      padding-top: 4px;
     }
 
     .quick-row-label {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
-      color: #4a5a68;
-      margin-bottom: 9px;
+      color: #5f6d79;
+      margin-bottom: 10px;
+      letter-spacing: 0.01em;
     }
 
     .quick-row {
       display: flex;
       gap: 10px;
       overflow-x: auto;
-      padding-bottom: 4px;
+      padding-bottom: 6px;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: thin;
     }
@@ -465,7 +465,7 @@
       background: #e8eeea;
       color: var(--blue);
       border-radius: 999px;
-      padding: 11px 15px;
+      padding: 11px 14px;
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
@@ -490,10 +490,8 @@
     }
 
     .radius-section {
-  margin-top: 14px;
-  margin-bottom: 14px;
-      margin-top: 8px;
-      margin-bottom: 18px;
+      margin-top: 14px;
+      margin-bottom: 24px;
     }
 
     .radius-buttons {
@@ -530,11 +528,6 @@
     }
 
     .action-btn {
-  height: 50px;
-  border-radius: 12px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
       width: 100%;
       border: 0;
       border-radius: 18px;
@@ -559,7 +552,6 @@
     }
 
     .action-btn:active {
-  transform: scale(0.97);
       transform: translateY(0);
       box-shadow: 0 8px 16px rgba(0,0,0,0.14);
     }
@@ -633,8 +625,6 @@
     }
 
     #status {
-  font-size: 14px;
-  opacity: 0.85;
       margin: 12px 0 6px;
       color: rgba(255,255,255,0.88);
       font-size: 13px;
@@ -1536,7 +1526,6 @@
       }
 
       body.home-mode .search-panel {
-  gap: 18px;
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
@@ -1561,8 +1550,6 @@
       }
 
       body.home-mode .radius-section {
-  margin-top: 14px;
-  margin-bottom: 14px;
         margin-bottom: 0;
       }
 
@@ -1572,11 +1559,6 @@
       }
 
       body.home-mode .action-btn {
-  height: 50px;
-  border-radius: 12px;
-  font-weight: 600;
-  letter-spacing: 0.2px;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
         min-height: 60px;
         font-size: 18px;
       }
@@ -1699,13 +1681,14 @@
           </div>
         </div>
 
-        <div class="quick-row-wrap" style="margin-bottom:18px;">
+        <div class="quick-row-wrap" style="margin-bottom:20px;">
           <div class="quick-row-label">Quick Actions</div>
           <div class="quick-row">
             <button type="button" class="chip-btn" onclick="runQuickAction('food')">🍔 Food</button>
             <button type="button" class="chip-btn" onclick="runQuickAction('coffee')">☕ Coffee</button>
             <button type="button" class="chip-btn" onclick="runQuickAction('gas')">⛽ Gas</button>
             <button type="button" class="chip-btn" onclick="runQuickAction('medical')">🏥 Medical</button>
+            <button type="button" class="chip-btn" onclick="runQuickAction('bars')">🍺 Bars</button>
           </div>
         </div>
 
@@ -3154,6 +3137,7 @@
       if (normalized === "coffee") return "☕ Coffee";
       if (normalized === "gas") return "⛽ Gas";
       if (normalized === "medical") return BACKEND_MEDICAL_LABEL;
+      if (normalized === "bars") return "🍺 Breweries/Bars";
       return "";
     }
 
