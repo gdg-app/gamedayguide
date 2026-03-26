@@ -863,8 +863,37 @@
       box-shadow: none;
     }
 
-    body.has-sticky-share .container {
-      padding-bottom: 120px;
+    body.has-sticky-share .app {
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 120px);
+    }
+
+    body.selected-share-mode .app {
+      width: min(100%, 760px);
+    }
+
+    body.selected-share-mode .app-card {
+      padding-bottom: 22px;
+    }
+
+    body.selected-share-mode .shared-banner {
+      margin-bottom: 14px;
+    }
+
+    body.selected-share-mode .results-grid {
+      gap: 12px;
+    }
+
+    body.selected-share-mode .card {
+      padding: 14px;
+    }
+
+    body.selected-share-mode .card-actions {
+      gap: 8px;
+    }
+
+    body.selected-share-mode .share-action {
+      opacity: 0.86;
+      box-shadow: 0 5px 12px rgba(123,31,162,0.12);
     }
 
     @media (max-width: 640px) {
@@ -3851,6 +3880,57 @@
       }
     }
 
+    function looksLikeMapsOrWebUrl(value) {
+      return /^https?:\/\//i.test(String(value || "").trim());
+    }
+
+    function firstReadableText(values) {
+      for (var i = 0; i < values.length; i++) {
+        var value = String(values[i] || "").trim();
+        if (!value) continue;
+        if (looksLikeMapsOrWebUrl(value)) continue;
+        if (/^(open|closed)/i.test(value)) continue;
+        if (/^\d+(\.\d+)?\s*mi/i.test(value)) continue;
+        if (/^\d+(\.\d+)?\s*min/i.test(value)) continue;
+        return value;
+      }
+      return "";
+    }
+
+    function firstFiniteNumber(values) {
+      for (var i = 0; i < values.length; i++) {
+        var raw = values[i];
+        var n = (typeof raw === "number") ? raw : Number(raw);
+        if (Number.isFinite(n)) return n;
+      }
+      return null;
+    }
+
+    function normalizeSharedPlaceRow(row) {
+      var r = Array.isArray(row) ? row : [];
+      var category = String(r[0] || "Place").trim();
+      var name = String(r[1] || "").trim();
+      var address = firstReadableText([r[3], r[7], r[8], r[5], r[4]]);
+      var statusText = firstReadableText([r[4], r[5]]);
+      var miles = firstFiniteNumber([r[6], r[8], r[9]]);
+
+      if (/^(open|closed)/i.test(address)) {
+        address = firstReadableText([r[3], r[7], r[8]]);
+      }
+
+      if (statusText && !/^(open|closed)/i.test(statusText)) {
+        statusText = "";
+      }
+
+      return {
+        category: category,
+        name: name || "Shared Place",
+        address: address,
+        statusText: statusText,
+        miles: miles
+      };
+    }
+
     function showSharedGuide(sharedGuide) {
       if (sharedGuide && String(sharedGuide.shareType || "").toLowerCase() === "selected_places") {
         showSharedSelectedPlaces(sharedGuide);
@@ -3862,6 +3942,9 @@
       resetLoadMoreState();
       stopLoadingState();
       document.body.classList.remove("home-mode");
+      document.body.classList.remove("selected-share-mode");
+      document.body.classList.remove("has-sticky-share");
+      document.getElementById("stickyShareBar").style.display = "none";
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
       document.getElementById("searchPanel").style.display = "none";
@@ -3896,11 +3979,15 @@
       resetSelectedPlaces();
       resetLoadMoreState();
       document.body.classList.remove("home-mode");
+      document.body.classList.add("selected-share-mode");
+      document.body.classList.remove("has-sticky-share");
+      document.getElementById("stickyShareBar").style.display = "none";
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "A few game day stops, shared with you.";
       document.getElementById("searchPanel").style.display = "none";
       document.getElementById("shareTools").style.display = "none";
       document.getElementById("shareLinkBox").style.display = "none";
+      document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       hideLoadMoreControls();
@@ -3908,7 +3995,7 @@
       var banner = document.getElementById("sharedBanner");
       var bannerText = document.getElementById("sharedBannerText");
       banner.style.display = "block";
-      banner.querySelector(".shared-banner-title").textContent = "Selected places";
+      banner.querySelector(".shared-banner-title").textContent = "Shared Picks";
       bannerText.textContent = "A few places someone picked out for game day.";
 
       lastResults = Array.isArray(sharedGuide && sharedGuide.results) ? sharedGuide.results : [];
@@ -3919,10 +4006,8 @@
       var results = document.getElementById("results");
       results.innerHTML = "";
 
-      results.appendChild(createSectionHeading("Shared Picks"));
-
       if (!lastResults.length) {
-        results.innerHTML +=
+        results.innerHTML =
           "<div class='card'>" +
             "<div class='card-name'>No shared places found</div>" +
             "<div class='card-address'>This selected places link does not contain any places.</div>" +
@@ -3933,40 +4018,24 @@
         return;
       }
 
-      var intro = document.createElement("div");
-      intro.className = "card";
-      intro.innerHTML =
-        "<div class='card-name'>Shared with your group</div>" +
-        "<div class='card-address'>These are the places someone selected to send over. Want your own nearby options too?</div>" +
-        "<div class='card-actions'>" +
-          "<a class='action-btn build-btn' href='" + esc(window.location.origin + window.location.pathname) + "'>Create Your Own Guide</a>" +
-          "<a class='secondary-btn' href='" + esc(window.location.origin + window.location.pathname) + "'>Open Full App</a>" +
-        "</div>";
-      results.appendChild(intro);
-
       var grid = document.createElement("div");
       grid.className = "results-grid";
       results.appendChild(grid);
 
       for (var i = 0; i < lastResults.length; i++) {
-        var r = lastResults[i] || [];
-        var category = String(r[0] || "Place").trim();
-        var name = String(r[1] || "").trim();
-        var minutes = String(r[5] || "").trim();
-        var miles = (typeof r[6] === "number") ? r[6] : Number(r[6]);
-        var address = String(r[7] || "").trim();
-
+        var place = normalizeSharedPlaceRow(lastResults[i]);
         var metaParts = [];
-        if (category) metaParts.push(esc(category));
-        if (minutes) metaParts.push(esc(minutes));
-        if (Number.isFinite(miles)) metaParts.push(esc(miles.toFixed(1) + " mi"));
+
+        if (place.category) metaParts.push(esc(place.category));
+        if (Number.isFinite(place.miles)) metaParts.push(esc(place.miles.toFixed(1) + " mi"));
+        if (place.statusText) metaParts.push(esc(place.statusText));
 
         var card = document.createElement("div");
         card.className = "card";
 
         var nameEl = document.createElement("div");
         nameEl.className = "card-name";
-        nameEl.textContent = name || "Shared Place";
+        nameEl.textContent = place.name;
         card.appendChild(nameEl);
 
         if (metaParts.length) {
@@ -3976,12 +4045,20 @@
           card.appendChild(metaEl);
         }
 
-        var addressEl = document.createElement("div");
-        addressEl.className = "card-address";
-        addressEl.innerHTML = esc(address || "");
-        card.appendChild(addressEl);
+        if (place.address) {
+          var addressEl = document.createElement("div");
+          addressEl.className = "card-address";
+          addressEl.textContent = place.address;
+          card.appendChild(addressEl);
+        }
 
-        card.appendChild(createLocationActions(name, address));
+        var actions = createLocationActions(place.name, place.address || place.name);
+        actions.classList.add("selected-shared-actions");
+        var shareBtn = actions.querySelector(".share-action");
+        if (shareBtn) {
+          shareBtn.classList.add("selected-share-spot-btn");
+        }
+        card.appendChild(actions);
         grid.appendChild(card);
       }
 
@@ -3996,6 +4073,9 @@
       resetSelectedPlaces();
       resetLoadMoreState();
       document.body.classList.remove("home-mode");
+      document.body.classList.remove("selected-share-mode");
+      document.body.classList.remove("has-sticky-share");
+      document.getElementById("stickyShareBar").style.display = "none";
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
       document.getElementById("searchPanel").style.display = "none";
