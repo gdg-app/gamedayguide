@@ -20,10 +20,49 @@ export default async function handler(req, res) {
     });
 
     if (cacheContext.eligible) {
+      console.log(
+        "[GDG CACHE] MISS_CHECK key=" +
+          cacheContext.key +
+          " mode=" +
+          mode +
+          " radius=" +
+          radiusMiles
+      );
+
       const cachedRows = await tryGetCachedGuideRows(cacheContext.key);
       if (Array.isArray(cachedRows)) {
+        console.log(
+          "[GDG CACHE] HIT key=" +
+            cacheContext.key +
+            " mode=" +
+            mode +
+            " radius=" +
+            radiusMiles +
+            " rows=" +
+            cachedRows.length
+        );
         return res.status(200).json(cachedRows);
       }
+
+      console.log(
+        "[GDG CACHE] MISS key=" +
+          cacheContext.key +
+          " mode=" +
+          mode +
+          " radius=" +
+          radiusMiles
+      );
+    } else {
+      console.log(
+        "[GDG CACHE] BYPASS reason=" +
+          cacheContext.reason +
+          " mode=" +
+          mode +
+          " radius=" +
+          radiusMiles +
+          " query=" +
+          summarizeForLog(query)
+      );
     }
 
     let loc = null;
@@ -39,11 +78,44 @@ export default async function handler(req, res) {
     const rows = await collectAllRows(loc, radiusMiles, apiKey, mode);
 
     if (cacheContext.eligible) {
-      await trySetCachedGuideRows(cacheContext.key, rows, getGuideCacheTtlSeconds(mode));
+      const stored = await trySetCachedGuideRows(
+        cacheContext.key,
+        rows,
+        getGuideCacheTtlSeconds(mode)
+      );
+
+      if (stored) {
+        console.log(
+          "[GDG CACHE] STORE key=" +
+            cacheContext.key +
+            " mode=" +
+            mode +
+            " radius=" +
+            radiusMiles +
+            " rows=" +
+            rows.length +
+            " ttl=" +
+            getGuideCacheTtlSeconds(mode)
+        );
+      } else {
+        console.log(
+          "[GDG CACHE] STORE_SKIPPED key=" +
+            cacheContext.key +
+            " mode=" +
+            mode +
+            " radius=" +
+            radiusMiles
+        );
+      }
     }
 
     return res.status(200).json(rows);
   } catch (err) {
+    console.error(
+      "[GDG CACHE] ERROR " +
+        (err && err.message ? err.message : String(err))
+    );
+
     return res.status(500).json({
       error: "Build guide failed",
       detail: err && err.message ? err.message : String(err)
@@ -1024,19 +1096,25 @@ function buildGuideCacheContext(params) {
   const radiusMiles = normalizeRadius(params && params.radiusMiles);
   const mode = normalizeMode(params && params.mode);
 
-  const eligible =
-    isGuideCacheEnabled() &&
-    !!query &&
-    !isValidLatLng(lat, lng) &&
-    mode === "core";
+  if (!isGuideCacheEnabled()) {
+    return { eligible: false, key: "", reason: "disabled" };
+  }
 
-  if (!eligible) {
-    return { eligible: false, key: "" };
+  if (!query) {
+    return { eligible: false, key: "", reason: "missing-query" };
+  }
+
+  if (isValidLatLng(lat, lng)) {
+    return { eligible: false, key: "", reason: "lat-lng-request" };
+  }
+
+  if (mode !== "core") {
+    return { eligible: false, key: "", reason: "non-core-mode" };
   }
 
   const normalizedQuery = normalizeCacheText(query);
   if (!normalizedQuery) {
-    return { eligible: false, key: "" };
+    return { eligible: false, key: "", reason: "empty-normalized-query" };
   }
 
   const key = [
@@ -1046,7 +1124,7 @@ function buildGuideCacheContext(params) {
     mode
   ].join(":");
 
-  return { eligible: true, key };
+  return { eligible: true, key, reason: "eligible" };
 }
 
 function isGuideCacheEnabled() {
@@ -1075,6 +1153,12 @@ function normalizeCacheText(value) {
     .replace(/\s/g, "-");
 }
 
+function summarizeForLog(value) {
+  const text = String(value || "").trim();
+  if (!text) return "none";
+  return text.length > 80 ? text.slice(0, 80) : text;
+}
+
 function getGuideCacheTtlSeconds(mode) {
   if (normalizeMode(mode) === "full") {
     return 6 * 60 * 60;
@@ -1100,7 +1184,13 @@ async function tryGetCachedGuideRows(cacheKey) {
     }
 
     return Array.isArray(parsed) ? parsed : null;
-  } catch (_err) {
+  } catch (err) {
+    console.error(
+      "[GDG CACHE] READ_ERROR key=" +
+        cacheKey +
+        " detail=" +
+        (err && err.message ? err.message : String(err))
+    );
     return null;
   }
 }
@@ -1112,7 +1202,13 @@ async function trySetCachedGuideRows(cacheKey, rows, ttlSeconds) {
     const payload = JSON.stringify(rows);
     await callUpstashRedis(["SET", cacheKey, payload, "EX", String(ttlSeconds)]);
     return true;
-  } catch (_err) {
+  } catch (err) {
+    console.error(
+      "[GDG CACHE] WRITE_ERROR key=" +
+        cacheKey +
+        " detail=" +
+        (err && err.message ? err.message : String(err))
+    );
     return false;
   }
 }
