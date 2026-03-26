@@ -28,32 +28,30 @@
 
   <style>
     :root {
-      --bg-dark: #10261d;
-      --bg-mid: #173527;
-      --bg-light: #214430;
-      --bg-accent: #2a5139;
-      --panel: rgba(251,250,247,0.95);
-      --panel-strong: #fdfcf9;
-      --panel-soft: rgba(251,250,247,0.9);
-      --text: #1c2420;
-      --muted: #687066;
-      --muted-strong: #465047;
-      --blue: #2f6fde;
-      --blue-dark: #1b252d;
+      --bg-dark: #07111f;
+      --bg-mid: #0d1b2d;
+      --bg-light: #132742;
+      --bg-accent: #1b3657;
+      --panel: rgba(255,255,255,0.94);
+      --panel-strong: #ffffff;
+      --panel-soft: rgba(255,255,255,0.84);
+      --text: #112033;
+      --muted: #687587;
+      --muted-strong: #435164;
+      --blue: #173a67;
+      --blue-dark: #102b4d;
       --green: #2d7a52;
       --green-dark: #21593c;
-      --purple: #2f6fde;
-      --share: #2f6fde;
-      --share-dark: #26333f;
-      --shadow: 0 18px 44px rgba(10,22,14,0.18);
-      --shadow-soft: 0 10px 28px rgba(10,22,14,0.08);
-      --shadow-card: 0 14px 34px rgba(10,22,14,0.1);
+      --purple: #69408d;
+      --shadow: 0 18px 44px rgba(5,12,24,0.2);
+      --shadow-soft: 0 10px 28px rgba(7,16,31,0.1);
+      --shadow-card: 0 14px 34px rgba(8,18,35,0.12);
       --shadow-app: 0 28px 70px rgba(0,0,0,0.22);
       --radius-xxl: 30px;
       --radius-xl: 24px;
       --radius-lg: 18px;
       --radius-md: 14px;
-      --border-soft: 1px solid rgba(255,255,255,0.48);
+      --border-soft: 1px solid rgba(255,255,255,0.52);
     }
 
     html {
@@ -62,7 +60,10 @@
       min-height: 100%;
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
-      background: linear-gradient(180deg, #1b3a2c 0%, #173527 42%, #10261d 100%);
+      background:
+        radial-gradient(circle at 14% 10%, rgba(255,255,255,0.08), transparent 22%),
+        radial-gradient(circle at 88% 16%, rgba(71,118,174,0.16), transparent 24%),
+        linear-gradient(180deg, #17304f 0%, var(--bg-mid) 44%, var(--bg-dark) 100%);
       background-attachment: fixed;
     }
 
@@ -84,7 +85,10 @@
       line-height: 1.45;
       overflow-x: hidden;
       position: relative;
-      background: linear-gradient(180deg, #1b3a2c 0%, #173527 42%, #10261d 100%);
+      background:
+        radial-gradient(circle at top center, rgba(255,255,255,0.06), transparent 22%),
+        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0) 20%),
+        linear-gradient(180deg, #183253 0%, var(--bg-mid) 42%, var(--bg-dark) 100%);
       background-attachment: fixed;
     }
 
@@ -93,8 +97,10 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background: radial-gradient(circle at 50% -10%, rgba(255,255,255,0.05), transparent 30%);
-      opacity: 0.65;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(255,255,255,0.08), transparent 30%),
+        linear-gradient(160deg, transparent 0 72%, rgba(255,255,255,0.05) 72.2%, rgba(255,255,255,0.05) 72.8%, transparent 73.2%);
+      opacity: 0.72;
     }
 
     body::after {
@@ -102,7 +108,8 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background: linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.01) 24%, rgba(0,0,0,0.14) 100%);
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.02) 24%, rgba(0,0,0,0.16) 100%);
       opacity: 1;
     }
 
@@ -122,7 +129,7 @@
     }
 
     .app-card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
+      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
       border: 1px solid rgba(255,255,255,0.12);
       border-radius: 34px;
       padding: 18px 16px 22px;
@@ -248,7 +255,7 @@
       width: 100%;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.93));
-      padding: 26px 20px 22px;
+      padding: 28px 22px 22px;
       border-radius: var(--radius-xxl);
       box-shadow: var(--shadow);
       margin-bottom: 22px;
@@ -262,7 +269,7 @@
       content: "";
       position: absolute;
       inset: 0 0 auto 0;
-      height: 96px;
+      height: 124px;
       background: linear-gradient(180deg, rgba(23,58,103,0.07), rgba(23,58,103,0));
       pointer-events: none;
     }
@@ -272,7 +279,7 @@
       z-index: 1;
     }
     .search-intro {
-      margin-bottom: 18px;
+      margin-bottom: 20px;
     }
 
     .search-kicker {
@@ -287,17 +294,17 @@
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.02em;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .search-title {
-      font-size: 31px;
-      line-height: 1.05;
-      letter-spacing: -0.045em;
+      font-size: 34px;
+      line-height: 1.02;
+      letter-spacing: -0.05em;
       font-weight: 800;
       color: #15263a;
       margin: 0 0 10px;
-      max-width: 13ch;
+      max-width: 12ch;
     }
 
     .search-subtitle {
@@ -305,7 +312,7 @@
       line-height: 1.55;
       color: #526274;
       margin: 0;
-      max-width: 38ch;
+      max-width: 40ch;
     }
 
     label {
@@ -355,7 +362,7 @@
       display: none;
       margin-top: 12px;
       margin-bottom: 14px;
-      background: #fdfcf9;
+      background: #fff;
       border: 1px solid #d8dde4;
       border-radius: 18px;
       box-shadow: var(--shadow-soft);
@@ -367,7 +374,7 @@
       font-size: 12px;
       font-weight: 800;
       color: #66717d;
-      background: #f5f4ef;
+      background: #f8fafc;
       border-bottom: 1px solid #eef2f6;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -377,7 +384,7 @@
       width: 100%;
       border: 0;
       border-bottom: 1px solid #eef2f6;
-      background: #fdfcf9;
+      background: #fff;
       text-align: left;
       padding: 14px;
       cursor: pointer;
@@ -475,7 +482,7 @@
 
     .chip-btn {
       border: 0;
-      background: #e8eeea;
+      background: #edf3fa;
       color: var(--blue);
       border-radius: 999px;
       padding: 11px 15px;
@@ -497,9 +504,67 @@
     }
 
     .chip-btn.expand-chip {
-      background: #fdfcf9;
+      background: #fff;
       color: #555;
       border: 1px solid #d8dde4;
+    }
+
+
+    .start-hint {
+      font-size: 12px;
+      font-weight: 800;
+      color: #5d6b78;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .quick-actions-wrap {
+      margin-top: 14px;
+      margin-bottom: 18px;
+    }
+
+    .quick-actions-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #4a5a68;
+      margin-bottom: 10px;
+    }
+
+    .quick-actions-row {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
+
+    .quick-actions-row::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .quick-actions-row::-webkit-scrollbar-thumb {
+      background: #c7d2de;
+      border-radius: 999px;
+    }
+
+    .quick-action-chip {
+      border: 0;
+      background: #e8eeea;
+      color: var(--blue);
+      border-radius: 999px;
+      padding: 11px 15px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      flex: 0 0 auto;
+      box-shadow: 0 6px 16px rgba(16,43,77,0.06);
+    }
+
+    .quick-action-chip:hover {
+      background: #dfeeff;
     }
 
     .radius-section {
@@ -515,7 +580,7 @@
     }
 
     .radius-btn {
-      background: #e7ece8;
+      background: #eef3f8;
       color: var(--blue);
       border: 0;
       border-radius: 999px;
@@ -570,7 +635,7 @@
     }
 
     .build-btn {
-      background: linear-gradient(180deg, #344350 0%, var(--blue) 100%);
+      background: linear-gradient(180deg, #224a7a 0%, var(--blue) 100%);
     }
 
     .location-btn {
@@ -578,21 +643,20 @@
     }
 
     .share-btn {
-      background: linear-gradient(180deg, #3a4a57 0%, var(--share) 100%);
+      background: linear-gradient(180deg, #8052a4 0%, var(--purple) 100%);
     }
 
     .match-btn {
       width: 100%;
-      margin-top: 8px;
-      min-height: 54px;
-      background: linear-gradient(180deg, #2e3c47 0%, var(--blue-dark) 100%);
+      margin-top: 4px;
+      background: linear-gradient(180deg, #274c77 0%, var(--blue-dark) 100%);
     }
 
     .secondary-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      background: #e8eeea;
+      background: #edf2f7;
       color: var(--blue);
       text-decoration: none;
       border: 0;
@@ -632,9 +696,9 @@
     }
 
     .location-action-btn.share-action {
-      background: linear-gradient(180deg, #3a4a57 0%, var(--share) 100%);
+      background: linear-gradient(180deg, #9340b7 0%, var(--purple) 100%);
       color: white;
-      box-shadow: 0 8px 16px rgba(36,49,61,0.18);
+      box-shadow: 0 8px 16px rgba(123,31,162,0.2);
     }
 
     #status {
@@ -790,7 +854,7 @@
       border-radius: 16px;
       margin: 10px 0 0;
       min-height: 52px;
-      background: #f7f5f1;
+      background: #f8fbff;
       color: var(--text);
       box-shadow:
         inset 0 1px 0 rgba(255,255,255,0.75),
@@ -930,7 +994,7 @@
 
     body.selected-share-mode .share-action {
       opacity: 0.86;
-      box-shadow: 0 5px 12px rgba(36,49,61,0.12);
+      box-shadow: 0 5px 12px rgba(123,31,162,0.12);
     }
 
     @media (max-width: 640px) {
@@ -1191,10 +1255,10 @@
     }
 
     .card.selected-card {
-      border: 2px solid rgba(36,49,61,0.22);
-      box-shadow: 0 14px 28px rgba(36,49,61,0.12);
+      border: 2px solid rgba(123,31,162,0.45);
+      box-shadow: 0 14px 28px rgba(123,31,162,0.16);
       background:
-        linear-gradient(180deg, rgba(251,250,247,0.99), rgba(244,246,242,0.96));
+        linear-gradient(180deg, rgba(255,255,255,0.99), rgba(248,243,252,0.96));
     }
 
     .urgent-card {
@@ -1242,19 +1306,19 @@
       padding: 10px 12px;
       min-height: 40px;
       white-space: nowrap;
-      background: #e8eeea;
-      color: var(--blue);
+      background: #f3ebf8;
+      color: var(--purple);
       font-size: 13px;
       font-weight: 800;
       cursor: pointer;
-      box-shadow: 0 6px 14px rgba(36,49,61,0.08);
+      box-shadow: 0 6px 14px rgba(105,64,141,0.08);
       flex: 0 0 auto;
     }
 
     .select-place-btn.selected {
-      background: linear-gradient(180deg, #3a4a57 0%, var(--share) 100%);
+      background: linear-gradient(180deg, #9340b7 0%, var(--purple) 100%);
       color: white;
-      box-shadow: 0 8px 16px rgba(36,49,61,0.18);
+      box-shadow: 0 8px 16px rgba(123,31,162,0.2);
     }
 
     .card-actions {
@@ -1275,7 +1339,7 @@
       font-weight: 700;
       border: 0;
       cursor: pointer;
-      background: linear-gradient(180deg, #344350 0%, var(--blue) 100%);
+      background: linear-gradient(180deg, #224a7a 0%, var(--blue) 100%);
       color: white;
       min-height: 48px;
       box-shadow: 0 10px 18px rgba(16,43,77,0.18);
@@ -1429,7 +1493,7 @@
     }
 
     .install-step-card {
-      background: #f5f4ef;
+      background: #f7fafc;
       border: 1px solid #e4ebf1;
       border-radius: 18px;
       padding: 14px;
@@ -1669,28 +1733,30 @@
 
       <div class="search-panel" id="searchPanel">
         <div class="search-intro">
-          <div class="search-kicker">Game Day, Made Easier.</div>
-          <h2 class="search-title">Find what you need near the game</h2>
-          <p class="search-subtitle">Search by field, facility, or current location for food, coffee, gas, pharmacies, and more.</p>
+          <div class="search-kicker">Start Here</div>
+          <h2 class="search-title">Find game day essentials fast</h2>
+          <p class="search-subtitle">Enter a field or facility, or use your location to find food, coffee, gas, medical, and more near the game.</p>
         </div>
 
-        <div class="quick-row-wrap" style="margin-bottom:16px;">
-          <div class="quick-row-label">Quick Start</div>
-          <div class="quick-row">
-            <button type="button" class="chip-btn" onclick="document.getElementById('address').focus()">Enter a field</button>
-            <button type="button" class="chip-btn secondary" onclick="setRadius(5)">5 mile radius</button>
-            <button type="button" class="chip-btn secondary" onclick="setRadius(10)">10 mile radius</button>
-          </div>
-        </div>
-        <label>Field Address or Field/Facility Name</label>
-        <input id="address" placeholder="Enter field address or facility name" value="" />
+        <div class="start-hint">Field or facility</div>
+        <input id="address" placeholder="Enter field, court, rink, or facility name" value="" />
         <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
         <div id="fieldMatchResults" class="match-results"></div>
-        <div class="helper-text">Try a field name, field number, court, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
+        <div class="helper-text">Try a field name, number, court, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
 
-        <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
-          <div class="quick-row-label">Recent searches</div>
-          <div class="quick-row" id="recentSearchRow"></div>
+        <div class="quick-actions-wrap">
+          <div class="quick-actions-label">Quick Actions</div>
+          <div class="quick-actions-row">
+            <button type="button" class="quick-action-chip" onclick="runQuickAction('food')">🍔 Food</button>
+            <button type="button" class="quick-action-chip" onclick="runQuickAction('coffee')">☕ Coffee</button>
+            <button type="button" class="quick-action-chip" onclick="runQuickAction('gas')">⛽ Gas</button>
+            <button type="button" class="quick-action-chip" onclick="runQuickAction('medical')">🏥 Medical</button>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button type="button" class="action-btn build-btn" onclick="runGuide()">Build Guide</button>
+          <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
         </div>
 
         <div class="radius-section">
@@ -1703,9 +1769,9 @@
           </div>
         </div>
 
-        <div class="button-row">
-          <button type="button" class="action-btn build-btn" onclick="runGuide()">Build Guide</button>
-          <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
+        <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
+          <div class="quick-row-label">Recent searches</div>
+          <div class="quick-row" id="recentSearchRow"></div>
         </div>
       </div>
 
@@ -1800,6 +1866,7 @@
     let lastBuildParams = null;
     let hasLoadedFullCategories = false;
     let isLoadingMoreCategories = false;
+    let pendingQuickCategory = "";
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
@@ -3141,6 +3208,51 @@
       runGuideWithQuery(query, "query");
     }
 
+
+    function categoryLabelForQuickAction(type) {
+      var normalized = String(type || "").toLowerCase();
+      if (normalized === "food") return "🍔 Food";
+      if (normalized === "coffee") return "☕ Coffee";
+      if (normalized === "gas") return "⛽ Gas";
+      if (normalized === "medical") return BACKEND_MEDICAL_LABEL;
+      return "";
+    }
+
+    function applyPendingQuickCategory() {
+      var category = categoryLabelForQuickAction(pendingQuickCategory);
+      var section, content, chevron;
+
+      if (!category) return;
+
+      section = document.getElementById("section-" + slugifyCategory(category));
+      pendingQuickCategory = "";
+
+      if (!section) return;
+
+      content = section.querySelector(".accordion-content");
+      chevron = section.querySelector(".accordion-chevron");
+
+      if (content && !content.classList.contains("open")) {
+        content.classList.add("open");
+        if (chevron) chevron.textContent = "▼";
+      }
+
+      setTimeout(function() {
+        try {
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (e) {}
+      }, 120);
+    }
+
+    function runQuickAction(type) {
+      pendingQuickCategory = String(type || "").toLowerCase();
+      if (String(document.getElementById("address").value || "").trim()) {
+        runGuide();
+      } else {
+        useMyLocation();
+      }
+    }
+
     function runGuide() {
       var rawQuery = (document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
@@ -3233,6 +3345,7 @@
           document.getElementById("status").textContent = "Done.";
           document.body.classList.remove("home-mode");
           render(lastResults);
+          applyPendingQuickCategory();
           trackSuccessfulGuideBuild(sourceType, query, lastResults.length);
           maybeOfferInstallPrompt(500);
         })
@@ -3287,6 +3400,7 @@
               document.getElementById("status").textContent = "Done.";
               document.body.classList.remove("home-mode");
               render(lastResults);
+              applyPendingQuickCategory();
               trackSuccessfulGuideBuild("gps", lastQueryOrGps, lastResults.length);
               maybeOfferInstallPrompt(500);
             })
