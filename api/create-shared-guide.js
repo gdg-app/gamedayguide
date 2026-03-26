@@ -4,6 +4,16 @@ import crypto from "crypto";
 const SHARED_GUIDES_SHEET_NAME =
   process.env.GOOGLE_SHARED_GUIDES_SHEET_NAME || "SharedGuides";
 
+const EXPECTED_HEADERS = [
+  "ShareId",
+  "CreatedAt",
+  "SourceType",
+  "QueryOrGps",
+  "Radius",
+  "ResultsJson",
+  "ShareType"
+];
+
 export default async function handler(req, res) {
   try {
     if (req.method !== "POST") {
@@ -13,8 +23,11 @@ export default async function handler(req, res) {
       });
     }
 
-    const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
+    const body = typeof req.body === "string"
+      ? JSON.parse(req.body || "{}")
+      : (req.body || {});
 
+    const shareType = normalizeShareType(body.shareType);
     const sourceType = String(body.sourceType || "").trim();
     const queryOrGps = String(body.queryOrGps || "").trim();
     const radius = normalizeRadius(body.radius);
@@ -34,11 +47,15 @@ export default async function handler(req, res) {
     const sheets = await getSheetsClient();
     const spreadsheetId = getSpreadsheetId();
 
-    await ensureSharedGuidesSheetExists(sheets, spreadsheetId, SHARED_GUIDES_SHEET_NAME);
+    await ensureSharedGuidesSheetExists(
+      sheets,
+      spreadsheetId,
+      SHARED_GUIDES_SHEET_NAME
+    );
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: `${SHARED_GUIDES_SHEET_NAME}!A:F`,
+      range: `${SHARED_GUIDES_SHEET_NAME}!A:G`,
       valueInputOption: "RAW",
       insertDataOption: "INSERT_ROWS",
       requestBody: {
@@ -48,7 +65,8 @@ export default async function handler(req, res) {
           sourceType,
           queryOrGps,
           radius,
-          JSON.stringify(results)
+          JSON.stringify(results),
+          shareType
         ]]
       }
     });
@@ -61,6 +79,7 @@ export default async function handler(req, res) {
         sourceType,
         queryOrGps,
         radius,
+        shareType,
         userId
       }
     });
@@ -70,6 +89,12 @@ export default async function handler(req, res) {
       error: err && err.message ? err.message : String(err)
     });
   }
+}
+
+function normalizeShareType(value) {
+  var v = String(value || "").trim().toLowerCase();
+  if (v === "selected_places") return "selected_places";
+  return "full_guide";
 }
 
 function normalizeRadius(radiusMiles) {
@@ -154,19 +179,19 @@ async function ensureSharedGuidesSheetExists(sheets, spreadsheetId, sheetName) {
     });
   }
 
-  const headerRange = `${sheetName}!A1:F1`;
+  const headerRange = `${sheetName}!A1:G1`;
   const headerRead = await sheets.spreadsheets.values.get({
     spreadsheetId,
     range: headerRange
   });
 
   const firstRow = (headerRead.data && headerRead.data.values && headerRead.data.values[0]) || [];
-  const expected = ["ShareId", "CreatedAt", "SourceType", "QueryOrGps", "Radius", "ResultsJson"];
+  const normalized = normalizeHeaderRow(firstRow);
 
   const needsHeaderWrite =
-    firstRow.length !== expected.length ||
-    expected.some(function(value, index) {
-      return firstRow[index] !== value;
+    normalized.length !== EXPECTED_HEADERS.length ||
+    EXPECTED_HEADERS.some(function(value, index) {
+      return normalized[index] !== value;
     });
 
   if (needsHeaderWrite) {
@@ -175,8 +200,31 @@ async function ensureSharedGuidesSheetExists(sheets, spreadsheetId, sheetName) {
       range: headerRange,
       valueInputOption: "RAW",
       requestBody: {
-        values: [expected]
+        values: [EXPECTED_HEADERS]
       }
     });
   }
+}
+
+function normalizeHeaderRow(row) {
+  var headers = Array.isArray(row) ? row.slice(0, EXPECTED_HEADERS.length) : [];
+
+  while (headers.length < 6) {
+    headers.push("");
+  }
+
+  var looksLikeLegacy =
+    headers[0] === "ShareId" &&
+    headers[1] === "CreatedAt" &&
+    headers[2] === "SourceType" &&
+    headers[3] === "QueryOrGps" &&
+    headers[4] === "Radius" &&
+    headers[5] === "ResultsJson";
+
+  if (looksLikeLegacy) {
+    headers[6] = "ShareType";
+    return headers;
+  }
+
+  return headers;
 }
