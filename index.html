@@ -1630,19 +1630,7 @@
         min-width: 280px;
       }
     }
-  
-.secondary-btn {
-  background: #f3f1ea;
-  color: #1c2420;
-  border: 1px solid rgba(0,0,0,0.08);
-  box-shadow: none;
-}
-
-.secondary-btn:active {
-  transform: scale(0.98);
-}
-</style>
-
+  </style>
 </head>
 <body>
   <div class="app">
@@ -1685,7 +1673,7 @@
         </div>
         <label>Field Address or Field/Facility Name</label>
         <input id="address" placeholder="Enter field address or facility name" value="" />
-        <button type="button" class="action-btn match-btn" onclick="findMatchingFields()"><span class="secondary-btn">Find Matching Fields</span></button>
+        <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
         <div id="fieldMatchResults" class="match-results"></div>
         <div class="helper-text">Try a field name, field number, court, rink, or full facility name. Example: Field 4 USA Baseball Complex.</div>
 
