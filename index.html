@@ -609,6 +609,20 @@
       box-shadow: 0 8px 16px rgba(123,31,162,0.2);
     }
 
+    .location-action-btn.light-action {
+      min-height: 42px;
+      padding: 10px 12px;
+      font-size: 13px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(11,61,145,0.08);
+    }
+
+    .location-action-btn.share-action.light-action {
+      background: #f2e8f8;
+      color: var(--purple);
+      box-shadow: 0 4px 10px rgba(123,31,162,0.08);
+    }
+
     #status {
       margin: 14px 0 8px;
       color: rgba(255,255,255,0.96);
@@ -995,12 +1009,24 @@
       margin-bottom: 10px;
     }
 
+    .card-meta.subtle-meta {
+      color: #5c6672;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+
     .card-address {
       color: #666;
       font-size: 14px;
       margin-bottom: 12px;
       line-height: 1.45;
       word-break: break-word;
+    }
+
+    .card-address.compact-address {
+      font-size: 13px;
+      margin-bottom: 10px;
+      color: #6a7280;
     }
 
     .select-place-btn {
@@ -1028,6 +1054,20 @@
       display: grid;
       gap: 8px;
       grid-template-columns: 1fr;
+    }
+
+    .card-actions.compact-actions {
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .card.compact-card {
+      padding: 18px 18px 16px;
+    }
+
+    .card.compact-card .card-name {
+      font-size: 18px;
+      margin-bottom: 6px;
     }
 
     .directions-btn {
@@ -2510,6 +2550,89 @@
       return actions;
     }
 
+    function createSelectedShareLocationActions(name, address) {
+      var actions = document.createElement("div");
+      actions.className = "card-actions compact-actions";
+
+      var googleLink = document.createElement("a");
+      googleLink.className = "location-action-btn google-btn light-action";
+      googleLink.href = buildGoogleMapsLink(name, address);
+      googleLink.target = "_blank";
+      googleLink.rel = "noopener";
+      googleLink.textContent = "Open in Google Maps";
+
+      var appleLink = document.createElement("a");
+      appleLink.className = "location-action-btn light-action";
+      appleLink.href = buildAppleMapsLink(name, address);
+      appleLink.target = "_blank";
+      appleLink.rel = "noopener";
+      appleLink.textContent = "Open in Apple Maps";
+
+      var shareBtn = document.createElement("button");
+      shareBtn.type = "button";
+      shareBtn.className = "location-action-btn share-action light-action";
+      shareBtn.textContent = "Share This Spot";
+      shareBtn.onclick = function() {
+        shareSpot(name, address, shareBtn);
+      };
+
+      actions.appendChild(googleLink);
+      actions.appendChild(appleLink);
+      actions.appendChild(shareBtn);
+
+      return actions;
+    }
+
+    function normalizeSharedPlaceAddress(sharedRow) {
+      var candidates = [
+        sharedRow && sharedRow[7],
+        sharedRow && sharedRow[3],
+        sharedRow && sharedRow[5],
+        sharedRow && sharedRow[4]
+      ];
+
+      for (var i = 0; i < candidates.length; i++) {
+        var value = String(candidates[i] || "").trim();
+        if (!value) continue;
+        if (isLikelyUrl(value)) continue;
+        if (value.toLowerCase() === "open now" || value.toLowerCase() === "closed") continue;
+        return value;
+      }
+
+      return "";
+    }
+
+    function normalizeSharedPlaceMeta(sharedRow) {
+      var category = String(sharedRow && sharedRow[0] || "Place").trim();
+      var dist = (typeof (sharedRow && sharedRow[6]) === "number")
+        ? sharedRow[6]
+        : Number(sharedRow && sharedRow[6]);
+      var openNow = String(sharedRow && sharedRow[4] || "").trim();
+      var minutes = String(sharedRow && sharedRow[5] || "").trim();
+      var rating = String(sharedRow && sharedRow[2] || "").trim();
+      var parts = [];
+
+      if (category) parts.push(esc(category));
+      if (Number.isFinite(dist)) {
+        parts.push(esc(dist.toFixed(1) + " mi"));
+      } else if (minutes && !isLikelyUrl(minutes)) {
+        parts.push(esc(minutes));
+      }
+
+      if (openNow && !isLikelyUrl(openNow) && openNow.length <= 40) {
+        parts.push(esc(openNow));
+      } else if (rating && !isLikelyUrl(rating) && /^\d(\.\d)?$/.test(rating)) {
+        parts.push("⭐ " + esc(rating));
+      }
+
+      return parts;
+    }
+
+    function isLikelyUrl(value) {
+      var v = String(value || "").trim().toLowerCase();
+      return !!v && (v.indexOf("http://") === 0 || v.indexOf("https://") === 0 || v.indexOf("www.") === 0);
+    }
+
     function getCuratedSuggestions(searchText) {
       return [];
     }
@@ -3789,19 +3912,12 @@
 
       for (var i = 0; i < lastResults.length; i++) {
         var r = lastResults[i] || [];
-        var category = String(r[0] || "Place").trim();
         var name = String(r[1] || "").trim();
-        var minutes = String(r[5] || "").trim();
-        var miles = (typeof r[6] === "number") ? r[6] : Number(r[6]);
-        var address = String(r[7] || "").trim();
-
-        var metaParts = [];
-        if (category) metaParts.push(esc(category));
-        if (minutes) metaParts.push(esc(minutes));
-        if (Number.isFinite(miles)) metaParts.push(esc(miles.toFixed(1) + " mi"));
+        var address = normalizeSharedPlaceAddress(r);
+        var metaParts = normalizeSharedPlaceMeta(r);
 
         var card = document.createElement("div");
-        card.className = "card";
+        card.className = "card compact-card";
 
         var nameEl = document.createElement("div");
         nameEl.className = "card-name";
@@ -3810,17 +3926,19 @@
 
         if (metaParts.length) {
           var metaEl = document.createElement("div");
-          metaEl.className = "card-meta";
+          metaEl.className = "card-meta subtle-meta";
           metaEl.innerHTML = metaParts.join(" • ");
           card.appendChild(metaEl);
         }
 
-        var addressEl = document.createElement("div");
-        addressEl.className = "card-address";
-        addressEl.innerHTML = esc(address || "");
-        card.appendChild(addressEl);
+        if (address) {
+          var addressEl = document.createElement("div");
+          addressEl.className = "card-address compact-address";
+          addressEl.innerHTML = esc(address);
+          card.appendChild(addressEl);
+        }
 
-        card.appendChild(createLocationActions(name, address));
+        card.appendChild(createSelectedShareLocationActions(name, address));
         grid.appendChild(card);
       }
 
