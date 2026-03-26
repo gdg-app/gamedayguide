@@ -23,7 +23,7 @@
   <meta name="apple-mobile-web-app-title" content="GameDayGuide">
   <meta name="application-name" content="GameDayGuide">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#0b1f3a">
+  <meta name="theme-color" content="#0a1724">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
   <style>
@@ -63,8 +63,7 @@
       min-height: 100%;
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
-      background:
-        linear-gradient(180deg, #0a1828 0%, #0b1f33 46%, #08131f 100%);
+      background: #0a1724;
       background-attachment: fixed;
     }
 
@@ -86,8 +85,7 @@
       line-height: 1.45;
       overflow-x: hidden;
       position: relative;
-      background:
-        linear-gradient(180deg, #0a1828 0%, #0b1f33 46%, #08131f 100%);
+      background: #0a1724;
       background-attachment: fixed;
     }
 
@@ -96,8 +94,8 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.00));
-      opacity: 0.72;
+      background: transparent;
+      opacity: 0;
     }
 
     body::after {
@@ -105,8 +103,8 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background: linear-gradient(180deg, rgba(0,0,0,0.10), rgba(0,0,0,0.03) 30%, rgba(0,0,0,0.16) 100%);
-      opacity: 1;
+      background: transparent;
+      opacity: 0;
     }
 
     button,
@@ -125,8 +123,8 @@
     }
 
     .app-card {
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025));
-      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.10);
       border-radius: 34px;
       padding: 18px 16px 24px;
       box-shadow: var(--shadow-app);
