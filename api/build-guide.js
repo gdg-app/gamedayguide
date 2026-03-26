@@ -1100,16 +1100,28 @@ function buildGuideCacheContext(params) {
     return { eligible: false, key: "", reason: "disabled" };
   }
 
-  if (!query) {
-    return { eligible: false, key: "", reason: "missing-query" };
+  if (mode !== "core" && mode !== "full") {
+    return { eligible: false, key: "", reason: "invalid-mode" };
   }
 
   if (isValidLatLng(lat, lng)) {
-    return { eligible: false, key: "", reason: "lat-lng-request" };
+    const roundedLat = roundCacheCoordinate(lat);
+    const roundedLng = roundCacheCoordinate(lng);
+
+    const key = [
+      "guide:v1",
+      "gps",
+      roundedLat,
+      roundedLng,
+      String(radiusMiles),
+      mode
+    ].join(":");
+
+    return { eligible: true, key, reason: "eligible-gps" };
   }
 
-  if (mode !== "core" && mode !== "full") {
-    return { eligible: false, key: "", reason: "invalid-mode" };
+  if (!query) {
+    return { eligible: false, key: "", reason: "missing-query" };
   }
 
   const normalizedQuery = normalizeCacheText(query);
@@ -1124,7 +1136,7 @@ function buildGuideCacheContext(params) {
     mode
   ].join(":");
 
-  return { eligible: true, key, reason: "eligible" };
+  return { eligible: true, key, reason: "eligible-text" };
 }
 
 function isGuideCacheEnabled() {
@@ -1151,6 +1163,10 @@ function normalizeCacheText(value) {
     .replace(/\s+/g, " ")
     .trim()
     .replace(/\s/g, "-");
+}
+
+function roundCacheCoordinate(value) {
+  return Number(value).toFixed(3);
 }
 
 function summarizeForLog(value) {
