@@ -248,10 +248,10 @@
       width: 100%;
       background:
         linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.93));
-      padding: 22px 18px 20px;
+      padding: 26px 20px 22px;
       border-radius: var(--radius-xxl);
       box-shadow: var(--shadow);
-      margin-bottom: 20px;
+      margin-bottom: 22px;
       border: var(--border-soft);
       backdrop-filter: blur(16px);
       position: relative;
@@ -262,7 +262,7 @@
       content: "";
       position: absolute;
       inset: 0 0 auto 0;
-      height: 110px;
+      height: 96px;
       background: linear-gradient(180deg, rgba(23,58,103,0.07), rgba(23,58,103,0));
       pointer-events: none;
     }
@@ -272,7 +272,7 @@
       z-index: 1;
     }
     .search-intro {
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
     .search-kicker {
@@ -291,21 +291,21 @@
     }
 
     .search-title {
-      font-size: 30px;
+      font-size: 31px;
       line-height: 1.05;
       letter-spacing: -0.045em;
       font-weight: 800;
       color: #15263a;
-      margin: 0 0 8px;
-      max-width: 14ch;
+      margin: 0 0 10px;
+      max-width: 13ch;
     }
 
     .search-subtitle {
       font-size: 15px;
-      line-height: 1.5;
+      line-height: 1.55;
       color: #526274;
       margin: 0;
-      max-width: 34ch;
+      max-width: 38ch;
     }
 
     label {
@@ -534,18 +534,19 @@
 
     .button-row {
       display: grid;
-      grid-template-columns: 1.3fr 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-top: 10px;
+      margin-top: 14px;
+      align-items: stretch;
     }
 
     .action-btn {
       width: 100%;
       border: 0;
       border-radius: 18px;
-      padding: 16px 16px;
-      min-height: 56px;
-      font-size: 17px;
+      padding: 15px 16px;
+      min-height: 58px;
+      font-size: 16px;
       font-weight: 700;
       color: white;
       cursor: pointer;
@@ -582,7 +583,8 @@
 
     .match-btn {
       width: 100%;
-      margin-top: 4px;
+      margin-top: 8px;
+      min-height: 54px;
       background: linear-gradient(180deg, #2e3c47 0%, var(--blue-dark) 100%);
     }
 
@@ -1598,7 +1600,7 @@
       }
 
       .button-row {
-        grid-template-columns: 1.3fr 1fr;
+        grid-template-columns: 1fr 1fr;
       }
 
       .shared-banner-actions {
@@ -1670,6 +1672,15 @@
           <div class="search-kicker">Game Day, Made Easier.</div>
           <h2 class="search-title">Find what you need near the game</h2>
           <p class="search-subtitle">Search by field, facility, or current location for food, coffee, gas, pharmacies, and more.</p>
+        </div>
+
+        <div class="quick-row-wrap" style="margin-bottom:16px;">
+          <div class="quick-row-label">Quick Start</div>
+          <div class="quick-row">
+            <button type="button" class="chip-btn" onclick="document.getElementById('address').focus()">Enter a field</button>
+            <button type="button" class="chip-btn secondary" onclick="setRadius(5)">5 mile radius</button>
+            <button type="button" class="chip-btn secondary" onclick="setRadius(10)">10 mile radius</button>
+          </div>
         </div>
         <label>Field Address or Field/Facility Name</label>
         <input id="address" placeholder="Enter field address or facility name" value="" />
