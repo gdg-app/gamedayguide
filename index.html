@@ -646,7 +646,14 @@
 
     .loading-wrap {
       display: none;
-      margin: 10px 0 16px;
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(calc(100% - 20px), 760px);
+      margin: 0;
+      z-index: 140;
+      pointer-events: none;
     }
 
     .loading-card {
@@ -1241,6 +1248,11 @@
         bottom: 92px;
         max-width: calc(100vw - 20px);
         padding: 9px 12px;
+      }
+
+      .loading-wrap {
+        width: calc(100% - 16px);
+        top: calc(env(safe-area-inset-top, 0px) + 8px);
       }
     }
 
