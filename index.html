@@ -2368,35 +2368,6 @@
         .replace(/^-+|-+$/g, "");
     }
 
-    function normalizeCategoryKey(categoryLabel) {
-      var label = String(categoryLabel || "").trim();
-
-      if (!label) return "";
-
-      label = label
-        .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
-
-      if (label === "food") return "food";
-      if (label === "coffee") return "coffee";
-      if (label === "breweries/bars" || label === "breweries / bars" || label === "bars" || label === "bar") return "bars";
-      if (label === "gas") return "gas";
-      if (label === "urgent care / er" || label === "urgent care/er" || label === "urgent care" || label === "er" || label === "medical") return "urgent_care";
-      if (label === "ice cream") return "ice_cream";
-      if (label === "pharmacy") return "pharmacy";
-      if (label === "grocery") return "grocery";
-      if (label === "hotels" || label === "hotel") return "hotels";
-      if (label === "sporting goods") return "sporting_goods";
-      if (label === "emergency dentist") return "emergency_dentist";
-      if (label === "atm") return "atm";
-
-      return label
-        .replace(/\s*\/\s*/g, "_")
-        .replace(/\s+/g, "_");
-    }
-
     function getAnonId() {
       try {
         var key = "gamedayguide_anon_id";
@@ -2427,6 +2398,25 @@
           sessionId: getAnonId(),
           sourceContext: detectSourceContext()
         })).catch(function() {});
+      } catch (e) {}
+    }
+
+    function trackPlaceClick(meta) {
+      try {
+        var info = meta || {};
+        var categoryKey = normalizeCategoryLabel(info.categoryLabel || "");
+        if (!categoryKey) return;
+
+        trackEvent("place_click", {
+          categoryLabel: categoryKey,
+          sourceType: lastSourceType || "",
+          queryOrGps: lastQueryOrGps || "",
+          radius: selectedRadius,
+          platform: detectSourceContext(),
+          interactionType: String(info.interactionType || "open_place"),
+          resultRank: Number(info.resultRank || 0) || "",
+          placeId: String(info.placeId || "")
+        });
       } catch (e) {}
     }
 
@@ -3228,35 +3218,37 @@
 
       return result.data;
     }
-function normalizeCategoryLabel(label) {
-  if (!label) return "";
 
-  let clean = String(label)
-    .replace(/[^a-zA-Z0-9\s\/]/g, "")
-    .trim()
-    .toLowerCase();
+    function normalizeCategoryLabel(label) {
+      if (!label) return "";
 
-  const map = {
-    "food": "food",
-    "coffee": "coffee",
-    "breweries/bars": "bars",
-    "breweries / bars": "bars",
-    "bars": "bars",
-    "gas": "gas",
-    "urgent care / er": "urgent_care",
-    "urgent care/er": "urgent_care",
-    "ice cream": "ice_cream",
-    "pharmacy": "pharmacy",
-    "grocery": "grocery",
-    "hotels": "hotels",
-    "sporting goods": "sporting_goods",
-    "emergency dentist": "emergency_dentist",
-    "atm": "atm"
-  };
+      let clean = String(label)
+        .replace(/[^a-zA-Z0-9\s\/]/g, "")
+        .trim()
+        .toLowerCase();
 
-  if (map[clean]) return map[clean];
-  return clean.replace(/\s+/g, "_");
-}
+      const map = {
+        "food": "food",
+        "coffee": "coffee",
+        "breweries/bars": "bars",
+        "breweries / bars": "bars",
+        "bars": "bars",
+        "gas": "gas",
+        "urgent care / er": "urgent_care",
+        "urgent care/er": "urgent_care",
+        "ice cream": "ice_cream",
+        "pharmacy": "pharmacy",
+        "grocery": "grocery",
+        "hotels": "hotels",
+        "sporting goods": "sporting_goods",
+        "emergency dentist": "emergency_dentist",
+        "atm": "atm"
+      };
+
+      if (map[clean]) return map[clean];
+      return clean.replace(/\s+/g, "_");
+    }
+
     function logCategoryOpened(categoryLabel) {
       try {
         var categoryKey = normalizeCategoryLabel(categoryLabel);
@@ -3481,7 +3473,7 @@ function normalizeCategoryLabel(label) {
         });
     }
 
-    function createLocationActions(name, address) {
+    function createLocationActions(name, address, analyticsMeta) {
       var actions = document.createElement("div");
       actions.className = "card-actions";
 
@@ -3491,6 +3483,13 @@ function normalizeCategoryLabel(label) {
       googleLink.target = "_blank";
       googleLink.rel = "noopener";
       googleLink.textContent = "Open in Google Maps";
+      googleLink.onclick = function() {
+        if (analyticsMeta) {
+          trackPlaceClick(Object.assign({}, analyticsMeta, {
+            interactionType: "open_google_maps"
+          }));
+        }
+      };
 
       var appleLink = document.createElement("a");
       appleLink.className = "location-action-btn";
@@ -3498,12 +3497,24 @@ function normalizeCategoryLabel(label) {
       appleLink.target = "_blank";
       appleLink.rel = "noopener";
       appleLink.textContent = "Open in Apple Maps";
+      appleLink.onclick = function() {
+        if (analyticsMeta) {
+          trackPlaceClick(Object.assign({}, analyticsMeta, {
+            interactionType: "open_apple_maps"
+          }));
+        }
+      };
 
       var shareBtn = document.createElement("button");
       shareBtn.type = "button";
       shareBtn.className = "location-action-btn share-action";
       shareBtn.textContent = "Share This Spot";
       shareBtn.onclick = function() {
+        if (analyticsMeta) {
+          trackPlaceClick(Object.assign({}, analyticsMeta, {
+            interactionType: "share_spot"
+          }));
+        }
         shareSpot(name, address, shareBtn);
       };
 
@@ -4547,7 +4558,10 @@ function normalizeCategoryLabel(label) {
           "<div class='top-stop-meta'>" + metaParts.join(" • ") + "</div>" +
           "<div class='top-stop-address'>" + esc(addr || "") + "</div>";
 
-        card.appendChild(createLocationActions(name, addr));
+        card.appendChild(createLocationActions(name, addr, {
+          categoryLabel: r[0] || "",
+          resultRank: 1
+        }));
         row.appendChild(card);
       });
 
@@ -4732,7 +4746,10 @@ function normalizeCategoryLabel(label) {
           addressEl.innerHTML = esc(addr || "");
           card.appendChild(addressEl);
 
-          card.appendChild(createLocationActions(name, addr));
+          card.appendChild(createLocationActions(name, addr, {
+          categoryLabel: r[0] || "",
+          resultRank: 1
+        }));
           grid.appendChild(card);
         }
 
