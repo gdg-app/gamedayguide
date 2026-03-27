@@ -714,6 +714,116 @@
       transition: opacity 0.2s ease;
     }
 
+
+    .loading-skeleton {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .loading-skeleton-row {
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(226,232,240,0.85) 0%, rgba(241,245,249,1) 48%, rgba(226,232,240,0.85) 100%);
+      background-size: 200% 100%;
+      animation: gdgShimmer 1.3s linear infinite;
+    }
+
+    .loading-skeleton-row.short {
+      width: 62%;
+      margin: 0 auto;
+    }
+
+    .loading-skeleton-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .loading-skeleton-card {
+      height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(90deg, rgba(232,238,245,0.92) 0%, rgba(245,248,251,1) 48%, rgba(232,238,245,0.92) 100%);
+      background-size: 200% 100%;
+      animation: gdgShimmer 1.25s linear infinite;
+      border: 1px solid rgba(222,229,238,0.85);
+    }
+
+    .location-btn.first-action-ready {
+      position: relative;
+      box-shadow:
+        0 16px 30px rgba(33,120,78,0.22),
+        0 0 0 4px rgba(76,175,80,0.10);
+      animation: gdgLocationNudge 2.1s ease-in-out infinite;
+    }
+
+    .location-btn.first-action-ready::after {
+      content: "Fastest start";
+      position: absolute;
+      top: -11px;
+      right: 10px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.96);
+      color: #246646;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+    }
+
+    .selection-toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(92px + env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(16px);
+      background: rgba(23,36,49,0.94);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      box-shadow: 0 14px 26px rgba(0,0,0,0.22);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 10020;
+      white-space: nowrap;
+      max-width: calc(100vw - 32px);
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .selection-toast.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    body.has-sticky-share .selection-toast {
+      bottom: calc(108px + env(safe-area-inset-bottom));
+    }
+
+    @keyframes gdgShimmer {
+      from { background-position: 200% 0; }
+      to { background-position: -200% 0; }
+    }
+
+    @keyframes gdgLocationNudge {
+      0%, 100% {
+        transform: translateY(0);
+        box-shadow:
+          0 16px 30px rgba(33,120,78,0.22),
+          0 0 0 4px rgba(76,175,80,0.10);
+      }
+      50% {
+        transform: translateY(-1px);
+        box-shadow:
+          0 20px 34px rgba(33,120,78,0.26),
+          0 0 0 6px rgba(76,175,80,0.13);
+      }
+    }
+
     @keyframes gdgPulse {
       0%, 100% {
         transform: scale(1);
@@ -1884,6 +1994,14 @@
           </div>
           <div class="loading-title">GDG Loading...</div>
           <div class="loading-subtext" id="loadingSubtext">Finding nearby game day stops...</div>
+          <div class="loading-skeleton" aria-hidden="true">
+            <div class="loading-skeleton-row"></div>
+            <div class="loading-skeleton-row short"></div>
+            <div class="loading-skeleton-grid">
+              <div class="loading-skeleton-card"></div>
+              <div class="loading-skeleton-card"></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1924,6 +2042,8 @@
     </div>
   </div>
 
+
+  <div id="selectionToast" class="selection-toast" aria-live="polite"></div>
 
   <div id="shareModal" class="share-modal">
     <div class="share-modal-backdrop" onclick="closeShareModal()"></div>
@@ -1988,6 +2108,10 @@
     let lastBuildParams = null;
     let hasLoadedFullCategories = false;
     let isLoadingMoreCategories = false;
+    let smartFirstActionTimer = null;
+    let hasInteractedSinceLoad = false;
+    let selectionToastTimer = null;
+    let firstAddToastCount = 0;
     let pendingQuickCategory = "";
     let activeQuickAction = "";
 
@@ -2035,7 +2159,8 @@
     const LOADING_MESSAGES = [
       "Finding nearby game day stops...",
       "Checking food, coffee, gas, and essentials...",
-      "Building your guide for this field...",
+      "Finding the fastest options near your field...",
+      "Pulling together places worth sharing...",
       "Almost ready for game day..."
     ];
 
@@ -2203,9 +2328,15 @@
 
     function togglePlaceSelection(row) {
       var key = makePlaceKey(row);
+      var placeName = String((row && row[1]) || "Place");
+      var wasSelected;
+
       if (!key) return;
 
-      if (selectedPlacesMap[key]) {
+      markUserInteraction();
+      wasSelected = !!selectedPlacesMap[key];
+
+      if (wasSelected) {
         delete selectedPlacesMap[key];
         selectedPlacesOrder = selectedPlacesOrder.filter(function(item) {
           return item !== key;
@@ -2213,10 +2344,73 @@
       } else {
         selectedPlacesMap[key] = row.slice();
         selectedPlacesOrder.push(key);
+
+        if (firstAddToastCount < 2) {
+          showSelectionToast(placeName + " added to your guide");
+          firstAddToastCount += 1;
+        }
       }
 
       updateShareSelectedButton();
     }
+
+
+    function markUserInteraction() {
+      hasInteractedSinceLoad = true;
+      clearSmartFirstAction();
+    }
+
+    function clearSmartFirstAction() {
+      if (smartFirstActionTimer) {
+        clearTimeout(smartFirstActionTimer);
+        smartFirstActionTimer = null;
+      }
+
+      var locationBtn = document.querySelector(".location-btn");
+      if (locationBtn) {
+        locationBtn.classList.remove("first-action-ready");
+      }
+    }
+
+    function scheduleSmartFirstAction() {
+      clearSmartFirstAction();
+
+      smartFirstActionTimer = setTimeout(function() {
+        var addressField = document.getElementById("address");
+        var locationBtn = document.querySelector(".location-btn");
+        var hasAddress = !!(addressField && String(addressField.value || "").trim());
+
+        if (hasInteractedSinceLoad || currentSharedGuide || hasAddress || !locationBtn || !document.body.classList.contains("home-mode")) {
+          return;
+        }
+
+        locationBtn.classList.add("first-action-ready");
+
+        var statusEl = document.getElementById("status");
+        if (statusEl && !String(statusEl.textContent || "").trim()) {
+          statusEl.textContent = "Fastest start: tap Use My Location.";
+        }
+      }, 1100);
+    }
+
+    function showSelectionToast(message) {
+      var toast = document.getElementById("selectionToast");
+      if (!toast) return;
+
+      toast.textContent = message;
+
+      if (selectionToastTimer) {
+        clearTimeout(selectionToastTimer);
+        selectionToastTimer = null;
+      }
+
+      toast.classList.add("visible");
+
+      selectionToastTimer = setTimeout(function() {
+        toast.classList.remove("visible");
+      }, 1500);
+    }
+
 
     function updateShareSelectedButton() {
       var btn = document.getElementById("shareSelectedBtn");
@@ -2595,6 +2789,7 @@
     }
 
     function startLoadingState() {
+      clearSmartFirstAction();
       var loadingWrap = document.getElementById("loadingState");
       var loadingSubtext = document.getElementById("loadingSubtext");
       var status = document.getElementById("status");
@@ -3168,6 +3363,7 @@
     }
 
     function findMatchingFields() {
+      markUserInteraction();
       var rawQuery = String(document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
 
@@ -3450,6 +3646,7 @@
     }
 
     function runGuide() {
+      markUserInteraction();
       var rawQuery = (document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
 
@@ -3555,6 +3752,7 @@
     }
 
     function useMyLocation() {
+      markUserInteraction();
       resetSelectedPlaces();
       resetLoadMoreState();
       document.getElementById("results").innerHTML = "";
@@ -4669,6 +4867,18 @@
       document.body.classList.add("home-mode");
       setRadius(5);
       focusAddressField();
+
+      var addressField = document.getElementById("address");
+      if (addressField) {
+        addressField.addEventListener("input", markUserInteraction);
+        addressField.addEventListener("focus", markUserInteraction, { once: true });
+      }
+
+      Array.prototype.slice.call(document.querySelectorAll(".radius-btn, .chip-btn, .build-btn, .location-btn, .match-btn")).forEach(function(el) {
+        el.addEventListener("click", markUserInteraction);
+      });
+
+      scheduleSmartFirstAction();
       maybeOfferInstallPrompt(1200);
     }
 
