@@ -1107,6 +1107,35 @@
       animation: gdgCountBump 0.28s ease;
     }
 
+    .selection-helper {
+      position: fixed;
+      left: 50%;
+      bottom: 96px;
+      transform: translate(-50%, 10px);
+      z-index: 9998;
+      display: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(20, 31, 45, 0.92);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      white-space: nowrap;
+      max-width: calc(100vw - 28px);
+      text-align: center;
+    }
+
+    .selection-helper.visible {
+      display: block;
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
     .category-section.section-spotlight .accordion-header {
       animation: gdgSectionSpotlight 1.2s ease;
       border-color: rgba(47,111,222,0.24);
@@ -1181,6 +1210,12 @@
 
       .sticky-share-bar {
         padding: 0 8px;
+      }
+
+      .selection-helper {
+        bottom: 92px;
+        max-width: calc(100vw - 20px);
+        padding: 9px 12px;
       }
     }
 
@@ -2082,8 +2117,10 @@
     let activeQuickAction = "";
     let currentShareMeta = null;
     let hasShownShareSuccess = false;
+    let selectionHelperTimer = null;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
+    const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
     const RECENT_SEARCH_KEY = "gamedayguide_recent_searches_v1";
     const INSTALL_PROMPT_SHOWN_KEY = "gamedayguide_install_prompt_shown_v2";
@@ -2297,7 +2334,9 @@
       var key = makePlaceKey(row);
       if (!key) return;
 
-      if (selectedPlacesMap[key]) {
+      var wasSelected = !!selectedPlacesMap[key];
+
+      if (wasSelected) {
         delete selectedPlacesMap[key];
         selectedPlacesOrder = selectedPlacesOrder.filter(function(item) {
           return item !== key;
@@ -2308,6 +2347,39 @@
       }
 
       updateShareSelectedButton();
+      if (!wasSelected) showSelectionHelper();
+    }
+
+    function hideSelectionHelper() {
+      var helper = document.getElementById("selectionHelper");
+      if (!helper) return;
+      helper.classList.remove("visible");
+      window.clearTimeout(selectionHelperTimer);
+      selectionHelperTimer = null;
+      window.setTimeout(function() {
+        if (!helper.classList.contains("visible")) {
+          helper.style.display = "none";
+        }
+      }, 220);
+    }
+
+    function showSelectionHelper() {
+      var helper = document.getElementById("selectionHelper");
+      if (!helper || currentSharedGuide) return;
+
+      try {
+        if (sessionStorage.getItem(SELECTION_HELPER_SESSION_KEY) === "1" && !helper.classList.contains("visible")) {
+          return;
+        }
+        sessionStorage.setItem(SELECTION_HELPER_SESSION_KEY, "1");
+      } catch (e) {}
+
+      helper.style.display = "block";
+      helper.classList.add("visible");
+      window.clearTimeout(selectionHelperTimer);
+      selectionHelperTimer = window.setTimeout(function() {
+        hideSelectionHelper();
+      }, 2500);
     }
 
     function updateShareSelectedButton() {
@@ -2316,12 +2388,12 @@
       var stickyCount = document.getElementById("stickyShareCount");
       var stickyInner = stickyBar ? stickyBar.querySelector(".sticky-share-inner") : null;
       var count = getSelectedPlaces().length;
-      var countLabel = count === 1 ? "1 place selected" : (count + " places selected");
+      var countLabel = count === 1 ? "1 place added" : (count + " places added");
       var wasVisible = !!(stickyBar && stickyBar.style.display !== "none");
 
       if (btn) {
         btn.style.display = "none";
-        btn.textContent = count === 1 ? "Share 1 Selected Place" : ("Share " + count + " Selected Places");
+        btn.textContent = count === 1 ? "Share 1 Added Place" : ("Share " + count + " Added Places");
       }
 
       if (stickyBar && stickyCount) {
@@ -2329,6 +2401,7 @@
           stickyBar.style.display = "none";
           stickyBar.classList.remove("bar-visible");
           document.body.classList.remove("has-sticky-share");
+          hideSelectionHelper();
         } else {
           stickyCount.textContent = countLabel;
           stickyBar.style.display = "block";
@@ -4408,7 +4481,7 @@
           var selectBtn = document.createElement("button");
           selectBtn.type = "button";
           selectBtn.className = "select-place-btn" + (isSelected ? " selected" : "");
-          selectBtn.textContent = isSelected ? "Added ✓" : "Select";
+          selectBtn.textContent = isSelected ? "✓ Added" : "Add";
           selectBtn.onclick = function(rowCopy, buttonEl, cardEl) {
             return function(e) {
               var key;
@@ -4423,12 +4496,12 @@
               animateClass(buttonEl, "tap-pop");
 
               if (isPlaceSelectedByKey(key)) {
-                buttonEl.textContent = "Added ✓";
+                buttonEl.textContent = "✓ Added";
                 buttonEl.classList.add("selected");
                 cardEl.classList.add("selected-card");
                 animateClass(cardEl, "card-bump");
               } else {
-                buttonEl.textContent = "Select";
+                buttonEl.textContent = "Add";
                 buttonEl.classList.remove("selected");
                 cardEl.classList.remove("selected-card");
               }
