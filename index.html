@@ -1706,6 +1706,7 @@
             <button type="button" class="chip-btn" onclick="runQuickAction('coffee')">☕ Coffee</button>
             <button type="button" class="chip-btn" onclick="runQuickAction('gas')">⛽ Gas</button>
             <button type="button" class="chip-btn" onclick="runQuickAction('medical')">🏥 Medical</button>
+            <button type="button" class="chip-btn" onclick="runQuickAction('bars')">🍺 Bars</button>
           </div>
         </div>
 
@@ -3154,6 +3155,7 @@
       if (normalized === "coffee") return "☕ Coffee";
       if (normalized === "gas") return "⛽ Gas";
       if (normalized === "medical") return BACKEND_MEDICAL_LABEL;
+      if (normalized === "bars") return "🍺 Breweries/Bars";
       return "";
     }
 
