@@ -1035,6 +1035,34 @@
       justify-content: center;
     }
 
+    #shareModalCopiedLink {
+      display: none;
+      width: 100%;
+      margin: 8px 0 0;
+      padding: 12px 14px;
+      min-height: 44px;
+      border: 1px solid #d7e0e7;
+      border-radius: 14px;
+      background: #f7f5f1;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow-x: auto;
+      overflow-y: hidden;
+      text-overflow: clip;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    #shareModalCopiedLink::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    #shareModalCopiedLink::-webkit-scrollbar-thumb {
+      background: #c7d2de;
+      border-radius: 999px;
+    }
+
     .sticky-share-bar {
       position: fixed;
       left: 0;
@@ -2148,7 +2176,7 @@
           <div class="share-modal-status-title" id="shareModalStatusTitle">Guide shared 👍</div>
           <div class="share-modal-status-text" id="shareModalStatusText">Your team can open the same GameDayGuide in one tap.</div>
           <input id="shareModalCopiedLink" class="share-link-input" type="text" readonly value="" style="display:none;" />
-          <button class="action-btn build-btn" type="button" onclick="startAnotherFromShareModal()">Start another</button>
+          <button class="action-btn build-btn" id="shareModalStartAnotherBtn" type="button" onclick="startAnotherFromShareModal()">Start another</button>
         </div>
       </div>
     </div>
@@ -3075,12 +3103,14 @@
       var statusTitleEl = document.getElementById("shareModalStatusTitle");
       var statusTextEl = document.getElementById("shareModalStatusText");
       var copiedLinkEl = document.getElementById("shareModalCopiedLink");
+      var startAnotherBtn = document.getElementById("shareModalStartAnotherBtn");
       if (statusTitleEl) statusTitleEl.textContent = "Guide shared 👍";
       if (statusTextEl) statusTextEl.textContent = "Your team can open the same GameDayGuide in one tap.";
       if (copiedLinkEl) {
         copiedLinkEl.value = "";
         copiedLinkEl.style.display = "none";
       }
+      if (startAnotherBtn) startAnotherBtn.style.display = "block";
 
       hasShownShareSuccess = false;
     }
@@ -3096,6 +3126,7 @@
       var statusTitleEl = document.getElementById("shareModalStatusTitle");
       var statusTextEl = document.getElementById("shareModalStatusText");
       var copiedLinkEl = document.getElementById("shareModalCopiedLink");
+      var startAnotherBtn = document.getElementById("shareModalStartAnotherBtn");
       var shareUrl = latestShareUrl || window.currentShareUrl || "";
       if (!actionsEl || !statusEl) return;
 
@@ -3108,7 +3139,9 @@
           copiedLinkEl.focus();
           copiedLinkEl.select();
           copiedLinkEl.setSelectionRange(0, copiedLinkEl.value.length);
+          copiedLinkEl.scrollLeft = 0;
         }
+        if (startAnotherBtn) startAnotherBtn.style.display = "none";
         document.getElementById("status").textContent = "Link copied";
       } else {
         if (statusTitleEl) statusTitleEl.textContent = "Guide shared 👍";
@@ -3117,6 +3150,7 @@
           copiedLinkEl.value = "";
           copiedLinkEl.style.display = "none";
         }
+        if (startAnotherBtn) startAnotherBtn.style.display = "block";
         document.getElementById("status").textContent = "Guide shared 👍";
       }
 
