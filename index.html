@@ -2019,6 +2019,17 @@
         <label>Field or facility</label>
         <input id="address" placeholder="Enter field address or facility name" value="" />
         <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
+
+        <div id="loadingState" class="loading-wrap" style="display:none;">
+          <div class="loading-card">
+            <div class="loading-logo-shell">
+              <img src="gdg-icon.png?v=3" alt="GameDayGuide Logo">
+            </div>
+            <div class="loading-title">Building your Game Day Guide…</div>
+            <div class="loading-subtext" id="loadingSubtext">Finding nearby game day stops...</div>
+          </div>
+        </div>
+
         <div id="fieldMatchResults" class="match-results"></div>
         <div class="helper-text">Pick your field and GDG will build a guide automatically. You can change the radius and rebuild anytime. Example: Field 4 USA Baseball Complex.</div>
 
@@ -2056,15 +2067,6 @@
 
       <div id="status"></div>
 
-      <div id="loadingState" class="loading-wrap" style="display:none;">
-        <div class="loading-card">
-          <div class="loading-logo-shell">
-            <img src="gdg-icon.png?v=3" alt="GameDayGuide Logo">
-          </div>
-            <div class="loading-title">Building your Game Day Guide…</div>
-          <div class="loading-subtext" id="loadingSubtext">Finding nearby game day stops...</div>
-        </div>
-      </div>
 
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
