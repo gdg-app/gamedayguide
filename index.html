@@ -901,7 +901,84 @@
       font-size: 18px;
       font-weight: 800;
       text-align: center;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
+    }
+
+    .share-modal-subtitle {
+      font-size: 14px;
+      line-height: 1.45;
+      color: #5f6d79;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .share-modal-preview {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .share-modal-preview.active {
+      display: flex;
+    }
+
+    .share-preview-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: #eef4fb;
+      color: var(--blue);
+      font-size: 16px;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(16,43,77,0.08);
+    }
+
+    .share-modal-count {
+      font-size: 14px;
+      font-weight: 700;
+      color: #344350;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .share-modal-status {
+      display: none;
+      text-align: center;
+      padding-top: 4px;
+    }
+
+    .share-modal-status.active {
+      display: block;
+    }
+
+    .share-modal-status-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1c2a35;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+
+    .share-modal-status-text {
+      font-size: 14px;
+      color: #5f6d79;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .share-modal-actions {
+      display: block;
+    }
+
+    .share-modal-actions.hidden {
+      display: none;
     }
 
     .share-modal-content .action-btn {
@@ -1030,6 +1107,35 @@
       animation: gdgCountBump 0.28s ease;
     }
 
+    .selection-helper {
+      position: fixed;
+      left: 50%;
+      bottom: 96px;
+      transform: translate(-50%, 10px);
+      z-index: 9998;
+      display: none;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(20, 31, 45, 0.92);
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.2;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.18);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      white-space: nowrap;
+      max-width: calc(100vw - 28px);
+      text-align: center;
+    }
+
+    .selection-helper.visible {
+      display: block;
+      opacity: 1;
+      transform: translate(-50%, 0);
+    }
+
     .category-section.section-spotlight .accordion-header {
       animation: gdgSectionSpotlight 1.2s ease;
       border-color: rgba(47,111,222,0.24);
@@ -1104,6 +1210,12 @@
 
       .sticky-share-bar {
         padding: 0 8px;
+      }
+
+      .selection-helper {
+        bottom: 92px;
+        max-width: calc(100vw - 20px);
+        padding: 9px 12px;
       }
     }
 
@@ -1796,35 +1908,7 @@
         min-width: 280px;
       }
     }
-  
-/* Streamline Pass 1 */
-.share-modal-sheet.dragging {
-  transition: none !important;
-}
-.share-preview-icons {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  margin: 10px 0 14px;
-}
-.share-preview-icon {
-  width: 46px;
-  height: 46px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  background: rgba(59, 107, 205, 0.08);
-  font-size: 24px;
-}
-.share-preview-icons.single .share-preview-icon {
-  width: 56px;
-  height: 56px;
-  font-size: 28px;
-}
-
-</style>
+  </style>
 </head>
 <body>
   <div class="app">
@@ -1869,7 +1953,9 @@
         <input id="address" placeholder="Enter field address or facility name" value="" />
         <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
         <div id="fieldMatchResults" class="match-results"></div>
-<div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
+        <div class="helper-text">Pick your field first. Then choose a radius, tap a Quick Action, or tap Build Guide. Example: Field 4 USA Baseball Complex.</div>
+
+        <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
           <div class="quick-row" id="recentSearchRow"></div>
         </div>
@@ -1958,16 +2044,28 @@
       <div class="share-modal-handle"></div>
 
       <div class="share-modal-content">
-        <div class="share-modal-title">Your GameDayGuide</div>
-        <div id="sharePreviewIcons" class="share-modal-preview"></div>
+        <div id="shareModalMain">
+          <div class="share-modal-title">Your GameDayGuide</div>
+          <div class="share-modal-subtitle" id="shareModalSubtitle">Send your picks to your team</div>
+          <div class="share-modal-preview" id="shareModalPreview"></div>
+          <div class="share-modal-count" id="shareModalCount">0 places included</div>
 
-        <button class="action-btn share-btn" onclick="triggerNativeShare()">
-          Share
-        </button>
+          <div class="share-modal-actions" id="shareModalActions">
+            <button class="action-btn share-btn" onclick="triggerNativeShare()">
+              Share
+            </button>
 
-        <button class="secondary-btn" onclick="copyShareLink()">
-          Copy Link
-        </button>
+            <button class="secondary-btn" onclick="copyShareLink()">
+              Copy Link
+            </button>
+          </div>
+        </div>
+
+        <div class="share-modal-status" id="shareModalStatus">
+          <div class="share-modal-status-title">Guide shared 👍</div>
+          <div class="share-modal-status-text">Your team can open the same GameDayGuide in one tap.</div>
+          <button class="action-btn build-btn" type="button" onclick="startAnotherFromShareModal()">Start another</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2017,8 +2115,12 @@
     let isLoadingMoreCategories = false;
     let pendingQuickCategory = "";
     let activeQuickAction = "";
+    let currentShareMeta = null;
+    let hasShownShareSuccess = false;
+    let selectionHelperTimer = null;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
+    const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
     const RECENT_SEARCH_KEY = "gamedayguide_recent_searches_v1";
     const INSTALL_PROMPT_SHOWN_KEY = "gamedayguide_install_prompt_shown_v2";
@@ -2083,7 +2185,7 @@
       } else if (lastSourceType === "gps") {
         source = "Current location";
       } else {
-        source = String(lastQueryOrGps || "").trim();
+        source = getShareSafeLocationLabel(lastSourceType, lastQueryOrGps) || String(lastQueryOrGps || "").trim();
       }
 
       if (!source && !radiusText) {
@@ -2232,7 +2334,9 @@
       var key = makePlaceKey(row);
       if (!key) return;
 
-      if (selectedPlacesMap[key]) {
+      var wasSelected = !!selectedPlacesMap[key];
+
+      if (wasSelected) {
         delete selectedPlacesMap[key];
         selectedPlacesOrder = selectedPlacesOrder.filter(function(item) {
           return item !== key;
@@ -2243,6 +2347,39 @@
       }
 
       updateShareSelectedButton();
+      if (!wasSelected) showSelectionHelper();
+    }
+
+    function hideSelectionHelper() {
+      var helper = document.getElementById("selectionHelper");
+      if (!helper) return;
+      helper.classList.remove("visible");
+      window.clearTimeout(selectionHelperTimer);
+      selectionHelperTimer = null;
+      window.setTimeout(function() {
+        if (!helper.classList.contains("visible")) {
+          helper.style.display = "none";
+        }
+      }, 220);
+    }
+
+    function showSelectionHelper() {
+      var helper = document.getElementById("selectionHelper");
+      if (!helper || currentSharedGuide) return;
+
+      try {
+        if (sessionStorage.getItem(SELECTION_HELPER_SESSION_KEY) === "1" && !helper.classList.contains("visible")) {
+          return;
+        }
+        sessionStorage.setItem(SELECTION_HELPER_SESSION_KEY, "1");
+      } catch (e) {}
+
+      helper.style.display = "block";
+      helper.classList.add("visible");
+      window.clearTimeout(selectionHelperTimer);
+      selectionHelperTimer = window.setTimeout(function() {
+        hideSelectionHelper();
+      }, 2500);
     }
 
     function updateShareSelectedButton() {
@@ -2251,12 +2388,12 @@
       var stickyCount = document.getElementById("stickyShareCount");
       var stickyInner = stickyBar ? stickyBar.querySelector(".sticky-share-inner") : null;
       var count = getSelectedPlaces().length;
-      var countLabel = count === 1 ? "1 place selected" : (count + " places selected");
+      var countLabel = count === 1 ? "1 place added" : (count + " places added");
       var wasVisible = !!(stickyBar && stickyBar.style.display !== "none");
 
       if (btn) {
         btn.style.display = "none";
-        btn.textContent = count === 1 ? "Share 1 Selected Place" : ("Share " + count + " Selected Places");
+        btn.textContent = count === 1 ? "Share 1 Added Place" : ("Share " + count + " Added Places");
       }
 
       if (stickyBar && stickyCount) {
@@ -2264,6 +2401,7 @@
           stickyBar.style.display = "none";
           stickyBar.classList.remove("bar-visible");
           document.body.classList.remove("has-sticky-share");
+          hideSelectionHelper();
         } else {
           stickyCount.textContent = countLabel;
           stickyBar.style.display = "block";
@@ -2702,15 +2840,123 @@
       return "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
     }
 
+
+    function getShareSafeLocationLabel(sourceType, queryOrGps) {
+      var source = String(sourceType || "").toLowerCase();
+      var value = String(queryOrGps || "").trim();
+
+      if (!value) {
+        return source === "gps" ? "Near your game" : "";
+      }
+
+      if (source === "gps") {
+        return "Near your game";
+      }
+
+      if (/^gps\s*:/i.test(value)) {
+        return "Near your game";
+      }
+
+      if (/^-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?$/.test(value)) {
+        return "Near your game";
+      }
+
+      return value;
+    }
+
+    function getShareContextResults() {
+      if (currentShareMeta && Array.isArray(currentShareMeta.results) && currentShareMeta.results.length) {
+        return currentShareMeta.results;
+      }
+      return Array.isArray(lastResults) ? lastResults : [];
+    }
+
+    function categoryEmojiFromLabel(label) {
+      var category = String(label || "");
+      if (category.indexOf("🍔") !== -1 || category === "🍔 Food") return "🍔";
+      if (category.indexOf("☕") !== -1 || category === "☕ Coffee") return "☕";
+      if (category.indexOf("🍺") !== -1 || category === "🍺 Breweries/Bars") return "🍺";
+      if (category.indexOf("⛽") !== -1 || category === "⛽ Gas") return "⛽";
+      if (category.indexOf("🏥") !== -1 || category === BACKEND_MEDICAL_LABEL) return "🏥";
+      if (category.indexOf("🍦") !== -1) return "🍦";
+      if (category.indexOf("💊") !== -1) return "💊";
+      if (category.indexOf("🏨") !== -1) return "🏨";
+      if (category.indexOf("🏧") !== -1) return "🏧";
+      if (category.indexOf("🛒") !== -1) return "🛒";
+      if (category.indexOf("⚾") !== -1) return "⚾";
+      if (category.indexOf("🦷") !== -1) return "🦷";
+      return "";
+    }
+
+    function getSharePreviewIcons(results) {
+      var seen = {};
+      var icons = [];
+      (results || []).forEach(function(row) {
+        var icon = categoryEmojiFromLabel(row && row[0]);
+        if (!icon || seen[icon]) return;
+        seen[icon] = true;
+        icons.push(icon);
+      });
+      return icons.slice(0, 3);
+    }
+
+    function updateShareModalContent() {
+      var subtitleEl = document.getElementById("shareModalSubtitle");
+      var countEl = document.getElementById("shareModalCount");
+      var previewEl = document.getElementById("shareModalPreview");
+      var actionsEl = document.getElementById("shareModalActions");
+      var statusEl = document.getElementById("shareModalStatus");
+
+      if (!subtitleEl || !countEl || !previewEl || !actionsEl || !statusEl) return;
+
+      var meta = currentShareMeta || {};
+      var shareResults = Array.isArray(meta.results) ? meta.results : getShareContextResults();
+      var count = shareResults.length;
+      var icons = getSharePreviewIcons(shareResults);
+      var noun = count === 1 ? "place" : "places";
+
+      subtitleEl.textContent = meta.subtitle || "Send your picks to your team";
+      countEl.textContent = count ? (count + " " + noun + " included") : "Ready to share";
+      previewEl.innerHTML = icons.map(function(icon) {
+        return "<span class='share-preview-icon'>" + esc(icon) + "</span>";
+      }).join("");
+      previewEl.classList.toggle("active", !!icons.length);
+      actionsEl.classList.remove("hidden");
+      statusEl.classList.remove("active");
+      hasShownShareSuccess = false;
+    }
+
+    function setShareModalMeta(meta) {
+      currentShareMeta = meta || null;
+      updateShareModalContent();
+    }
+
+    function showShareSuccessState() {
+      var actionsEl = document.getElementById("shareModalActions");
+      var statusEl = document.getElementById("shareModalStatus");
+      if (!actionsEl || !statusEl) return;
+      actionsEl.classList.add("hidden");
+      statusEl.classList.add("active");
+      hasShownShareSuccess = true;
+      document.getElementById("status").textContent = "Guide shared 👍";
+    }
+
+    function startAnotherFromShareModal() {
+      closeShareModal();
+      startNewGuide();
+    }
+
     function buildGuideShareTitle() {
-      return lastQueryOrGps
-        ? ("GameDayGuide for " + lastQueryOrGps)
+      var locationLabel = getShareSafeLocationLabel(lastSourceType, lastQueryOrGps);
+      return locationLabel
+        ? ("GameDayGuide for " + locationLabel)
         : "GameDayGuide";
     }
 
     function buildGuideShareText(url) {
       var lines = [];
-      if (lastQueryOrGps) lines.push("GameDayGuide for " + lastQueryOrGps);
+      var locationLabel = getShareSafeLocationLabel(lastSourceType, lastQueryOrGps);
+      if (locationLabel) lines.push("GameDayGuide for " + locationLabel);
       if (selectedRadius) lines.push("Radius: " + selectedRadius + " mi");
       if (url) lines.push(url);
       return lines.join("\n\n");
@@ -2987,6 +3233,10 @@
         }
       }
 
+      setShareModalMeta({
+        subtitle: "Send this spot to your team",
+        results: [[ "", name || "Shared Spot", "", address || "" ]]
+      });
       openShareModal();
     }
 
@@ -3662,7 +3912,7 @@
         "Could not copy link automatically. You can still copy the link below."
       );
 
-      closeShareModal();
+      showShareSuccessState();
 
       var input = document.getElementById("shareLinkInput");
       if (input) {
@@ -3689,7 +3939,7 @@
           title: "GameDayGuide",
           url: shareUrl
         });
-        closeShareModal();
+        showShareSuccessState();
       } catch (err) {
         if (err && err.name === "AbortError") {
           console.log("Share cancelled");
@@ -3703,14 +3953,15 @@
       latestShareUrl = url || "";
       window.currentShareUrl = latestShareUrl;
 
+      var safeLocationLabel = getShareSafeLocationLabel(lastSourceType, lastQueryOrGps);
       var shareLabel = customTitle || (
-        lastQueryOrGps
-          ? "Field guide ready for " + esc(lastQueryOrGps)
+        safeLocationLabel
+          ? "Field guide ready for " + esc(safeLocationLabel)
           : "Field guide ready to share"
       );
 
       var shareMeta = customMeta || (
-        lastQueryOrGps
+        safeLocationLabel
           ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
           : "Send this to your team chat so everyone can open the same GameDayGuide."
       );
@@ -3766,6 +4017,11 @@
         }
       }
 
+      setShareModalMeta({
+        subtitle: "Send your picks to your team",
+        results: Array.isArray(lastResults) ? lastResults.slice() : []
+      });
+
       openShareModal();
     }
 
@@ -3779,7 +4035,7 @@
 
       postJson("/api/create-shared-guide", {
         sourceType: lastSourceType,
-        queryOrGps: lastQueryOrGps,
+        queryOrGps: getShareSafeLocationLabel(lastSourceType, lastQueryOrGps) || lastQueryOrGps,
         radius: selectedRadius,
         results: lastResults,
         userId: getAnonId()
@@ -3817,7 +4073,7 @@
       postJson("/api/create-shared-guide", {
         shareType: "selected_places",
         sourceType: lastSourceType,
-        queryOrGps: lastQueryOrGps,
+        queryOrGps: getShareSafeLocationLabel(lastSourceType, lastQueryOrGps) || lastQueryOrGps,
         radius: selectedRadius,
         results: selectedResults,
         userId: getAnonId()
@@ -3835,6 +4091,10 @@
 
           latestShareUrl = url;
           window.currentShareUrl = url;
+          setShareModalMeta({
+            subtitle: "Send your picks to your team",
+            results: selectedResults.slice()
+          });
           openShareModal();
           document.getElementById("status").textContent = "";
         })
@@ -3846,131 +4106,21 @@
 
 
 
-    
-    function getSelectedCategoryPreviewIcons() {
-      var selectedResults = getSelectedPlaces();
-      if (!selectedResults.length) return [];
-
-      var iconMap = {
-        "🍔 Food": "🍔",
-        "☕ Coffee": "☕",
-        "🍦 Ice Cream": "🍦",
-        "⛽ Gas": "⛽",
-        "🛒 Grocery": "🛒",
-        "🏨 Hotels": "🏨",
-        "🏧 ATM": "🏧",
-        "💊 Pharmacy": "💊",
-        "⚾ Sporting Goods": "⚾",
-        "🏥 Urgent Care / ER": "🏥",
-        "🦷 Emergency Dentist": "🦷",
-        "🍺 Breweries/Bars": "🍺"
-      };
-
-      var seen = {};
-      var icons = [];
-
-      selectedResults.forEach(function(place) {
-        var category = String((place && place[0]) || "");
-        var icon = iconMap[category] || "";
-        if (icon && !seen[icon] && icons.length < 3) {
-          seen[icon] = true;
-          icons.push(icon);
-        }
-      });
-
-      return icons;
-    }
-
-    function renderSharePreviewIcons() {
-      var wrap = document.getElementById("sharePreviewIcons");
-      if (!wrap) return;
-
-      var icons = getSelectedCategoryPreviewIcons();
-      if (!icons.length) {
-        wrap.classList.remove("active");
-        wrap.innerHTML = "";
-        return;
-      }
-
-      wrap.classList.add("active");
-      wrap.innerHTML = icons.map(function(icon) {
-        return "<div class='share-preview-icon'>" + icon + "</div>";
-      }).join("");
-    }
-
-    function initShareModalSwipe() {
-      var modal = document.getElementById("shareModal");
-      var sheet = modal ? modal.querySelector(".share-modal-sheet") : null;
-      if (!modal || !sheet || sheet.dataset.swipeReady === "true") return;
-
-      sheet.dataset.swipeReady = "true";
-
-      var startY = 0;
-      var currentY = 0;
-      var dragging = false;
-
-      function getY(evt) {
-        return evt.touches ? evt.touches[0].clientY : evt.clientY;
-      }
-
-      function start(evt) {
-        if (!modal.classList.contains("active")) return;
-        startY = getY(evt);
-        currentY = startY;
-        dragging = true;
-        sheet.classList.add("dragging");
-      }
-
-      function move(evt) {
-        if (!dragging) return;
-        currentY = getY(evt);
-        var delta = Math.max(0, currentY - startY);
-        sheet.style.transform = "translateY(" + delta + "px)";
-        if (delta > 0 && evt.cancelable) evt.preventDefault();
-      }
-
-      function end() {
-        if (!dragging) return;
-        dragging = false;
-        var delta = Math.max(0, currentY - startY);
-        sheet.classList.remove("dragging");
-
-        if (delta > 90) {
-          closeShareModal();
-        } else {
-          sheet.style.transform = "";
-        }
-      }
-
-      sheet.addEventListener("touchstart", start, { passive: true });
-      sheet.addEventListener("touchmove", move, { passive: false });
-      sheet.addEventListener("touchend", end);
-    }
-
-
     function openShareModal() {
-      renderSharePreviewIcons();
-      initShareModalSwipe();
       var modal = document.getElementById("shareModal");
       if (modal) {
+        updateShareModalContent();
         modal.classList.add("active");
       }
     }
 
     function closeShareModal() {
       var modal = document.getElementById("shareModal");
-      var sheet = modal ? modal.querySelector(".share-modal-sheet") : null;
-      if (sheet) {
-        sheet.classList.remove("dragging");
-        sheet.style.transform = "";
-      }
       if (modal) {
         modal.classList.remove("active");
       }
-    }
-      var modal = document.getElementById("shareModal");
-      if (modal) {
-        modal.classList.remove("active");
+      if (hasShownShareSuccess) {
+        updateShareModalContent();
       }
     }
 
@@ -4331,7 +4481,7 @@
           var selectBtn = document.createElement("button");
           selectBtn.type = "button";
           selectBtn.className = "select-place-btn" + (isSelected ? " selected" : "");
-          selectBtn.textContent = isSelected ? "Added ✓" : "Select";
+          selectBtn.textContent = isSelected ? "✓ Added" : "Add";
           selectBtn.onclick = function(rowCopy, buttonEl, cardEl) {
             return function(e) {
               var key;
@@ -4346,12 +4496,12 @@
               animateClass(buttonEl, "tap-pop");
 
               if (isPlaceSelectedByKey(key)) {
-                buttonEl.textContent = "Added ✓";
+                buttonEl.textContent = "✓ Added";
                 buttonEl.classList.add("selected");
                 cardEl.classList.add("selected-card");
                 animateClass(cardEl, "card-bump");
               } else {
-                buttonEl.textContent = "Select";
+                buttonEl.textContent = "Add";
                 buttonEl.classList.remove("selected");
                 cardEl.classList.remove("selected-card");
               }
@@ -4529,9 +4679,9 @@
         var value = String(values[i] || "").trim();
         if (!value) continue;
         if (looksLikeMapsOrWebUrl(value)) continue;
-        if (/^(open|closed)/i.test(value)) continue;
-        if (/^\d+(\.\d+)?\s*mi/i.test(value)) continue;
-        if (/^\d+(\.\d+)?\s*min/i.test(value)) continue;
+        if (/^(open|closed)/i.test(value)) continue;
+        if (/^\d+(\.\d+)?\s*mi/i.test(value)) continue;
+        if (/^\d+(\.\d+)?\s*min/i.test(value)) continue;
         return value;
       }
       return "";
@@ -4554,11 +4704,11 @@
       var statusText = firstReadableText([r[4], r[5]]);
       var miles = firstFiniteNumber([r[6], r[8], r[9]]);
 
-      if (/^(open|closed)/i.test(address)) {
+      if (/^(open|closed)/i.test(address)) {
         address = firstReadableText([r[3], r[7], r[8]]);
       }
 
-      if (statusText && !/^(open|closed)/i.test(statusText)) {
+      if (statusText && !/^(open|closed)/i.test(statusText)) {
         statusText = "";
       }
 
@@ -4596,8 +4746,12 @@
       banner.querySelector(".shared-banner-title").textContent = "Shared guide";
 
       var line = "";
-      if (sharedGuide && sharedGuide.queryOrGps) {
-        line += "Built for: " + sharedGuide.queryOrGps;
+      var sharedLocationLabel = getShareSafeLocationLabel(
+        sharedGuide && sharedGuide.sourceType,
+        sharedGuide && sharedGuide.queryOrGps
+      );
+      if (sharedLocationLabel) {
+        line += "Built for: " + sharedLocationLabel;
       }
       if (sharedGuide && sharedGuide.radius) {
         line += (line ? " • " : "") + "Radius: " + sharedGuide.radius + " mi";
@@ -4838,5 +4992,8 @@
        Privacy
     </a>
   </div>
+
+  <div id="selectionHelper" class="selection-helper" aria-live="polite">Your list is building below</div>
+
 </body>
 </html>
