@@ -843,6 +843,67 @@
       white-space: nowrap;
     }
 
+
+    .share-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+    }
+
+    .share-modal.active {
+      display: block;
+    }
+
+    .share-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+    }
+
+    .share-modal-sheet {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #fff;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      padding: 14px 16px 24px;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
+      transform: translateY(100%);
+      transition: transform 0.25s ease;
+    }
+
+    .share-modal.active .share-modal-sheet {
+      transform: translateY(0);
+    }
+
+    .share-modal-handle {
+      width: 40px;
+      height: 5px;
+      background: #ddd;
+      border-radius: 999px;
+      margin: 0 auto 14px;
+    }
+
+    .share-modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .share-modal-content .action-btn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .share-modal-content .secondary-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
     .sticky-share-bar {
       position: fixed;
       left: 0;
@@ -1736,8 +1797,9 @@
         </div>
       </div>
 
-      <div id="selectionNudge" class="selection-nudge" style="display:none;"></div>
-      <div id="shareLinkBox" style="display:none;"></div>
+      <div id="shareSection" style="display:none;">
+        <div id="shareLinkBox" style="display:none;"></div>
+      </div>
 
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
         <div class="load-more-card">
@@ -1761,6 +1823,27 @@
         <div class="sticky-share-text">Share your picks without scrolling back up.</div>
       </div>
       <button type="button" class="action-btn share-btn sticky-share-btn" onclick="shareSelectedPlaces()">Share with Team</button>
+    </div>
+  </div>
+
+
+  <div id="shareModal" class="share-modal">
+    <div class="share-modal-backdrop" onclick="closeShareModal()"></div>
+
+    <div class="share-modal-sheet">
+      <div class="share-modal-handle"></div>
+
+      <div class="share-modal-content">
+        <div class="share-modal-title">Your GameDayGuide</div>
+
+        <button class="action-btn share-btn" onclick="triggerNativeShare()">
+          Share
+        </button>
+
+        <button class="secondary-btn" onclick="copyShareLink()">
+          Copy Link
+        </button>
+      </div>
     </div>
   </div>
 
@@ -2038,7 +2121,6 @@
 
     function updateShareSelectedButton() {
       var btn = document.getElementById("shareSelectedBtn");
-      var nudge = document.getElementById("selectionNudge");
       var stickyBar = document.getElementById("stickyShareBar");
       var stickyCount = document.getElementById("stickyShareCount");
       var count = getSelectedPlaces().length;
@@ -2051,23 +2133,6 @@
         } else {
           btn.style.display = "inline-flex";
           btn.textContent = count === 1 ? "Share 1 Selected Place" : ("Share " + count + " Selected Places");
-        }
-      }
-
-      if (nudge) {
-        if (!count || currentSharedGuide) {
-          nudge.style.display = "none";
-          nudge.innerHTML = "";
-        } else {
-          nudge.style.display = "block";
-          nudge.innerHTML =
-            "<div class='selection-nudge-card'>" +
-              "<div class='selection-nudge-copy'>" +
-                "<div class='selection-nudge-title'>✔ " + esc(countLabel) + "</div>" +
-                "<div class='selection-nudge-text'>Share these picks with your team any time.</div>" +
-              "</div>" +
-              "<button type='button' class='secondary-btn' onclick='shareSelectedPlaces()'>Share with Team</button>" +
-            "</div>";
         }
       }
 
@@ -2670,7 +2735,9 @@
       }
 
       function selectShareInputIfPresent() {
-        var input = document.getElementById("shareLinkInput");
+        closeShareModal();
+
+      var input = document.getElementById("shareLinkInput");
         if (input) {
           input.focus();
           input.select();
@@ -2734,6 +2801,11 @@
       var appleMapsLink = buildAppleMapsLink(name, address);
 
       var box = document.getElementById("shareLinkBox");
+      var shareSection = document.getElementById("shareSection");
+      if (shareSection) {
+        shareSection.style.display = "none";
+      }
+
       box.style.display = "block";
       box.innerHTML =
         "<div class='card'>" +
@@ -2784,7 +2856,7 @@
         }
       }
 
-      box.scrollIntoView({ behavior: "smooth", block: "start" });
+      openShareModal();
     }
 
     function shareSpot(name, address, buttonEl) {
@@ -3369,16 +3441,20 @@
     }
 
     function copyShareLink(url) {
-      if (!url) {
+      var shareUrl = url || latestShareUrl || window.currentShareUrl || "";
+
+      if (!shareUrl) {
         document.getElementById("status").textContent = "No share link available.";
         return;
       }
 
       copyTextToClipboard(
-        url,
+        shareUrl,
         "Share link copied.",
         "Could not copy link automatically. You can still copy the link below."
       );
+
+      closeShareModal();
 
       var input = document.getElementById("shareLinkInput");
       if (input) {
@@ -3387,40 +3463,37 @@
       }
     }
 
-    function triggerNativeShare() {
-      if (!latestShareUrl) {
+    async function triggerNativeShare() {
+      var shareUrl = latestShareUrl || window.currentShareUrl || "";
+
+      if (!shareUrl) {
         document.getElementById("status").textContent = "No share link available.";
         return;
       }
 
       if (!navigator.share) {
-        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link, Text, or Email instead.";
+        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
         return;
       }
 
-      var shareText = lastQueryOrGps
-        ? "GameDayGuide for " + lastQueryOrGps
-        : "GameDayGuide for our field";
-
-      navigator.share({
-        title: "GameDayGuide",
-        text: shareText,
-        url: latestShareUrl
-      })
-      .then(function() {
-        document.getElementById("status").textContent = "Share sheet opened.";
-      })
-      .catch(function(err) {
+      try {
+        await navigator.share({
+          title: "GameDayGuide",
+          url: shareUrl
+        });
+        closeShareModal();
+      } catch (err) {
         if (err && err.name === "AbortError") {
-          document.getElementById("status").textContent = "Share canceled.";
+          console.log("Share cancelled");
           return;
         }
-        document.getElementById("status").textContent = "Could not open share options. You can still copy, text, or email the link below.";
-      });
+        document.getElementById("status").textContent = "Could not open share options. You can still copy the link.";
+      }
     }
 
     function showShareLink(url, customTitle, customMeta) {
       latestShareUrl = url || "";
+      window.currentShareUrl = latestShareUrl;
 
       var shareLabel = customTitle || (
         lastQueryOrGps
@@ -3438,6 +3511,12 @@
       var emailLink = buildGuideEmailShareLink(url);
 
       var box = document.getElementById("shareLinkBox");
+      var shareSection = document.getElementById("shareSection");
+
+      if (shareSection) {
+        shareSection.style.display = "none";
+      }
+
       box.style.display = "block";
       box.innerHTML =
         "<div class='card'>" +
@@ -3464,7 +3543,7 @@
       var copyBtn = document.getElementById("copyShareAgainBtn");
       if (copyBtn) {
         copyBtn.onclick = function() {
-          copyShareLink(url);
+          copyShareLink(shareUrl);
         };
       }
 
@@ -3479,7 +3558,7 @@
         }
       }
 
-      box.scrollIntoView({ behavior: "smooth", block: "start" });
+      openShareModal();
     }
 
     function shareGuide() {
@@ -3546,17 +3625,31 @@
             return;
           }
 
-          var count = selectedResults.length;
-          var title = count === 1 ? "1 selected place ready to share" : (count + " selected places ready to share");
-          var meta = "Send this mini GameDayGuide list to your team chat.";
-
-          showShareLink(url, title, meta);
+          latestShareUrl = url;
+          window.currentShareUrl = url;
+          openShareModal();
           document.getElementById("status").textContent = "Selected places share link ready.";
         })
         .catch(function(err) {
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
         });
+    }
+
+
+
+    function openShareModal() {
+      var modal = document.getElementById("shareModal");
+      if (modal) {
+        modal.classList.add("active");
+      }
+    }
+
+    function closeShareModal() {
+      var modal = document.getElementById("shareModal");
+      if (modal) {
+        modal.classList.remove("active");
+      }
     }
 
     function createSectionHeading(title) {
