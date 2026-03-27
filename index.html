@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
   <title>GameDayGuide</title>
-  <meta name="description" content="Game Day, Made Easier." />
+  <meta name="description" content="Find what you need near your game." />
   <meta property="og:title" content="GameDayGuide" />
-  <meta property="og:description" content="Game Day, Made Easier." />
+  <meta property="og:description" content="Find what you need near your game." />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="GameDayGuide" />
   <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="GameDayGuide" />
-  <meta name="twitter:description" content="Game Day, Made Easier." />
+  <meta name="twitter:description" content="Find what you need near your game." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1933,7 +1933,16 @@
         min-width: 280px;
       }
     }
-  </style>
+  
+/* Phase 2 – density + polish */
+.search-section { margin-bottom: 12px; }
+.search-section label { font-weight: 600; font-size: 14px; color: #555; }
+.search-section input { padding: 12px; }
+.radius-row { margin: 10px 0 14px; }
+.app-container { padding: 14px; }
+.card { box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
+
+</style>
 </head>
 <body>
   <div class="app">
@@ -1947,7 +1956,7 @@
             <div class="title" id="pageTitle">GameDayGuide</div>
           </div>
         </div>
-        <div class="subtitle" id="pageSubtitle">Game Day, Made Easier.</div>
+        <div class="subtitle" id="pageSubtitle">Find what you need near your game.</div>
       </div>
 
       <div id="homeScreenTip" class="tip-banner" style="display:none;">
@@ -1974,7 +1983,7 @@
           <p class="search-subtitle">Search by field, facility, or current location for food, coffee, gas, pharmacies, and more.</p>
         </div>
 
-        <label>Field Address or Field/Facility Name</label>
+        <label>Field or facility</label>
         <input id="address" placeholder="Enter field address or facility name" value="" />
         <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
         <div id="fieldMatchResults" class="match-results"></div>
@@ -4762,7 +4771,7 @@
       document.body.classList.remove("has-sticky-share");
       document.getElementById("stickyShareBar").style.display = "none";
       document.getElementById("pageTitle").textContent = "GameDayGuide";
-      document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
+      document.getElementById("pageSubtitle").textContent = "Find what you need near your game.";
       document.getElementById("searchPanel").style.display = "none";
       clearResultsContext();
 
@@ -4899,7 +4908,7 @@
       document.body.classList.remove("has-sticky-share");
       document.getElementById("stickyShareBar").style.display = "none";
       document.getElementById("pageTitle").textContent = "GameDayGuide";
-      document.getElementById("pageSubtitle").textContent = "Game Day, Made Easier.";
+      document.getElementById("pageSubtitle").textContent = "Find what you need near your game.";
       document.getElementById("searchPanel").style.display = "none";
       document.getElementById("sharedBanner").style.display = "block";
       document.querySelector("#sharedBanner .shared-banner-title").textContent = "Shared guide";
