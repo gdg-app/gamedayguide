@@ -731,12 +731,12 @@
 
     #shareTools,
     #shareLinkBox {
-      margin: 14px 0 18px;
+      margin: 10px 0 12px;
     }
 
     #shareTools {
-      padding: 14px;
-      border-radius: 22px;
+      padding: 10px;
+      border-radius: 18px;
       background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.9));
       border: var(--border-soft);
       box-shadow: var(--shadow-card);
@@ -745,38 +745,48 @@
 
     .share-tools-row {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    #shareSelectedBtn {
+      display: none !important;
     }
 
     .load-more-wrap {
       display: none;
-      margin: 14px 0 18px;
+      margin: 10px 0 14px;
     }
 
     .load-more-card {
       background:
         linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
-      border-radius: 20px;
+      border-radius: 18px;
       box-shadow: var(--shadow-card);
-      padding: 16px;
+      padding: 12px 14px;
       border: var(--border-soft);
       backdrop-filter: blur(12px);
     }
 
     .load-more-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 800;
       color: #1c2a35;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       letter-spacing: -0.02em;
     }
 
     .load-more-text {
-      font-size: 14px;
+      font-size: 13px;
       color: #5f6d79;
-      line-height: 1.45;
-      margin-bottom: 12px;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    #loadMoreBtn {
+      min-height: 50px;
+      padding-top: 12px;
+      padding-bottom: 12px;
     }
 
     .share-link-input {
@@ -843,14 +853,75 @@
       white-space: nowrap;
     }
 
+
+    .share-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+    }
+
+    .share-modal.active {
+      display: block;
+    }
+
+    .share-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+    }
+
+    .share-modal-sheet {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: #fff;
+      border-top-left-radius: 24px;
+      border-top-right-radius: 24px;
+      padding: 14px 16px 24px;
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
+      transform: translateY(100%);
+      transition: transform 0.25s ease;
+    }
+
+    .share-modal.active .share-modal-sheet {
+      transform: translateY(0);
+    }
+
+    .share-modal-handle {
+      width: 40px;
+      height: 5px;
+      background: #ddd;
+      border-radius: 999px;
+      margin: 0 auto 14px;
+    }
+
+    .share-modal-title {
+      font-size: 18px;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .share-modal-content .action-btn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .share-modal-content .secondary-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
     .sticky-share-bar {
       position: fixed;
       left: 0;
       right: 0;
-      bottom: max(10px, env(safe-area-inset-bottom));
+      bottom: max(8px, env(safe-area-inset-bottom));
       z-index: 90;
       display: none;
-      padding: 0 12px;
+      padding: 0 10px;
       pointer-events: none;
     }
 
@@ -860,13 +931,13 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 22px;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 18px;
       background: rgba(18, 37, 56, 0.94);
       color: white;
-      box-shadow: 0 16px 36px rgba(8, 19, 34, 0.28);
-      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 12px 28px rgba(8, 19, 34, 0.24);
+      border: 1px solid rgba(255,255,255,0.14);
       backdrop-filter: blur(14px);
       pointer-events: auto;
     }
@@ -876,29 +947,29 @@
     }
 
     .sticky-share-count {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       line-height: 1.2;
       color: white;
     }
 
     .sticky-share-text {
-      font-size: 13px;
-      line-height: 1.35;
-      color: rgba(255,255,255,0.82);
-      margin-top: 2px;
+      font-size: 12px;
+      line-height: 1.3;
+      color: rgba(255,255,255,0.8);
+      margin-top: 1px;
     }
 
     .sticky-share-btn {
       flex: 0 0 auto;
-      min-height: 46px;
-      padding: 12px 16px;
+      min-height: 42px;
+      padding: 10px 14px;
       white-space: nowrap;
       box-shadow: none;
     }
 
     body.has-sticky-share .app {
-      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 120px);
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 98px);
     }
 
     body.selected-share-mode .app {
@@ -1007,22 +1078,29 @@
       100% { box-shadow: var(--shadow-card); }
     }
 
-
     @media (max-width: 640px) {
-      .selection-nudge-card,
-      .sticky-share-inner {
+      .selection-nudge-card {
         align-items: stretch;
         flex-direction: column;
       }
 
-      .selection-nudge .secondary-btn,
-      .sticky-share-btn {
+      .selection-nudge .secondary-btn {
         width: 100%;
         justify-content: center;
       }
 
+      .sticky-share-inner {
+        align-items: center;
+        flex-direction: row;
+      }
+
+      .sticky-share-btn {
+        width: auto;
+        justify-content: center;
+      }
+
       .sticky-share-bar {
-        padding: 0 10px;
+        padding: 0 8px;
       }
     }
 
@@ -1708,7 +1786,7 @@
       }
 
       .share-tools-row {
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
       }
 
       .top-stop-card {
@@ -1814,13 +1892,14 @@
         </div>
       </div>
 
-      <div id="selectionNudge" class="selection-nudge" style="display:none;"></div>
-      <div id="shareLinkBox" style="display:none;"></div>
+      <div id="shareSection" style="display:none;">
+        <div id="shareLinkBox" style="display:none;"></div>
+      </div>
 
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
         <div class="load-more-card">
           <div class="load-more-title">Need more nearby?</div>
-          <div class="load-more-text">Add pharmacy, grocery, hotels, ATM, sporting goods, emergency dentist, and more.</div>
+          <div class="load-more-text">Add pharmacy, hotels, ATM, and more.</div>
           <button type="button" class="action-btn build-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More Categories</button>
         </div>
       </div>
@@ -1836,9 +1915,30 @@
     <div class="sticky-share-inner">
       <div class="sticky-share-copy">
         <div id="stickyShareCount" class="sticky-share-count">1 place selected</div>
-        <div class="sticky-share-text">Share your picks without scrolling back up.</div>
+        <div class="sticky-share-text">Ready to share.</div>
       </div>
       <button type="button" class="action-btn share-btn sticky-share-btn" onclick="shareSelectedPlaces()">Share with Team</button>
+    </div>
+  </div>
+
+
+  <div id="shareModal" class="share-modal">
+    <div class="share-modal-backdrop" onclick="closeShareModal()"></div>
+
+    <div class="share-modal-sheet">
+      <div class="share-modal-handle"></div>
+
+      <div class="share-modal-content">
+        <div class="share-modal-title">Your GameDayGuide</div>
+
+        <button class="action-btn share-btn" onclick="triggerNativeShare()">
+          Share
+        </button>
+
+        <button class="secondary-btn" onclick="copyShareLink()">
+          Copy Link
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1887,8 +1987,6 @@
     let isLoadingMoreCategories = false;
     let pendingQuickCategory = "";
     let activeQuickAction = "";
-    let lastStickyShareCount = 0;
-    let stickyShareVisible = false;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
@@ -2119,21 +2217,16 @@
 
     function updateShareSelectedButton() {
       var btn = document.getElementById("shareSelectedBtn");
-      var nudge = document.getElementById("selectionNudge");
       var stickyBar = document.getElementById("stickyShareBar");
-      var stickyInner = stickyBar ? stickyBar.querySelector(".sticky-share-inner") : null;
       var stickyCount = document.getElementById("stickyShareCount");
+      var stickyInner = stickyBar ? stickyBar.querySelector(".sticky-share-inner") : null;
       var count = getSelectedPlaces().length;
       var countLabel = count === 1 ? "1 place selected" : (count + " places selected");
+      var wasVisible = !!(stickyBar && stickyBar.style.display !== "none");
 
       if (btn) {
         btn.style.display = "none";
         btn.textContent = count === 1 ? "Share 1 Selected Place" : ("Share " + count + " Selected Places");
-      }
-
-      if (nudge) {
-        nudge.style.display = "none";
-        nudge.innerHTML = "";
       }
 
       if (stickyBar && stickyCount) {
@@ -2141,24 +2234,17 @@
           stickyBar.style.display = "none";
           stickyBar.classList.remove("bar-visible");
           document.body.classList.remove("has-sticky-share");
-          stickyShareVisible = false;
-          lastStickyShareCount = 0;
         } else {
           stickyCount.textContent = countLabel;
           stickyBar.style.display = "block";
           stickyBar.classList.add("bar-visible");
           document.body.classList.add("has-sticky-share");
 
-          if (!stickyShareVisible && stickyInner) {
+          if (!wasVisible && stickyInner) {
             animateClass(stickyInner, "bar-enter");
-          }
-
-          if (lastStickyShareCount && lastStickyShareCount !== count) {
+          } else {
             animateClass(stickyCount, "count-bump");
           }
-
-          stickyShareVisible = true;
-          lastStickyShareCount = count;
         }
       }
     }
@@ -2750,7 +2836,9 @@
       }
 
       function selectShareInputIfPresent() {
-        var input = document.getElementById("shareLinkInput");
+        closeShareModal();
+
+      var input = document.getElementById("shareLinkInput");
         if (input) {
           input.focus();
           input.select();
@@ -2814,6 +2902,11 @@
       var appleMapsLink = buildAppleMapsLink(name, address);
 
       var box = document.getElementById("shareLinkBox");
+      var shareSection = document.getElementById("shareSection");
+      if (shareSection) {
+        shareSection.style.display = "none";
+      }
+
       box.style.display = "block";
       box.innerHTML =
         "<div class='card'>" +
@@ -2864,7 +2957,7 @@
         }
       }
 
-      box.scrollIntoView({ behavior: "smooth", block: "start" });
+      openShareModal();
     }
 
     function shareSpot(name, address, buttonEl) {
@@ -3222,7 +3315,6 @@
       wrap.style.display = "block";
     }
 
-
     function animateClass(el, className) {
       if (!el || !className) return;
       el.classList.remove(className);
@@ -3306,7 +3398,6 @@
       }, options.delay || 90);
     }
 
-
     function runPresetFacilityGuide(query, displayLabel) {
       setRadius(5);
       document.getElementById("address").value = displayLabel || query || "";
@@ -3320,6 +3411,7 @@
       if (normalized === "coffee") return "☕ Coffee";
       if (normalized === "gas") return "⛽ Gas";
       if (normalized === "medical") return BACKEND_MEDICAL_LABEL;
+      if (normalized === "bars") return "🍺 Breweries/Bars";
       return "";
     }
 
@@ -3373,7 +3465,6 @@
       lastQueryOrGps = "";
       currentSharedGuide = null;
       latestShareUrl = "";
-      setActiveQuickAction("");
       resetSelectedPlaces();
       resetLoadMoreState();
 
@@ -3393,6 +3484,7 @@
       renderRecentSearches();
       document.body.classList.add("home-mode");
       window.scrollTo({ top: 0, behavior: "smooth" });
+      setActiveQuickAction("");
       focusAddressField();
     }
 
@@ -3527,16 +3619,20 @@
     }
 
     function copyShareLink(url) {
-      if (!url) {
+      var shareUrl = url || latestShareUrl || window.currentShareUrl || "";
+
+      if (!shareUrl) {
         document.getElementById("status").textContent = "No share link available.";
         return;
       }
 
       copyTextToClipboard(
-        url,
+        shareUrl,
         "Share link copied.",
         "Could not copy link automatically. You can still copy the link below."
       );
+
+      closeShareModal();
 
       var input = document.getElementById("shareLinkInput");
       if (input) {
@@ -3545,40 +3641,37 @@
       }
     }
 
-    function triggerNativeShare() {
-      if (!latestShareUrl) {
+    async function triggerNativeShare() {
+      var shareUrl = latestShareUrl || window.currentShareUrl || "";
+
+      if (!shareUrl) {
         document.getElementById("status").textContent = "No share link available.";
         return;
       }
 
       if (!navigator.share) {
-        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link, Text, or Email instead.";
+        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
         return;
       }
 
-      var shareText = lastQueryOrGps
-        ? "GameDayGuide for " + lastQueryOrGps
-        : "GameDayGuide for our field";
-
-      navigator.share({
-        title: "GameDayGuide",
-        text: shareText,
-        url: latestShareUrl
-      })
-      .then(function() {
-        document.getElementById("status").textContent = "Share sheet opened.";
-      })
-      .catch(function(err) {
+      try {
+        await navigator.share({
+          title: "GameDayGuide",
+          url: shareUrl
+        });
+        closeShareModal();
+      } catch (err) {
         if (err && err.name === "AbortError") {
-          document.getElementById("status").textContent = "Share canceled.";
+          console.log("Share cancelled");
           return;
         }
-        document.getElementById("status").textContent = "Could not open share options. You can still copy, text, or email the link below.";
-      });
+        document.getElementById("status").textContent = "Could not open share options. You can still copy the link.";
+      }
     }
 
     function showShareLink(url, customTitle, customMeta) {
       latestShareUrl = url || "";
+      window.currentShareUrl = latestShareUrl;
 
       var shareLabel = customTitle || (
         lastQueryOrGps
@@ -3596,6 +3689,12 @@
       var emailLink = buildGuideEmailShareLink(url);
 
       var box = document.getElementById("shareLinkBox");
+      var shareSection = document.getElementById("shareSection");
+
+      if (shareSection) {
+        shareSection.style.display = "none";
+      }
+
       box.style.display = "block";
       box.innerHTML =
         "<div class='card'>" +
@@ -3622,7 +3721,7 @@
       var copyBtn = document.getElementById("copyShareAgainBtn");
       if (copyBtn) {
         copyBtn.onclick = function() {
-          copyShareLink(url);
+          copyShareLink(shareUrl);
         };
       }
 
@@ -3637,7 +3736,7 @@
         }
       }
 
-      box.scrollIntoView({ behavior: "smooth", block: "start" });
+      openShareModal();
     }
 
     function shareGuide() {
@@ -3704,17 +3803,31 @@
             return;
           }
 
-          var count = selectedResults.length;
-          var title = count === 1 ? "1 selected place ready to share" : (count + " selected places ready to share");
-          var meta = "Send this mini GameDayGuide list to your team chat.";
-
-          showShareLink(url, title, meta);
-          document.getElementById("status").textContent = "Selected places share link ready.";
+          latestShareUrl = url;
+          window.currentShareUrl = url;
+          openShareModal();
+          document.getElementById("status").textContent = "";
         })
         .catch(function(err) {
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
         });
+    }
+
+
+
+    function openShareModal() {
+      var modal = document.getElementById("shareModal");
+      if (modal) {
+        modal.classList.add("active");
+      }
+    }
+
+    function closeShareModal() {
+      var modal = document.getElementById("shareModal");
+      if (modal) {
+        modal.classList.remove("active");
+      }
     }
 
     function createSectionHeading(title) {
@@ -3967,7 +4080,14 @@
           var section = document.getElementById("section-" + slugifyCategory(cat));
           if (!section) return;
 
-          focusCategorySection(section, { delay: 60 });
+          var content = section.querySelector(".accordion-content");
+          var chevron = section.querySelector(".accordion-chevron");
+          if (content && !content.classList.contains("open")) {
+            content.classList.add("open");
+            if (chevron) chevron.textContent = "▼";
+          }
+
+          section.scrollIntoView({ behavior: "smooth", block: "start" });
         };
 
         row.appendChild(btn);
@@ -4079,18 +4199,18 @@
 
               key = makePlaceKey(rowCopy);
 
+              animateClass(buttonEl, "tap-pop");
+
               if (isPlaceSelectedByKey(key)) {
                 buttonEl.textContent = "Selected ✓";
                 buttonEl.classList.add("selected");
                 cardEl.classList.add("selected-card");
+                animateClass(cardEl, "card-bump");
               } else {
                 buttonEl.textContent = "Select";
                 buttonEl.classList.remove("selected");
                 cardEl.classList.remove("selected-card");
               }
-
-              animateClass(buttonEl, "tap-pop");
-              animateClass(cardEl, "card-bump");
             };
           }(r.slice(), selectBtn, card);
 
@@ -4138,7 +4258,6 @@
         } else {
           content.classList.add("open");
           header.querySelector(".accordion-chevron").textContent = "▼";
-          spotlightCategorySection(section);
           logCategoryOpened(cat);
         }
       };
@@ -4315,7 +4434,6 @@
       }
 
       currentSharedGuide = sharedGuide || null;
-      setActiveQuickAction("");
       resetSelectedPlaces();
       resetLoadMoreState();
       stopLoadingState();
@@ -4355,7 +4473,6 @@
     function showSharedSelectedPlaces(sharedGuide) {
       stopLoadingState();
       currentSharedGuide = sharedGuide || { shareType: "selected_places" };
-      setActiveQuickAction("");
       resetSelectedPlaces();
       resetLoadMoreState();
       document.body.classList.remove("home-mode");
