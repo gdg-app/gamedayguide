@@ -889,18 +889,37 @@
       transform: translateY(0);
     }
 
-    .share-modal-sheet.dragging {
-      transition: none !important;
-      will-change: transform;
-    }
-
-
     .share-modal-handle {
       width: 40px;
       height: 5px;
       background: #ddd;
       border-radius: 999px;
       margin: 0 auto 14px;
+    }
+
+    .share-modal-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      width: 34px;
+      height: 34px;
+      border: 0;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.06);
+      color: #4f5d69;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .share-modal-close:active {
+      background: rgba(0,0,0,0.12);
+      transform: scale(0.96);
     }
 
     .share-modal-title {
@@ -1959,7 +1978,8 @@
         <input id="address" placeholder="Enter field address or facility name" value="" />
         <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
         <div id="fieldMatchResults" class="match-results"></div>
-        
+        <div class="helper-text">Pick your field first. Then choose a radius, tap a Quick Action, or tap Build Guide. Example: Field 4 USA Baseball Complex.</div>
+
         <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
           <div class="quick-row" id="recentSearchRow"></div>
@@ -2046,6 +2066,7 @@
     <div class="share-modal-backdrop" onclick="closeShareModal()"></div>
 
     <div class="share-modal-sheet">
+      <button type="button" class="share-modal-close" aria-label="Close share options" onclick="closeShareModal()">✕</button>
       <div class="share-modal-handle"></div>
 
       <div class="share-modal-content">
@@ -2894,25 +2915,15 @@
     }
 
     function getSharePreviewIcons(results) {
+      var seen = {};
       var icons = [];
-      var maxIcons = 3;
-
       (results || []).forEach(function(row) {
-        if (icons.length >= maxIcons) return;
         var icon = categoryEmojiFromLabel(row && row[0]);
-        if (!icon) return;
+        if (!icon || seen[icon]) return;
+        seen[icon] = true;
         icons.push(icon);
       });
-
-      if (!icons.length) return [];
-
-      if (icons.length === 1 && results && results.length > 1) {
-        while (icons.length < Math.min(maxIcons, results.length)) {
-          icons.push(icons[0]);
-        }
-      }
-
-      return icons.slice(0, maxIcons);
+      return icons.slice(0, 3);
     }
 
     function updateShareModalContent() {
@@ -4924,70 +4935,6 @@
       maybeOfferInstallPrompt(700);
     }
 
-
-    function setupShareModalSwipeClose() {
-      var modal = document.getElementById("shareModal");
-      if (!modal) return;
-
-      var sheet = modal.querySelector(".share-modal-sheet");
-      var handle = modal.querySelector(".share-modal-handle");
-      if (!sheet || !handle || sheet.dataset.swipeBound === "1") return;
-
-      sheet.dataset.swipeBound = "1";
-
-      var startY = 0;
-      var currentY = 0;
-      var dragging = false;
-
-      function pointY(evt) {
-        if (evt.touches && evt.touches.length) return evt.touches[0].clientY;
-        if (evt.changedTouches && evt.changedTouches.length) return evt.changedTouches[0].clientY;
-        return 0;
-      }
-
-      function onStart(evt) {
-        if (!modal.classList.contains("active")) return;
-        startY = pointY(evt);
-        currentY = startY;
-        dragging = true;
-        sheet.classList.add("dragging");
-      }
-
-      function onMove(evt) {
-        if (!dragging) return;
-        currentY = pointY(evt);
-        var delta = Math.max(0, currentY - startY);
-        sheet.style.transform = "translateY(" + delta + "px)";
-        if (delta > 0 && evt.cancelable) evt.preventDefault();
-      }
-
-      function onEnd() {
-        if (!dragging) return;
-        dragging = false;
-        var delta = Math.max(0, currentY - startY);
-        sheet.classList.remove("dragging");
-
-        if (delta > 90) {
-          sheet.style.transform = "";
-          closeShareModal();
-        } else {
-          sheet.style.transform = "";
-        }
-      }
-
-      handle.addEventListener("touchstart", onStart, { passive: true });
-      handle.addEventListener("touchmove", onMove, { passive: false });
-      handle.addEventListener("touchend", onEnd);
-      handle.addEventListener("touchcancel", onEnd);
-
-      sheet.addEventListener("transitionend", function() {
-        if (!modal.classList.contains("active")) {
-          sheet.style.transform = "";
-          sheet.classList.remove("dragging");
-        }
-      });
-    }
-
     async function initializeApp() {
       renderRecentSearches();
       updateInstallTipForMode();
@@ -5047,7 +4994,6 @@
     }
 
     window.addEventListener("load", function() {
-      setupShareModalSwipeClose();
       initializeApp();
     });
   </script>
