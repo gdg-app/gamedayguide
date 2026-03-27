@@ -1,5 +1,5 @@
-// SAFE PHASE 2.5 VERSION
-// Keeps guide_build behavior intact and adds category_click support.
+// SAFE PHASE 3 VERSION
+// Keeps guide_build and category_click behavior intact and adds place_click support.
 
 import { google } from "googleapis";
 import crypto from "crypto";
@@ -40,15 +40,20 @@ export default async function handler(req, res) {
     const sourceContext = String(body.sourceContext || "web_app").trim();
 
     const isCategoryClick = eventType === "category_click";
+    const isPlaceClick = eventType === "place_click";
 
-    // Preserve current guide_build behavior, but support category_click cleanly.
-    const searchCategory = isCategoryClick
+    const searchCategory = (isCategoryClick || isPlaceClick)
       ? String(body.categoryLabel || body.searchCategory || body.category || "").trim()
       : "";
 
-    const interactionType = isCategoryClick ? "open_category" : "build_guide";
-    const placeId = "";
-    const resultRank = "";
+    const interactionType = isCategoryClick
+      ? "open_category"
+      : (isPlaceClick
+          ? String(body.interactionType || "open_place").trim()
+          : "build_guide");
+
+    const placeId = isPlaceClick ? String(body.placeId || "").trim() : "";
+    const resultRank = isPlaceClick ? String(body.resultRank || "").trim() : "";
 
     const contextResolutionMethod =
       sourceType === "gps" ? "device_gps" :
@@ -74,25 +79,25 @@ export default async function handler(req, res) {
       insertDataOption: "INSERT_ROWS",
       requestBody: {
         values: [[
-          eventId,                  // A  event_id
-          eventTimeUtc,             // B  event_time_utc
-          eventDateLocal,           // C  event_date_local
-          eventType,                // D  event_type
-          sessionId,                // E  session_id
-          "",                       // F  complex_id
-          complexName,              // G  complex_name
-          "",                       // H  field_id
-          fieldName,                // I  field_name
-          searchCategory,           // J  search_category
-          interactionType,          // K  interaction_type
-          placeId,                  // L  place_id
-          resultRank,               // M  result_rank
-          sourceContext,            // N  source_context
-          contextResolutionMethod,  // O  context_resolution_method
-          locationConfidence,       // P  location_confidence
-          hourBucketLocal,          // Q  hour_bucket_local
-          dayOfWeekLocal,           // R  day_of_week_local
-          String(body.appVersion || "").trim() // S  app_version
+          eventId,
+          eventTimeUtc,
+          eventDateLocal,
+          eventType,
+          sessionId,
+          "",
+          complexName,
+          "",
+          fieldName,
+          searchCategory,
+          interactionType,
+          placeId,
+          resultRank,
+          sourceContext,
+          contextResolutionMethod,
+          locationConfidence,
+          hourBucketLocal,
+          dayOfWeekLocal,
+          String(body.appVersion || "").trim()
         ]]
       }
     });
