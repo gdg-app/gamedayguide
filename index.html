@@ -1009,7 +1009,8 @@
     .chip-btn.quick-active {
       background: linear-gradient(180deg, #3a4a57 0%, var(--blue) 100%);
       color: white;
-      box-shadow: 0 10px 22px rgba(16,43,77,0.18);
+      box-shadow: 0 14px 28px rgba(16,43,77,0.24);
+      transform: translateY(-1px);
     }
 
     .chip-btn.tap-pop,
@@ -1022,15 +1023,17 @@
     }
 
     .sticky-share-inner.bar-enter {
-      animation: gdgStickySlideUp 0.26s cubic-bezier(0.2, 0.8, 0.2, 1);
+      animation: gdgStickySlideUp 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
     .sticky-share-count.count-bump {
-      animation: gdgCountBump 0.22s ease;
+      animation: gdgCountBump 0.28s ease;
     }
 
     .category-section.section-spotlight .accordion-header {
       animation: gdgSectionSpotlight 1.2s ease;
+      border-color: rgba(47,111,222,0.24);
+      box-shadow: 0 18px 34px rgba(47,111,222,0.16);
     }
 
     .card.card-bump {
@@ -3366,10 +3369,10 @@
       if (!el) return;
       var appCard = document.querySelector(".app-card");
       var appRect = appCard ? appCard.getBoundingClientRect() : null;
-      var targetY = window.pageYOffset + el.getBoundingClientRect().top - 16;
+      var targetY = window.pageYOffset + el.getBoundingClientRect().top - 24;
 
       if (appRect && appRect.top > 0) {
-        targetY = window.pageYOffset + el.getBoundingClientRect().top - Math.max(appRect.top + 10, 16);
+        targetY = window.pageYOffset + el.getBoundingClientRect().top - Math.max(appRect.top + 18, 24);
       }
 
       try {
@@ -4187,7 +4190,7 @@
           var selectBtn = document.createElement("button");
           selectBtn.type = "button";
           selectBtn.className = "select-place-btn" + (isSelected ? " selected" : "");
-          selectBtn.textContent = isSelected ? "Selected ✓" : "Select";
+          selectBtn.textContent = isSelected ? "Added ✓" : "Select";
           selectBtn.onclick = function(rowCopy, buttonEl, cardEl) {
             return function(e) {
               var key;
@@ -4202,7 +4205,7 @@
               animateClass(buttonEl, "tap-pop");
 
               if (isPlaceSelectedByKey(key)) {
-                buttonEl.textContent = "Selected ✓";
+                buttonEl.textContent = "Added ✓";
                 buttonEl.classList.add("selected");
                 cardEl.classList.add("selected-card");
                 animateClass(cardEl, "card-bump");
