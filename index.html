@@ -430,23 +430,22 @@
     }
 
     .quick-row-wrap {
-      margin-bottom: 22px;
-      padding-top: 4px;
+      margin-bottom: 18px;
+      padding-top: 2px;
     }
 
     .quick-row-label {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 700;
-      color: #5f6d79;
-      margin-bottom: 10px;
-      letter-spacing: 0.01em;
+      color: #4a5a68;
+      margin-bottom: 9px;
     }
 
     .quick-row {
       display: flex;
       gap: 10px;
       overflow-x: auto;
-      padding-bottom: 6px;
+      padding-bottom: 4px;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: thin;
     }
@@ -465,7 +464,7 @@
       background: #e8eeea;
       color: var(--blue);
       border-radius: 999px;
-      padding: 11px 14px;
+      padding: 11px 15px;
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
@@ -490,8 +489,8 @@
     }
 
     .radius-section {
-      margin-top: 14px;
-      margin-bottom: 24px;
+      margin-top: 8px;
+      margin-bottom: 18px;
     }
 
     .radius-buttons {
@@ -850,12 +849,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 22px;
+      gap: 14px;
+      padding: 14px 14px 14px 16px;
+      border-radius: 24px;
       background: rgba(18, 37, 56, 0.94);
       color: white;
-      box-shadow: 0 16px 36px rgba(8, 19, 34, 0.28);
+      box-shadow: 0 18px 38px rgba(8, 19, 34, 0.30);
       border: 1px solid rgba(255,255,255,0.16);
       backdrop-filter: blur(14px);
       pointer-events: auto;
@@ -881,8 +880,8 @@
 
     .sticky-share-btn {
       flex: 0 0 auto;
-      min-height: 46px;
-      padding: 12px 16px;
+      min-height: 48px;
+      padding: 12px 18px;
       white-space: nowrap;
       box-shadow: none;
     }
@@ -1223,19 +1222,35 @@
       word-break: break-word;
     }
 
+
     .select-place-btn {
       border: 0;
       border-radius: 999px;
-      padding: 10px 12px;
-      min-height: 40px;
-      white-space: nowrap;
+      width: 42px;
+      min-width: 42px;
+      height: 42px;
+      padding: 0;
       background: #e8eeea;
       color: var(--blue);
-      font-size: 13px;
-      font-weight: 800;
+      font-size: 18px;
+      font-weight: 900;
+      line-height: 1;
       cursor: pointer;
       box-shadow: 0 6px 14px rgba(36,49,61,0.08);
       flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease, color 0.14s ease;
+    }
+
+    .select-place-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(36,49,61,0.12);
+    }
+
+    .select-place-btn:active {
+      transform: scale(0.97);
     }
 
     .select-place-btn.selected {
@@ -1681,14 +1696,13 @@
           </div>
         </div>
 
-        <div class="quick-row-wrap" style="margin-bottom:20px;">
+        <div class="quick-row-wrap" style="margin-bottom:18px;">
           <div class="quick-row-label">Quick Actions</div>
           <div class="quick-row">
             <button type="button" class="chip-btn" onclick="runQuickAction('food')">🍔 Food</button>
             <button type="button" class="chip-btn" onclick="runQuickAction('coffee')">☕ Coffee</button>
             <button type="button" class="chip-btn" onclick="runQuickAction('gas')">⛽ Gas</button>
             <button type="button" class="chip-btn" onclick="runQuickAction('medical')">🏥 Medical</button>
-            <button type="button" class="chip-btn" onclick="runQuickAction('bars')">🍺 Bars</button>
           </div>
         </div>
 
@@ -1740,7 +1754,7 @@
     <div class="sticky-share-inner">
       <div class="sticky-share-copy">
         <div id="stickyShareCount" class="sticky-share-count">1 place selected</div>
-        <div class="sticky-share-text">Share your picks without scrolling back up.</div>
+        <div class="sticky-share-text">Collect spots as you browse, then share in one tap.</div>
       </div>
       <button type="button" class="action-btn share-btn sticky-share-btn" onclick="shareSelectedPlaces()">Share with Team</button>
     </div>
@@ -2024,7 +2038,7 @@
       var stickyBar = document.getElementById("stickyShareBar");
       var stickyCount = document.getElementById("stickyShareCount");
       var count = getSelectedPlaces().length;
-      var countLabel = count === 1 ? "1 place selected" : (count + " places selected");
+      var countLabel = count === 1 ? "1 spot selected" : (count + " spots selected");
 
       if (btn) {
         if (!count || currentSharedGuide) {
@@ -2032,7 +2046,7 @@
           btn.textContent = "Share Picks";
         } else {
           btn.style.display = "inline-flex";
-          btn.textContent = count === 1 ? "Share 1 Selected Place" : ("Share " + count + " Selected Places");
+          btn.textContent = count === 1 ? "Share 1 Selected Spot" : ("Share " + count + " Selected Spots");
         }
       }
 
@@ -2046,7 +2060,7 @@
             "<div class='selection-nudge-card'>" +
               "<div class='selection-nudge-copy'>" +
                 "<div class='selection-nudge-title'>✔ " + esc(countLabel) + "</div>" +
-                "<div class='selection-nudge-text'>Share these picks with your team any time.</div>" +
+                "<div class='selection-nudge-text'>Keep browsing, then share your selected spots in one tap.</div>" +
               "</div>" +
               "<button type='button' class='secondary-btn' onclick='shareSelectedPlaces()'>Share with Team</button>" +
             "</div>";
@@ -3137,7 +3151,6 @@
       if (normalized === "coffee") return "☕ Coffee";
       if (normalized === "gas") return "⛽ Gas";
       if (normalized === "medical") return BACKEND_MEDICAL_LABEL;
-      if (normalized === "bars") return "🍺 Breweries/Bars";
       return "";
     }
 
@@ -3898,7 +3911,9 @@
           var selectBtn = document.createElement("button");
           selectBtn.type = "button";
           selectBtn.className = "select-place-btn" + (isSelected ? " selected" : "");
-          selectBtn.textContent = isSelected ? "Selected ✓" : "Select";
+          selectBtn.textContent = isSelected ? "✓" : "+";
+          selectBtn.setAttribute("aria-label", isSelected ? "Remove from selected spots" : "Add to selected spots");
+          selectBtn.title = isSelected ? "Selected for sharing" : "Add to selected spots";
           selectBtn.onclick = function(rowCopy, buttonEl, cardEl) {
             return function(e) {
               var key;
@@ -3911,11 +3926,15 @@
               key = makePlaceKey(rowCopy);
 
               if (isPlaceSelectedByKey(key)) {
-                buttonEl.textContent = "Selected ✓";
+                buttonEl.textContent = "✓";
+                buttonEl.setAttribute("aria-label", "Remove from selected spots");
+                buttonEl.title = "Selected for sharing";
                 buttonEl.classList.add("selected");
                 cardEl.classList.add("selected-card");
               } else {
-                buttonEl.textContent = "Select";
+                buttonEl.textContent = "+";
+                buttonEl.setAttribute("aria-label", "Add to selected spots");
+                buttonEl.title = "Add to selected spots";
                 buttonEl.classList.remove("selected");
                 cardEl.classList.remove("selected-card");
               }
