@@ -1987,7 +1987,7 @@
         <input id="address" placeholder="Enter field address or facility name" value="" />
         <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
         <div id="fieldMatchResults" class="match-results"></div>
-        <div class="helper-text">Pick your field first. Then choose a radius, tap a Quick Action, or tap Build Guide. Example: Field 4 USA Baseball Complex.</div>
+        <div class="helper-text">Pick your field and GDG will build a guide automatically. You can change the radius and rebuild anytime. Example: Field 4 USA Baseball Complex.</div>
 
         <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
@@ -3508,9 +3508,7 @@
 
           if (visibleSuggestions.length === 1 && Number(visibleSuggestions[0].rankScore || 0) > AUTO_RUN_RANK_THRESHOLD) {
             var best = visibleSuggestions[0];
-            document.getElementById("address").value = best.query || best.label || "";
-            hideFieldMatchResults();
-            document.getElementById("status").textContent = "Field selected. Choose a radius, then tap a Quick Action or Build Guide.";
+            autoBuildFromMatchedField(best);
             return;
           }
 
@@ -3524,13 +3522,22 @@
         });
     }
 
+    function autoBuildFromMatchedField(item) {
+      var chosenQuery = String((item && (item.query || item.label)) || "").trim();
+      if (!chosenQuery) return;
+
+      setRadius(5);
+      document.getElementById("address").value = chosenQuery;
+      hideFieldMatchResults();
+      document.getElementById("status").textContent = "Building guide…";
+      runGuideWithQuery(chosenQuery, "query");
+    }
+
     function selectMatchedFieldByIndex(index) {
       var item = visibleSuggestions[index];
       if (!item) return;
 
-      document.getElementById("address").value = item.query || item.label || "";
-      hideFieldMatchResults();
-      document.getElementById("status").textContent = "Field selected. Choose a radius, then tap a Quick Action or Build Guide.";
+      autoBuildFromMatchedField(item);
     }
 
     function setupFieldMatchResults() {
