@@ -757,7 +757,24 @@
       margin: 10px 0 14px;
     }
 
-    .load-more-card {
+    
+    .load-more-inline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .load-more-inline-btn {
+      padding: 8px 12px;
+      min-height: 36px;
+      font-size: 13px;
+    }
+.load-more-card {
+      padding: 10px 12px;
+      border-radius: 14px;
+
       background:
         linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
       border-radius: 18px;
@@ -1175,6 +1192,9 @@
     .card,
     .shared-banner,
     .load-more-card {
+      padding: 10px 12px;
+      border-radius: 14px;
+
       animation: gdgFadeUp 0.32s ease;
     }
 
@@ -1742,11 +1762,10 @@
 
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
         <div class="load-more-card">
-          <div class="load-more-copy">
-            <div class="load-more-title">Need more nearby?</div>
-            <div class="load-more-text">Add pharmacy, grocery, hotels, ATM, sporting goods, emergency dentist, and more.</div>
+          <div class="load-more-inline">
+            <span class="load-more-title">Need more nearby?</span>
+            <button type="button" class="secondary-btn load-more-inline-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More</button>
           </div>
-          <button type="button" class="secondary-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More</button>
         </div>
       </div>
 
