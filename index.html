@@ -2368,35 +2368,6 @@
         .replace(/^-+|-+$/g, "");
     }
 
-    function normalizeCategoryKey(categoryLabel) {
-      var label = String(categoryLabel || "").trim();
-
-      if (!label) return "";
-
-      label = label
-        .replace(/[\u{1F300}-\u{1FAFF}]/gu, "")
-        .replace(/\s+/g, " ")
-        .trim()
-        .toLowerCase();
-
-      if (label === "food") return "food";
-      if (label === "coffee") return "coffee";
-      if (label === "breweries/bars" || label === "breweries / bars" || label === "bars" || label === "bar") return "bars";
-      if (label === "gas") return "gas";
-      if (label === "urgent care / er" || label === "urgent care/er" || label === "urgent care" || label === "er" || label === "medical") return "urgent_care";
-      if (label === "ice cream") return "ice_cream";
-      if (label === "pharmacy") return "pharmacy";
-      if (label === "grocery") return "grocery";
-      if (label === "hotels" || label === "hotel") return "hotels";
-      if (label === "sporting goods") return "sporting_goods";
-      if (label === "emergency dentist") return "emergency_dentist";
-      if (label === "atm") return "atm";
-
-      return label
-        .replace(/\s*\/\s*/g, "_")
-        .replace(/\s+/g, "_");
-    }
-
     function getAnonId() {
       try {
         var key = "gamedayguide_anon_id";
@@ -3229,18 +3200,41 @@
       return result.data;
     }
 
-    function logCategoryOpened(categoryLabel) {
-      try {
-        var categoryKey = normalizeCategoryKey(categoryLabel);
-        if (!categoryKey) return;
+    function normalizeCategoryLabel(label) {
+  if (!label) return "";
 
-        trackEvent("category_click", {
-          categoryLabel: categoryKey,
-          sourceType: lastSourceType || "",
-          queryOrGps: lastQueryOrGps || "",
-          radius: selectedRadius,
-          platform: detectSourceContext()
-        });
+  let clean = label
+    .replace(/[^a-zA-Z0-9\s\/]/g, "")
+    .trim()
+    .toLowerCase();
+
+  const map = {
+    "food": "food",
+    "coffee": "coffee",
+    "breweries/bars": "bars",
+    "breweries / bars": "bars",
+    "bars": "bars",
+    "gas": "gas",
+    "urgent care / er": "urgent_care",
+    "urgent care/er": "urgent_care",
+    "ice cream": "ice_cream",
+    "pharmacy": "pharmacy",
+    "grocery": "grocery",
+    "hotels": "hotels",
+    "sporting goods": "sporting_goods",
+    "emergency dentist": "emergency_dentist",
+    "atm": "atm"
+  };
+
+  if (map[clean]) return map[clean];
+
+  return clean.replace(/\s+/g, "_");
+}
+
+
+function logCategoryOpened(categoryLabel) {
+      try {
+        console.log("category opened", categoryLabel || "");
       } catch (e) {}
     }
 
