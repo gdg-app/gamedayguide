@@ -1177,9 +1177,9 @@ function summarizeForLog(value) {
 
 function getGuideCacheTtlSeconds(mode) {
   if (normalizeMode(mode) === "full") {
-    return 6 * 60 * 60;
+    return 12 * 60 * 60; // 12 hours
   }
-  return 12 * 60 * 60;
+  return 24 * 60 * 60; // 24 hours
 }
 
 async function tryGetCachedGuideRows(cacheKey) {
