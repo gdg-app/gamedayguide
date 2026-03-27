@@ -2145,8 +2145,9 @@
         </div>
 
         <div class="share-modal-status" id="shareModalStatus">
-          <div class="share-modal-status-title">Guide shared 👍</div>
-          <div class="share-modal-status-text">Your team can open the same GameDayGuide in one tap.</div>
+          <div class="share-modal-status-title" id="shareModalStatusTitle">Guide shared 👍</div>
+          <div class="share-modal-status-text" id="shareModalStatusText">Your team can open the same GameDayGuide in one tap.</div>
+          <input id="shareModalCopiedLink" class="share-link-input" type="text" readonly value="" style="display:none;" />
           <button class="action-btn build-btn" type="button" onclick="startAnotherFromShareModal()">Start another</button>
         </div>
       </div>
@@ -3070,6 +3071,17 @@
       previewEl.classList.toggle("active", !!icons.length);
       actionsEl.classList.remove("hidden");
       statusEl.classList.remove("active");
+
+      var statusTitleEl = document.getElementById("shareModalStatusTitle");
+      var statusTextEl = document.getElementById("shareModalStatusText");
+      var copiedLinkEl = document.getElementById("shareModalCopiedLink");
+      if (statusTitleEl) statusTitleEl.textContent = "Guide shared 👍";
+      if (statusTextEl) statusTextEl.textContent = "Your team can open the same GameDayGuide in one tap.";
+      if (copiedLinkEl) {
+        copiedLinkEl.value = "";
+        copiedLinkEl.style.display = "none";
+      }
+
       hasShownShareSuccess = false;
     }
 
@@ -3078,14 +3090,39 @@
       updateShareModalContent();
     }
 
-    function showShareSuccessState() {
+    function showShareSuccessState(mode) {
       var actionsEl = document.getElementById("shareModalActions");
       var statusEl = document.getElementById("shareModalStatus");
+      var statusTitleEl = document.getElementById("shareModalStatusTitle");
+      var statusTextEl = document.getElementById("shareModalStatusText");
+      var copiedLinkEl = document.getElementById("shareModalCopiedLink");
+      var shareUrl = latestShareUrl || window.currentShareUrl || "";
       if (!actionsEl || !statusEl) return;
+
+      if (mode === "copied") {
+        if (statusTitleEl) statusTitleEl.textContent = "Link copied";
+        if (statusTextEl) statusTextEl.textContent = "Paste this link into your team chat, text, or email.";
+        if (copiedLinkEl) {
+          copiedLinkEl.value = shareUrl;
+          copiedLinkEl.style.display = "block";
+          copiedLinkEl.focus();
+          copiedLinkEl.select();
+          copiedLinkEl.setSelectionRange(0, copiedLinkEl.value.length);
+        }
+        document.getElementById("status").textContent = "Link copied";
+      } else {
+        if (statusTitleEl) statusTitleEl.textContent = "Guide shared 👍";
+        if (statusTextEl) statusTextEl.textContent = "Your team can open the same GameDayGuide in one tap.";
+        if (copiedLinkEl) {
+          copiedLinkEl.value = "";
+          copiedLinkEl.style.display = "none";
+        }
+        document.getElementById("status").textContent = "Guide shared 👍";
+      }
+
       actionsEl.classList.add("hidden");
       statusEl.classList.add("active");
       hasShownShareSuccess = true;
-      document.getElementById("status").textContent = "Guide shared 👍";
     }
 
     function startAnotherFromShareModal() {
@@ -4133,12 +4170,15 @@
         "Could not copy link automatically. You can still copy the link below."
       );
 
-      showShareSuccessState();
+      showShareSuccessState("copied");
 
-      var input = document.getElementById("shareLinkInput");
+      var input = document.getElementById("shareModalCopiedLink") || document.getElementById("shareLinkInput");
       if (input) {
         input.focus();
         input.select();
+        if (input.setSelectionRange) {
+          input.setSelectionRange(0, input.value.length);
+        }
       }
     }
 
