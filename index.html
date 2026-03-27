@@ -521,15 +521,9 @@
       box-shadow: 0 10px 22px rgba(16,43,77,0.22);
     }
 
-    .entry-stack {
-      display: grid;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
     .button-row {
       display: grid;
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr 1fr;
       gap: 12px;
       margin-top: 14px;
       align-items: stretch;
@@ -575,7 +569,10 @@
     }
 
     .location-btn {
-      background: linear-gradient(180deg, #344350 0%, var(--blue) 100%);
+      background: linear-gradient(180deg, #56b47f 0%, #43a16f 42%, var(--green) 100%);
+      box-shadow:
+        0 14px 24px rgba(33,89,60,0.18),
+        inset 0 1px 0 rgba(255,255,255,0.16);
     }
 
     .share-btn {
@@ -584,8 +581,9 @@
 
     .match-btn {
       width: 100%;
+      margin-top: 8px;
       min-height: 54px;
-      background: linear-gradient(180deg, #344350 0%, var(--blue) 100%);
+      background: linear-gradient(180deg, #2e3c47 0%, var(--blue-dark) 100%);
     }
 
     .secondary-btn {
@@ -651,14 +649,7 @@
 
     .loading-wrap {
       display: none;
-      position: fixed;
-      top: calc(env(safe-area-inset-top, 0px) + 10px);
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(calc(100% - 20px), 760px);
-      margin: 0;
-      z-index: 140;
-      pointer-events: none;
+      margin: 10px 0 16px;
     }
 
     .loading-card {
@@ -1253,11 +1244,6 @@
         bottom: 92px;
         max-width: calc(100vw - 20px);
         padding: 9px 12px;
-      }
-
-      .loading-wrap {
-        width: calc(100% - 16px);
-        top: calc(env(safe-area-inset-top, 0px) + 8px);
       }
     }
 
@@ -1939,7 +1925,7 @@
       }
 
       .button-row {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
       }
 
       .shared-banner-actions {
@@ -2023,21 +2009,7 @@
 
         <label>Field or facility</label>
         <input id="address" placeholder="Enter field address or facility name" value="" />
-        <div class="entry-stack">
-          <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
-          <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
-        </div>
-
-        <div id="loadingState" class="loading-wrap" style="display:none;">
-          <div class="loading-card">
-            <div class="loading-logo-shell">
-              <img src="gdg-icon.png?v=3" alt="GameDayGuide Logo">
-            </div>
-            <div class="loading-title">Building your Game Day Guide…</div>
-            <div class="loading-subtext" id="loadingSubtext">Finding nearby game day stops...</div>
-          </div>
-        </div>
-
+        <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
         <div id="fieldMatchResults" class="match-results"></div>
         <div class="helper-text">Pick your field and GDG will build a guide automatically. You can change the radius and rebuild anytime. Example: Field 4 USA Baseball Complex.</div>
 
@@ -2067,13 +2039,23 @@
           </div>
         </div>
 
-        <div class="button-row" id="updateGuideRow" style="display:none;">
-          <button type="button" class="action-btn build-btn" id="updateGuideBtn" onclick="runGuide()">Update Guide</button>
+        <div class="button-row">
+          <button type="button" class="action-btn build-btn" onclick="runGuide()">Build Guide</button>
+          <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
         </div>
       </div>
 
       <div id="status"></div>
 
+      <div id="loadingState" class="loading-wrap" style="display:none;">
+        <div class="loading-card">
+          <div class="loading-logo-shell">
+            <img src="gdg-icon.png?v=3" alt="GameDayGuide Logo">
+          </div>
+            <div class="loading-title">Building your Game Day Guide…</div>
+          <div class="loading-subtext" id="loadingSubtext">Finding nearby game day stops...</div>
+        </div>
+      </div>
 
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
@@ -2197,7 +2179,6 @@
     let currentShareMeta = null;
     let hasShownShareSuccess = false;
     let selectionHelperTimer = null;
-    let hasBuiltGuide = false;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
@@ -2417,20 +2398,6 @@
       var address = String((row && row[3]) || "");
       return normalizeForMatch(category + "|" + name + "|" + address);
     }
-
-    function updateGuideButtonVisibility() {
-      var row = document.getElementById("updateGuideRow");
-      var btn = document.getElementById("updateGuideBtn");
-      if (!row || !btn) return;
-
-      if (hasBuiltGuide && !currentSharedGuide) {
-        row.style.display = "grid";
-        btn.textContent = "Update Guide";
-      } else {
-        row.style.display = "none";
-      }
-    }
-
 
     function resetSelectedPlaces() {
       selectedPlacesMap = {};
@@ -3890,7 +3857,6 @@
       lastQueryOrGps = "";
       currentSharedGuide = null;
       latestShareUrl = "";
-      hasBuiltGuide = false;
       resetSelectedPlaces();
       resetLoadMoreState();
 
@@ -3912,7 +3878,6 @@
       document.body.classList.add("home-mode");
       window.scrollTo({ top: 0, behavior: "smooth" });
       setActiveQuickAction("");
-      updateGuideButtonVisibility();
       focusAddressField();
     }
 
@@ -3963,12 +3928,10 @@
           lastSourceType = sourceType;
           lastQueryOrGps = query;
           hasLoadedFullCategories = false;
-          hasBuiltGuide = true;
           saveRecentSearch(query);
           renderRecentSearches();
           document.getElementById("status").textContent = "Done.";
           document.body.classList.remove("home-mode");
-          updateGuideButtonVisibility();
           render(lastResults);
           applyPendingQuickCategory();
           trackSuccessfulGuideBuild(sourceType, query, lastResults.length);
@@ -4023,10 +3986,8 @@
               lastSourceType = "gps";
               lastQueryOrGps = "GPS:" + lat + "," + lng;
               hasLoadedFullCategories = false;
-              hasBuiltGuide = true;
               document.getElementById("status").textContent = "Done.";
               document.body.classList.remove("home-mode");
-              updateGuideButtonVisibility();
               render(lastResults);
               applyPendingQuickCategory();
               trackSuccessfulGuideBuild("gps", lastQueryOrGps, lastResults.length);
@@ -4761,7 +4722,6 @@
 
       if (!lastResults.length) {
         hideLoadMoreControls();
-        updateGuideButtonVisibility();
         clearResultsContext();
         clearRadiusResultsHint();
       clearRadiusResultsHint();
@@ -4886,7 +4846,6 @@
       }
 
       currentSharedGuide = sharedGuide || null;
-      hasBuiltGuide = false;
       resetSelectedPlaces();
       resetLoadMoreState();
       stopLoadingState();
@@ -4897,7 +4856,6 @@
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Find what you need near your game.";
       document.getElementById("searchPanel").style.display = "none";
-      updateGuideButtonVisibility();
       clearResultsContext();
       clearRadiusResultsHint();
 
@@ -4932,7 +4890,6 @@
     function showSharedSelectedPlaces(sharedGuide) {
       stopLoadingState();
       currentSharedGuide = sharedGuide || { shareType: "selected_places" };
-      hasBuiltGuide = false;
       resetSelectedPlaces();
       resetLoadMoreState();
       document.body.classList.remove("home-mode");
@@ -4942,7 +4899,6 @@
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "A few game day stops, shared with you.";
       document.getElementById("searchPanel").style.display = "none";
-      updateGuideButtonVisibility();
       document.getElementById("shareTools").style.display = "none";
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -5029,7 +4985,6 @@
     function showSharedSpot(sharedSpot) {
       stopLoadingState();
       currentSharedGuide = null;
-      hasBuiltGuide = false;
       resetSelectedPlaces();
       resetLoadMoreState();
       document.body.classList.remove("home-mode");
@@ -5039,7 +4994,6 @@
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Find what you need near your game.";
       document.getElementById("searchPanel").style.display = "none";
-      updateGuideButtonVisibility();
       document.getElementById("sharedBanner").style.display = "block";
       document.querySelector("#sharedBanner .shared-banner-title").textContent = "Shared guide";
       document.getElementById("shareTools").style.display = "none";
@@ -5081,7 +5035,6 @@
       setupAddressKeyActions();
       setupInstallPrompt();
       stopLoadingState();
-      updateGuideButtonVisibility();
 
       var shareId = getShareIdFromUrl();
       var spotId = getSpotIdFromUrl();
@@ -5127,8 +5080,6 @@
 
       document.getElementById("sharedBanner").style.display = "none";
       document.getElementById("searchPanel").style.display = "block";
-      hasBuiltGuide = false;
-      updateGuideButtonVisibility();
       document.body.classList.add("home-mode");
       setRadius(5);
       focusAddressField();
