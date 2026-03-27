@@ -760,39 +760,32 @@
     .load-more-card {
       background:
         linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
-      border-radius: 16px;
+      border-radius: 18px;
       box-shadow: var(--shadow-card);
-      padding: 10px 12px;
+      padding: 14px 16px;
       border: var(--border-soft);
       backdrop-filter: blur(12px);
-    }
-
-    .load-more-inline {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      width: 100%;
+      gap: 14px;
+      flex-wrap: wrap;
     }
 
     .load-more-title {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 800;
       color: #1c2a35;
-      margin: 0;
+      margin-bottom: 2px;
       letter-spacing: -0.02em;
     }
 
     .load-more-text {
-      display: none;
-    }
-
-    .load-more-inline-btn {
-      padding: 8px 12px;
-      min-height: 36px;
       font-size: 13px;
-      width: auto;
-      flex: 0 0 auto;
+      color: #5f6d79;
+      line-height: 1.4;
+      margin-bottom: 0;
+      flex: 1 1 260px;
     }
 
     .share-link-input {
@@ -817,6 +810,47 @@
       margin-top: 8px;
     }
 
+
+    .selection-nudge {
+      display: none;
+      margin: 10px 0 14px;
+    }
+
+    .selection-nudge-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.92);
+      border: var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(10px);
+    }
+
+    .selection-nudge-copy {
+      min-width: 0;
+    }
+
+    .selection-nudge-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #15324a;
+      line-height: 1.25;
+      margin-bottom: 2px;
+    }
+
+    .selection-nudge-text {
+      font-size: 13px;
+      color: #5f6d79;
+      line-height: 1.35;
+    }
+
+    .selection-nudge .secondary-btn {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
 
     .sticky-share-bar {
       position: fixed;
@@ -905,99 +939,14 @@
       box-shadow: 0 5px 12px rgba(36,49,61,0.12);
     }
 
-
-    .share-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 120;
-      display: none;
-    }
-
-    .share-modal.active {
-      display: block;
-    }
-
-    .share-modal-backdrop {
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.42);
-      backdrop-filter: blur(4px);
-    }
-
-    .share-modal-sheet {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(180deg, rgba(255,255,255,0.99), rgba(255,255,255,0.95));
-      border-top-left-radius: 26px;
-      border-top-right-radius: 26px;
-      padding: 14px 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
-      box-shadow: 0 -12px 34px rgba(0,0,0,0.22);
-      transform: translateY(100%);
-      transition: transform 0.24s ease;
-      border-top: 1px solid rgba(255,255,255,0.5);
-    }
-
-    .share-modal.active .share-modal-sheet {
-      transform: translateY(0);
-    }
-
-    .share-modal-handle {
-      width: 42px;
-      height: 5px;
-      background: #d7dde3;
-      border-radius: 999px;
-      margin: 0 auto 14px;
-    }
-
-    .share-modal-title {
-      font-size: 20px;
-      line-height: 1.15;
-      font-weight: 800;
-      text-align: center;
-      color: #1c2a35;
-      letter-spacing: -0.02em;
-      margin-bottom: 6px;
-    }
-
-    .share-modal-subtitle {
-      font-size: 14px;
-      line-height: 1.45;
-      color: #5f6d79;
-      text-align: center;
-      margin-bottom: 14px;
-    }
-
-    .share-modal-actions {
-      display: grid;
-      gap: 10px;
-      grid-template-columns: 1fr;
-    }
-
-    .share-modal-link {
-      width: 100%;
-      padding: 14px 16px;
-      font-size: 14px;
-      border: 1px solid #d7e0e7;
-      border-radius: 16px;
-      min-height: 52px;
-      background: #f7f5f1;
-      color: var(--text);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 2px 8px rgba(8,25,18,0.04);
-      margin-bottom: 10px;
-    }
-
-    .share-modal-close {
-      margin-top: 2px;
-    }
-
     @media (max-width: 640px) {
+      .selection-nudge-card,
       .sticky-share-inner {
         align-items: stretch;
         flex-direction: column;
       }
 
+      .selection-nudge .secondary-btn,
       .sticky-share-btn {
         width: 100%;
         justify-content: center;
@@ -1010,7 +959,7 @@
 
     .results-context {
       display: none;
-      margin: 4px 0 10px;
+      margin: 4px 0 12px;
       padding: 0 4px;
       border-radius: 0;
       background: transparent;
@@ -1788,14 +1737,16 @@
         </div>
       </div>
 
+      <div id="selectionNudge" class="selection-nudge" style="display:none;"></div>
       <div id="shareLinkBox" style="display:none;"></div>
 
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
         <div class="load-more-card">
-          <div class="load-more-inline">
+          <div class="load-more-copy">
             <div class="load-more-title">Need more nearby?</div>
-            <button type="button" class="secondary-btn load-more-inline-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More</button>
+            <div class="load-more-text">Add pharmacy, grocery, hotels, ATM, sporting goods, emergency dentist, and more.</div>
           </div>
+          <button type="button" class="secondary-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More</button>
         </div>
       </div>
 
@@ -1809,25 +1760,10 @@
   <div id="stickyShareBar" class="sticky-share-bar" style="display:none;">
     <div class="sticky-share-inner">
       <div class="sticky-share-copy">
-        <div id="stickyShareCount" class="sticky-share-count">1 spot selected</div>
-        <div class="sticky-share-text">Ready to share.</div>
+        <div id="stickyShareCount" class="sticky-share-count">1 place selected</div>
+        <div class="sticky-share-text">Share your picks without scrolling back up.</div>
       </div>
       <button type="button" class="action-btn share-btn sticky-share-btn" onclick="shareSelectedPlaces()">Share with Team</button>
-    </div>
-  </div>
-
-  <div id="shareModal" class="share-modal" aria-hidden="true">
-    <div class="share-modal-backdrop" onclick="closeShareModal()"></div>
-    <div class="share-modal-sheet">
-      <div class="share-modal-handle"></div>
-      <div class="share-modal-title">Share your selected spots</div>
-      <div class="share-modal-subtitle">Send a mini GameDayGuide to your team in one tap.</div>
-      <input id="shareModalLink" class="share-modal-link" type="text" readonly value="" />
-      <div class="share-modal-actions">
-        <button type="button" class="action-btn share-btn" onclick="triggerNativeShare()">Share</button>
-        <button type="button" class="secondary-btn" onclick="copyShareLink(latestShareUrl)">Copy Link</button>
-        <button type="button" class="secondary-btn share-modal-close" onclick="closeShareModal()">Close</button>
-      </div>
     </div>
   </div>
 
@@ -2104,14 +2040,37 @@
 
     function updateShareSelectedButton() {
       var btn = document.getElementById("shareSelectedBtn");
+      var nudge = document.getElementById("selectionNudge");
       var stickyBar = document.getElementById("stickyShareBar");
       var stickyCount = document.getElementById("stickyShareCount");
       var count = getSelectedPlaces().length;
-      var countLabel = count === 1 ? "1 spot selected" : (count + " spots selected");
+      var countLabel = count === 1 ? "1 place selected" : (count + " places selected");
 
       if (btn) {
-        btn.style.display = "none";
-        btn.textContent = count === 1 ? "Share 1 Selected Spot" : ("Share " + count + " Selected Spots");
+        if (!count || currentSharedGuide) {
+          btn.style.display = "none";
+          btn.textContent = "Share Picks";
+        } else {
+          btn.style.display = "inline-flex";
+          btn.textContent = count === 1 ? "Share 1 Selected Place" : ("Share " + count + " Selected Places");
+        }
+      }
+
+      if (nudge) {
+        if (!count || currentSharedGuide) {
+          nudge.style.display = "none";
+          nudge.innerHTML = "";
+        } else {
+          nudge.style.display = "block";
+          nudge.innerHTML =
+            "<div class='selection-nudge-card'>" +
+              "<div class='selection-nudge-copy'>" +
+                "<div class='selection-nudge-title'>✔ " + esc(countLabel) + "</div>" +
+                "<div class='selection-nudge-text'>Share these picks with your team any time.</div>" +
+              "</div>" +
+              "<button type='button' class='secondary-btn' onclick='shareSelectedPlaces()'>Share with Team</button>" +
+            "</div>";
+        }
       }
 
       if (stickyBar && stickyCount) {
@@ -2455,12 +2414,6 @@
       setTimeout(function() {
         showInstallPrompt();
       }, Number(delayMs || 0));
-    }
-
-    function setupShareModal() {
-      document.addEventListener("keydown", function(e) {
-        if (e.key === "Escape") closeShareModal();
-      });
     }
 
     function setupInstallPrompt() {
@@ -3071,7 +3024,7 @@
             var best = visibleSuggestions[0];
             document.getElementById("address").value = best.query || best.label || "";
             hideFieldMatchResults();
-            document.getElementById("status").textContent = "Field selected. Choose a radius, then tap Build Guide or Use My Location.";
+            runGuideWithQuery(best.query || best.label || "", "query");
             return;
           }
 
@@ -3091,7 +3044,7 @@
 
       document.getElementById("address").value = item.query || item.label || "";
       hideFieldMatchResults();
-      document.getElementById("status").textContent = "Field selected. Choose a radius, then tap Build Guide or Use My Location.";
+      runGuideWithQuery(item.query || item.label || "", "query");
     }
 
     function setupFieldMatchResults() {
@@ -3393,7 +3346,7 @@
       }
 
       if (!navigator.share) {
-        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
+        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link, Text, or Email instead.";
         return;
       }
 
@@ -3407,16 +3360,14 @@
         url: latestShareUrl
       })
       .then(function() {
-        closeShareModal();
         document.getElementById("status").textContent = "Share sheet opened.";
       })
       .catch(function(err) {
         if (err && err.name === "AbortError") {
-          closeShareModal();
           document.getElementById("status").textContent = "Share canceled.";
           return;
         }
-        document.getElementById("status").textContent = "Could not open share options. Use Copy Link instead.";
+        document.getElementById("status").textContent = "Could not open share options. You can still copy, text, or email the link below.";
       });
     }
 
@@ -3522,11 +3473,11 @@
       var selectedResults = getSelectedPlaces();
 
       if (!selectedResults.length) {
-        document.getElementById("status").textContent = "Select at least one spot first.";
+        document.getElementById("status").textContent = "Select at least one place first.";
         return;
       }
 
-      document.getElementById("status").textContent = "Creating selected spots share link…";
+      document.getElementById("status").textContent = "Creating selected places share link…";
 
       postJson("/api/create-shared-guide", {
         shareType: "selected_places",
@@ -3547,34 +3498,17 @@
             return;
           }
 
-          latestShareUrl = url;
-          openShareModal(url);
-          document.getElementById("status").textContent = "Selected spots ready to share.";
+          var count = selectedResults.length;
+          var title = count === 1 ? "1 selected place ready to share" : (count + " selected places ready to share");
+          var meta = "Send this mini GameDayGuide list to your team chat.";
+
+          showShareLink(url, title, meta);
+          document.getElementById("status").textContent = "Selected places share link ready.";
         })
         .catch(function(err) {
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
         });
-    }
-
-    function openShareModal(url) {
-      var modal = document.getElementById("shareModal");
-      var input = document.getElementById("shareModalLink");
-      latestShareUrl = String(url || latestShareUrl || "").trim();
-
-      if (input) input.value = latestShareUrl || "";
-      if (modal) {
-        modal.classList.add("active");
-        modal.setAttribute("aria-hidden", "false");
-      }
-    }
-
-    function closeShareModal() {
-      var modal = document.getElementById("shareModal");
-      if (modal) {
-        modal.classList.remove("active");
-        modal.setAttribute("aria-hidden", "true");
-      }
     }
 
     function createSectionHeading(title) {
@@ -4360,7 +4294,6 @@
       updateInstallTipForMode();
       setupFieldMatchResults();
       setupAddressKeyActions();
-      setupShareModal();
       setupInstallPrompt();
       stopLoadingState();
 
