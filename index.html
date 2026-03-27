@@ -714,116 +714,6 @@
       transition: opacity 0.2s ease;
     }
 
-
-    .loading-skeleton {
-      display: grid;
-      gap: 10px;
-      margin-top: 16px;
-    }
-
-    .loading-skeleton-row {
-      height: 12px;
-      border-radius: 999px;
-      background: linear-gradient(90deg, rgba(226,232,240,0.85) 0%, rgba(241,245,249,1) 48%, rgba(226,232,240,0.85) 100%);
-      background-size: 200% 100%;
-      animation: gdgShimmer 1.3s linear infinite;
-    }
-
-    .loading-skeleton-row.short {
-      width: 62%;
-      margin: 0 auto;
-    }
-
-    .loading-skeleton-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 4px;
-    }
-
-    .loading-skeleton-card {
-      height: 56px;
-      border-radius: 16px;
-      background: linear-gradient(90deg, rgba(232,238,245,0.92) 0%, rgba(245,248,251,1) 48%, rgba(232,238,245,0.92) 100%);
-      background-size: 200% 100%;
-      animation: gdgShimmer 1.25s linear infinite;
-      border: 1px solid rgba(222,229,238,0.85);
-    }
-
-    .location-btn.first-action-ready {
-      position: relative;
-      box-shadow:
-        0 16px 30px rgba(33,120,78,0.22),
-        0 0 0 4px rgba(76,175,80,0.10);
-      animation: gdgLocationNudge 2.1s ease-in-out infinite;
-    }
-
-    .location-btn.first-action-ready::after {
-      content: "Fastest start";
-      position: absolute;
-      top: -11px;
-      right: 10px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.96);
-      color: #246646;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.01em;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
-    }
-
-    .selection-toast {
-      position: fixed;
-      left: 50%;
-      bottom: calc(92px + env(safe-area-inset-bottom));
-      transform: translateX(-50%) translateY(16px);
-      background: rgba(23,36,49,0.94);
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: 13px;
-      font-weight: 700;
-      box-shadow: 0 14px 26px rgba(0,0,0,0.22);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s ease, transform 0.2s ease;
-      z-index: 10020;
-      white-space: nowrap;
-      max-width: calc(100vw - 32px);
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .selection-toast.visible {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    body.has-sticky-share .selection-toast {
-      bottom: calc(108px + env(safe-area-inset-bottom));
-    }
-
-    @keyframes gdgShimmer {
-      from { background-position: 200% 0; }
-      to { background-position: -200% 0; }
-    }
-
-    @keyframes gdgLocationNudge {
-      0%, 100% {
-        transform: translateY(0);
-        box-shadow:
-          0 16px 30px rgba(33,120,78,0.22),
-          0 0 0 4px rgba(76,175,80,0.10);
-      }
-      50% {
-        transform: translateY(-1px);
-        box-shadow:
-          0 20px 34px rgba(33,120,78,0.26),
-          0 0 0 6px rgba(76,175,80,0.13);
-      }
-    }
-
     @keyframes gdgPulse {
       0%, 100% {
         transform: scale(1);
@@ -1011,7 +901,84 @@
       font-size: 18px;
       font-weight: 800;
       text-align: center;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
+    }
+
+    .share-modal-subtitle {
+      font-size: 14px;
+      line-height: 1.45;
+      color: #5f6d79;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .share-modal-preview {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .share-modal-preview.active {
+      display: flex;
+    }
+
+    .share-preview-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 34px;
+      height: 34px;
+      padding: 0 10px;
+      border-radius: 999px;
+      background: #eef4fb;
+      color: var(--blue);
+      font-size: 16px;
+      font-weight: 800;
+      box-shadow: 0 4px 10px rgba(16,43,77,0.08);
+    }
+
+    .share-modal-count {
+      font-size: 14px;
+      font-weight: 700;
+      color: #344350;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .share-modal-status {
+      display: none;
+      text-align: center;
+      padding-top: 4px;
+    }
+
+    .share-modal-status.active {
+      display: block;
+    }
+
+    .share-modal-status-title {
+      font-size: 22px;
+      font-weight: 800;
+      color: #1c2a35;
+      letter-spacing: -0.03em;
+      margin-bottom: 8px;
+    }
+
+    .share-modal-status-text {
+      font-size: 14px;
+      color: #5f6d79;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+
+    .share-modal-actions {
+      display: block;
+    }
+
+    .share-modal-actions.hidden {
+      display: none;
     }
 
     .share-modal-content .action-btn {
@@ -1994,14 +1961,6 @@
           </div>
           <div class="loading-title">GDG Loading...</div>
           <div class="loading-subtext" id="loadingSubtext">Finding nearby game day stops...</div>
-          <div class="loading-skeleton" aria-hidden="true">
-            <div class="loading-skeleton-row"></div>
-            <div class="loading-skeleton-row short"></div>
-            <div class="loading-skeleton-grid">
-              <div class="loading-skeleton-card"></div>
-              <div class="loading-skeleton-card"></div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -2043,8 +2002,6 @@
   </div>
 
 
-  <div id="selectionToast" class="selection-toast" aria-live="polite"></div>
-
   <div id="shareModal" class="share-modal">
     <div class="share-modal-backdrop" onclick="closeShareModal()"></div>
 
@@ -2052,15 +2009,28 @@
       <div class="share-modal-handle"></div>
 
       <div class="share-modal-content">
-        <div class="share-modal-title">Your GameDayGuide</div>
+        <div id="shareModalMain">
+          <div class="share-modal-title">Your GameDayGuide</div>
+          <div class="share-modal-subtitle" id="shareModalSubtitle">Send your picks to your team</div>
+          <div class="share-modal-preview" id="shareModalPreview"></div>
+          <div class="share-modal-count" id="shareModalCount">0 places included</div>
 
-        <button class="action-btn share-btn" onclick="triggerNativeShare()">
-          Share
-        </button>
+          <div class="share-modal-actions" id="shareModalActions">
+            <button class="action-btn share-btn" onclick="triggerNativeShare()">
+              Share
+            </button>
 
-        <button class="secondary-btn" onclick="copyShareLink()">
-          Copy Link
-        </button>
+            <button class="secondary-btn" onclick="copyShareLink()">
+              Copy Link
+            </button>
+          </div>
+        </div>
+
+        <div class="share-modal-status" id="shareModalStatus">
+          <div class="share-modal-status-title">Guide shared 👍</div>
+          <div class="share-modal-status-text">Your team can open the same GameDayGuide in one tap.</div>
+          <button class="action-btn build-btn" type="button" onclick="startAnotherFromShareModal()">Start another</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2108,12 +2078,10 @@
     let lastBuildParams = null;
     let hasLoadedFullCategories = false;
     let isLoadingMoreCategories = false;
-    let smartFirstActionTimer = null;
-    let hasInteractedSinceLoad = false;
-    let selectionToastTimer = null;
-    let firstAddToastCount = 0;
     let pendingQuickCategory = "";
     let activeQuickAction = "";
+    let currentShareMeta = null;
+    let hasShownShareSuccess = false;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const DISPLAY_MEDICAL_LABEL = "🏥 Medical";
@@ -2159,8 +2127,7 @@
     const LOADING_MESSAGES = [
       "Finding nearby game day stops...",
       "Checking food, coffee, gas, and essentials...",
-      "Finding the fastest options near your field...",
-      "Pulling together places worth sharing...",
+      "Building your guide for this field...",
       "Almost ready for game day..."
     ];
 
@@ -2181,7 +2148,7 @@
       } else if (lastSourceType === "gps") {
         source = "Current location";
       } else {
-        source = String(lastQueryOrGps || "").trim();
+        source = getShareSafeLocationLabel(lastSourceType, lastQueryOrGps) || String(lastQueryOrGps || "").trim();
       }
 
       if (!source && !radiusText) {
@@ -2328,15 +2295,9 @@
 
     function togglePlaceSelection(row) {
       var key = makePlaceKey(row);
-      var placeName = String((row && row[1]) || "Place");
-      var wasSelected;
-
       if (!key) return;
 
-      markUserInteraction();
-      wasSelected = !!selectedPlacesMap[key];
-
-      if (wasSelected) {
+      if (selectedPlacesMap[key]) {
         delete selectedPlacesMap[key];
         selectedPlacesOrder = selectedPlacesOrder.filter(function(item) {
           return item !== key;
@@ -2344,73 +2305,10 @@
       } else {
         selectedPlacesMap[key] = row.slice();
         selectedPlacesOrder.push(key);
-
-        if (firstAddToastCount < 2) {
-          showSelectionToast(placeName + " added to your guide");
-          firstAddToastCount += 1;
-        }
       }
 
       updateShareSelectedButton();
     }
-
-
-    function markUserInteraction() {
-      hasInteractedSinceLoad = true;
-      clearSmartFirstAction();
-    }
-
-    function clearSmartFirstAction() {
-      if (smartFirstActionTimer) {
-        clearTimeout(smartFirstActionTimer);
-        smartFirstActionTimer = null;
-      }
-
-      var locationBtn = document.querySelector(".location-btn");
-      if (locationBtn) {
-        locationBtn.classList.remove("first-action-ready");
-      }
-    }
-
-    function scheduleSmartFirstAction() {
-      clearSmartFirstAction();
-
-      smartFirstActionTimer = setTimeout(function() {
-        var addressField = document.getElementById("address");
-        var locationBtn = document.querySelector(".location-btn");
-        var hasAddress = !!(addressField && String(addressField.value || "").trim());
-
-        if (hasInteractedSinceLoad || currentSharedGuide || hasAddress || !locationBtn || !document.body.classList.contains("home-mode")) {
-          return;
-        }
-
-        locationBtn.classList.add("first-action-ready");
-
-        var statusEl = document.getElementById("status");
-        if (statusEl && !String(statusEl.textContent || "").trim()) {
-          statusEl.textContent = "Fastest start: tap Use My Location.";
-        }
-      }, 1100);
-    }
-
-    function showSelectionToast(message) {
-      var toast = document.getElementById("selectionToast");
-      if (!toast) return;
-
-      toast.textContent = message;
-
-      if (selectionToastTimer) {
-        clearTimeout(selectionToastTimer);
-        selectionToastTimer = null;
-      }
-
-      toast.classList.add("visible");
-
-      selectionToastTimer = setTimeout(function() {
-        toast.classList.remove("visible");
-      }, 1500);
-    }
-
 
     function updateShareSelectedButton() {
       var btn = document.getElementById("shareSelectedBtn");
@@ -2789,7 +2687,6 @@
     }
 
     function startLoadingState() {
-      clearSmartFirstAction();
       var loadingWrap = document.getElementById("loadingState");
       var loadingSubtext = document.getElementById("loadingSubtext");
       var status = document.getElementById("status");
@@ -2870,15 +2767,123 @@
       return "mailto:?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
     }
 
+
+    function getShareSafeLocationLabel(sourceType, queryOrGps) {
+      var source = String(sourceType || "").toLowerCase();
+      var value = String(queryOrGps || "").trim();
+
+      if (!value) {
+        return source === "gps" ? "Near your game" : "";
+      }
+
+      if (source === "gps") {
+        return "Near your game";
+      }
+
+      if (/^gps\s*:/i.test(value)) {
+        return "Near your game";
+      }
+
+      if (/^-?\d+(?:\.\d+)?\s*,\s*-?\d+(?:\.\d+)?$/.test(value)) {
+        return "Near your game";
+      }
+
+      return value;
+    }
+
+    function getShareContextResults() {
+      if (currentShareMeta && Array.isArray(currentShareMeta.results) && currentShareMeta.results.length) {
+        return currentShareMeta.results;
+      }
+      return Array.isArray(lastResults) ? lastResults : [];
+    }
+
+    function categoryEmojiFromLabel(label) {
+      var category = String(label || "");
+      if (category.indexOf("🍔") !== -1 || category === "🍔 Food") return "🍔";
+      if (category.indexOf("☕") !== -1 || category === "☕ Coffee") return "☕";
+      if (category.indexOf("🍺") !== -1 || category === "🍺 Breweries/Bars") return "🍺";
+      if (category.indexOf("⛽") !== -1 || category === "⛽ Gas") return "⛽";
+      if (category.indexOf("🏥") !== -1 || category === BACKEND_MEDICAL_LABEL) return "🏥";
+      if (category.indexOf("🍦") !== -1) return "🍦";
+      if (category.indexOf("💊") !== -1) return "💊";
+      if (category.indexOf("🏨") !== -1) return "🏨";
+      if (category.indexOf("🏧") !== -1) return "🏧";
+      if (category.indexOf("🛒") !== -1) return "🛒";
+      if (category.indexOf("⚾") !== -1) return "⚾";
+      if (category.indexOf("🦷") !== -1) return "🦷";
+      return "";
+    }
+
+    function getSharePreviewIcons(results) {
+      var seen = {};
+      var icons = [];
+      (results || []).forEach(function(row) {
+        var icon = categoryEmojiFromLabel(row && row[0]);
+        if (!icon || seen[icon]) return;
+        seen[icon] = true;
+        icons.push(icon);
+      });
+      return icons.slice(0, 3);
+    }
+
+    function updateShareModalContent() {
+      var subtitleEl = document.getElementById("shareModalSubtitle");
+      var countEl = document.getElementById("shareModalCount");
+      var previewEl = document.getElementById("shareModalPreview");
+      var actionsEl = document.getElementById("shareModalActions");
+      var statusEl = document.getElementById("shareModalStatus");
+
+      if (!subtitleEl || !countEl || !previewEl || !actionsEl || !statusEl) return;
+
+      var meta = currentShareMeta || {};
+      var shareResults = Array.isArray(meta.results) ? meta.results : getShareContextResults();
+      var count = shareResults.length;
+      var icons = getSharePreviewIcons(shareResults);
+      var noun = count === 1 ? "place" : "places";
+
+      subtitleEl.textContent = meta.subtitle || "Send your picks to your team";
+      countEl.textContent = count ? (count + " " + noun + " included") : "Ready to share";
+      previewEl.innerHTML = icons.map(function(icon) {
+        return "<span class='share-preview-icon'>" + esc(icon) + "</span>";
+      }).join("");
+      previewEl.classList.toggle("active", !!icons.length);
+      actionsEl.classList.remove("hidden");
+      statusEl.classList.remove("active");
+      hasShownShareSuccess = false;
+    }
+
+    function setShareModalMeta(meta) {
+      currentShareMeta = meta || null;
+      updateShareModalContent();
+    }
+
+    function showShareSuccessState() {
+      var actionsEl = document.getElementById("shareModalActions");
+      var statusEl = document.getElementById("shareModalStatus");
+      if (!actionsEl || !statusEl) return;
+      actionsEl.classList.add("hidden");
+      statusEl.classList.add("active");
+      hasShownShareSuccess = true;
+      document.getElementById("status").textContent = "Guide shared 👍";
+    }
+
+    function startAnotherFromShareModal() {
+      closeShareModal();
+      startNewGuide();
+    }
+
     function buildGuideShareTitle() {
-      return lastQueryOrGps
-        ? ("GameDayGuide for " + lastQueryOrGps)
+      var locationLabel = getShareSafeLocationLabel(lastSourceType, lastQueryOrGps);
+      return locationLabel
+        ? ("GameDayGuide for " + locationLabel)
         : "GameDayGuide";
     }
 
     function buildGuideShareText(url) {
       var lines = [];
-      if (lastQueryOrGps) lines.push("GameDayGuide for " + lastQueryOrGps);
+      var locationLabel = getShareSafeLocationLabel(lastSourceType, lastQueryOrGps);
+      if (locationLabel) lines.push("GameDayGuide for " + locationLabel);
       if (selectedRadius) lines.push("Radius: " + selectedRadius + " mi");
       if (url) lines.push(url);
       return lines.join("\n\n");
@@ -3155,6 +3160,10 @@
         }
       }
 
+      setShareModalMeta({
+        subtitle: "Send this spot to your team",
+        results: [[ "", name || "Shared Spot", "", address || "" ]]
+      });
       openShareModal();
     }
 
@@ -3363,7 +3372,6 @@
     }
 
     function findMatchingFields() {
-      markUserInteraction();
       var rawQuery = String(document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
 
@@ -3646,7 +3654,6 @@
     }
 
     function runGuide() {
-      markUserInteraction();
       var rawQuery = (document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
 
@@ -3752,7 +3759,6 @@
     }
 
     function useMyLocation() {
-      markUserInteraction();
       resetSelectedPlaces();
       resetLoadMoreState();
       document.getElementById("results").innerHTML = "";
@@ -3833,7 +3839,7 @@
         "Could not copy link automatically. You can still copy the link below."
       );
 
-      closeShareModal();
+      showShareSuccessState();
 
       var input = document.getElementById("shareLinkInput");
       if (input) {
@@ -3860,7 +3866,7 @@
           title: "GameDayGuide",
           url: shareUrl
         });
-        closeShareModal();
+        showShareSuccessState();
       } catch (err) {
         if (err && err.name === "AbortError") {
           console.log("Share cancelled");
@@ -3874,14 +3880,15 @@
       latestShareUrl = url || "";
       window.currentShareUrl = latestShareUrl;
 
+      var safeLocationLabel = getShareSafeLocationLabel(lastSourceType, lastQueryOrGps);
       var shareLabel = customTitle || (
-        lastQueryOrGps
-          ? "Field guide ready for " + esc(lastQueryOrGps)
+        safeLocationLabel
+          ? "Field guide ready for " + esc(safeLocationLabel)
           : "Field guide ready to share"
       );
 
       var shareMeta = customMeta || (
-        lastQueryOrGps
+        safeLocationLabel
           ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
           : "Send this to your team chat so everyone can open the same GameDayGuide."
       );
@@ -3937,6 +3944,11 @@
         }
       }
 
+      setShareModalMeta({
+        subtitle: "Send your picks to your team",
+        results: Array.isArray(lastResults) ? lastResults.slice() : []
+      });
+
       openShareModal();
     }
 
@@ -3950,7 +3962,7 @@
 
       postJson("/api/create-shared-guide", {
         sourceType: lastSourceType,
-        queryOrGps: lastQueryOrGps,
+        queryOrGps: getShareSafeLocationLabel(lastSourceType, lastQueryOrGps) || lastQueryOrGps,
         radius: selectedRadius,
         results: lastResults,
         userId: getAnonId()
@@ -3988,7 +4000,7 @@
       postJson("/api/create-shared-guide", {
         shareType: "selected_places",
         sourceType: lastSourceType,
-        queryOrGps: lastQueryOrGps,
+        queryOrGps: getShareSafeLocationLabel(lastSourceType, lastQueryOrGps) || lastQueryOrGps,
         radius: selectedRadius,
         results: selectedResults,
         userId: getAnonId()
@@ -4006,6 +4018,10 @@
 
           latestShareUrl = url;
           window.currentShareUrl = url;
+          setShareModalMeta({
+            subtitle: "Send your picks to your team",
+            results: selectedResults.slice()
+          });
           openShareModal();
           document.getElementById("status").textContent = "";
         })
@@ -4020,6 +4036,7 @@
     function openShareModal() {
       var modal = document.getElementById("shareModal");
       if (modal) {
+        updateShareModalContent();
         modal.classList.add("active");
       }
     }
@@ -4028,6 +4045,9 @@
       var modal = document.getElementById("shareModal");
       if (modal) {
         modal.classList.remove("active");
+      }
+      if (hasShownShareSuccess) {
+        updateShareModalContent();
       }
     }
 
@@ -4653,8 +4673,12 @@
       banner.querySelector(".shared-banner-title").textContent = "Shared guide";
 
       var line = "";
-      if (sharedGuide && sharedGuide.queryOrGps) {
-        line += "Built for: " + sharedGuide.queryOrGps;
+      var sharedLocationLabel = getShareSafeLocationLabel(
+        sharedGuide && sharedGuide.sourceType,
+        sharedGuide && sharedGuide.queryOrGps
+      );
+      if (sharedLocationLabel) {
+        line += "Built for: " + sharedLocationLabel;
       }
       if (sharedGuide && sharedGuide.radius) {
         line += (line ? " • " : "") + "Radius: " + sharedGuide.radius + " mi";
@@ -4867,18 +4891,6 @@
       document.body.classList.add("home-mode");
       setRadius(5);
       focusAddressField();
-
-      var addressField = document.getElementById("address");
-      if (addressField) {
-        addressField.addEventListener("input", markUserInteraction);
-        addressField.addEventListener("focus", markUserInteraction, { once: true });
-      }
-
-      Array.prototype.slice.call(document.querySelectorAll(".radius-btn, .chip-btn, .build-btn, .location-btn, .match-btn")).forEach(function(el) {
-        el.addEventListener("click", markUserInteraction);
-      });
-
-      scheduleSmartFirstAction();
       maybeOfferInstallPrompt(1200);
     }
 
