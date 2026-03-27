@@ -3228,10 +3228,38 @@
 
       return result.data;
     }
+function normalizeCategoryLabel(label) {
+  if (!label) return "";
 
+  let clean = String(label)
+    .replace(/[^a-zA-Z0-9\s\/]/g, "")
+    .trim()
+    .toLowerCase();
+
+  const map = {
+    "food": "food",
+    "coffee": "coffee",
+    "breweries/bars": "bars",
+    "breweries / bars": "bars",
+    "bars": "bars",
+    "gas": "gas",
+    "urgent care / er": "urgent_care",
+    "urgent care/er": "urgent_care",
+    "ice cream": "ice_cream",
+    "pharmacy": "pharmacy",
+    "grocery": "grocery",
+    "hotels": "hotels",
+    "sporting goods": "sporting_goods",
+    "emergency dentist": "emergency_dentist",
+    "atm": "atm"
+  };
+
+  if (map[clean]) return map[clean];
+  return clean.replace(/\s+/g, "_");
+}
     function logCategoryOpened(categoryLabel) {
       try {
-        var categoryKey = normalizeCategoryKey(categoryLabel);
+        var categoryKey = normalizeCategoryLabel(categoryLabel);
         if (!categoryKey) return;
 
         trackEvent("category_click", {
