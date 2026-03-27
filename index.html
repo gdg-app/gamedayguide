@@ -1272,6 +1272,27 @@
       margin: 0;
     }
 
+    .radius-results-hint {
+      display: none;
+      margin: 8px 0 14px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.92);
+      border: var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(10px);
+      color: #475564;
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    .radius-results-hint strong {
+      color: #1b2a3c;
+      font-weight: 800;
+    }
+
+
     .section-heading {
       margin-top: 22px;
       margin-bottom: 12px;
@@ -2028,8 +2049,8 @@
           <div class="loading-logo-shell">
             <img src="gdg-icon.png?v=3" alt="GameDayGuide Logo">
           </div>
-          <div class="loading-title">Building your Game Day Guide…</div>
-          <div class="loading-subtext" id="loadingSubtext">Your results will appear below.</div>
+            <div class="loading-title">Building your Game Day Guide…</div>
+          <div class="loading-subtext" id="loadingSubtext">Finding nearby game day stops...</div>
         </div>
       </div>
 
@@ -2053,6 +2074,7 @@
         </div>
       </div>
 
+      <div id="radiusResultsHint" class="radius-results-hint" style="display:none;"><strong>Want a wider search?</strong> Choose 2, 10, or 20 miles, then tap Build Guide.</div>
       <div id="resultsContext" class="results-context" style="display:none;"></div>
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
@@ -2142,9 +2164,8 @@
     let currentSharedGuide = null;
     let latestShareUrl = "";
     let loadingRotateTimer = null;
-    let loadingRotateDelayTimer = null;
     let loadingRotateIndex = 0;
-    let loadingShownAt = 0;
+    let loadingVisibleAt = 0;
     let selectedPlacesMap = {};
     let selectedPlacesOrder = [];
     let lastBuildParams = null;
@@ -2199,14 +2220,13 @@
     ];
 
     const LOADING_MESSAGES = [
-      "Your results will appear below.",
-      "Finding food, coffee, gas, and more near your field...",
-      "Pulling top nearby spots for game day...",
-      "Almost ready for game day..."
+      "Building your Game Day Guide… Your results will appear below.",
+      "Finding food, coffee, gas, and more near your field…",
+      "Pulling top nearby spots for game day…",
+      "Almost ready — your guide will appear below…"
     ];
-    const LOADING_FIRST_MESSAGE_MS = 2200;
+    const MIN_LOADING_VISIBLE_MS = 1600;
     const LOADING_ROTATE_MS = 2400;
-    const LOADING_MIN_VISIBLE_MS = 900;
 
     function getResultsContextText() {
       var title = "Near Your Game";
@@ -2252,15 +2272,9 @@
       }
 
       var copy = getResultsContextText();
-      var helperLine = "";
-      if (!currentSharedGuide) {
-        helperLine = "<div class='results-context-subtitle' style='margin-top:6px;'>Want a wider search? Choose 2, 10, or 20 miles, then tap Build Guide.</div>";
-      }
-
       el.innerHTML =
         "<div class='results-context-title'>" + esc(copy.title) + "</div>" +
-        "<div class='results-context-subtitle'>" + esc(copy.subtitle) + "</div>" +
-        helperLine;
+        "<div class='results-context-subtitle'>" + esc(copy.subtitle) + "</div>";
       el.style.display = "block";
     }
 
@@ -2270,6 +2284,30 @@
       el.style.display = "none";
       el.innerHTML = "";
     }
+
+    function updateRadiusResultsHint() {
+      var hint = document.getElementById("radiusResultsHint");
+      if (!hint) return;
+
+      if (
+        currentSharedGuide ||
+        !lastResults ||
+        !lastResults.length ||
+        !lastBuildParams
+      ) {
+        hint.style.display = "none";
+        return;
+      }
+
+      hint.style.display = "block";
+    }
+
+    function clearRadiusResultsHint() {
+      var hint = document.getElementById("radiusResultsHint");
+      if (!hint) return;
+      hint.style.display = "none";
+    }
+
 
     function esc(s) {
       return String(s || "")
@@ -2807,26 +2845,14 @@
 
     function startLoadingState() {
       var loadingWrap = document.getElementById("loadingState");
-      var loadingTitle = document.querySelector(".loading-title");
       var loadingSubtext = document.getElementById("loadingSubtext");
       var status = document.getElementById("status");
 
-      if (loadingRotateTimer) {
-        clearInterval(loadingRotateTimer);
-        loadingRotateTimer = null;
-      }
-      if (loadingRotateDelayTimer) {
-        clearTimeout(loadingRotateDelayTimer);
-        loadingRotateDelayTimer = null;
-      }
-
+      stopLoadingState(true);
       document.body.classList.remove("home-mode");
-      loadingShownAt = Date.now();
+      loadingVisibleAt = Date.now();
       loadingRotateIndex = 0;
 
-      if (loadingTitle) {
-        loadingTitle.textContent = "Building your Game Day Guide…";
-      }
       if (loadingSubtext) {
         loadingSubtext.style.opacity = "1";
         loadingSubtext.textContent = LOADING_MESSAGES[0];
@@ -2838,58 +2864,53 @@
         status.textContent = "";
       }
 
-      loadingRotateDelayTimer = setTimeout(function() {
-        loadingRotateTimer = setInterval(function() {
-          var subtextEl = document.getElementById("loadingSubtext");
-          if (!subtextEl) return;
+      loadingRotateTimer = setInterval(function() {
+        var subtextEl = document.getElementById("loadingSubtext");
+        if (!subtextEl) return;
 
-          loadingRotateIndex = (loadingRotateIndex + 1) % LOADING_MESSAGES.length;
-          subtextEl.style.opacity = "0.45";
+        loadingRotateIndex = (loadingRotateIndex + 1) % LOADING_MESSAGES.length;
+        subtextEl.style.opacity = "0.45";
 
-          setTimeout(function() {
-            subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
-            subtextEl.style.opacity = "1";
-          }, 180);
-        }, LOADING_ROTATE_MS);
-      }, LOADING_FIRST_MESSAGE_MS);
+        setTimeout(function() {
+          subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
+          subtextEl.style.opacity = "1";
+        }, 180);
+      }, LOADING_ROTATE_MS);
     }
 
-    function stopLoadingState(force) {
+    function stopLoadingState(forceImmediate) {
       var loadingWrap = document.getElementById("loadingState");
-      var loadingTitle = document.querySelector(".loading-title");
       var loadingSubtext = document.getElementById("loadingSubtext");
-      var elapsed = loadingShownAt ? (Date.now() - loadingShownAt) : LOADING_MIN_VISIBLE_MS;
-      var remaining = LOADING_MIN_VISIBLE_MS - elapsed;
-
-      if (!force && remaining > 0) {
-        setTimeout(function() {
-          stopLoadingState(true);
-        }, remaining);
-        return;
-      }
 
       if (loadingRotateTimer) {
         clearInterval(loadingRotateTimer);
         loadingRotateTimer = null;
-      }
-      if (loadingRotateDelayTimer) {
-        clearTimeout(loadingRotateDelayTimer);
-        loadingRotateDelayTimer = null;
       }
 
       if (loadingWrap) {
         loadingWrap.style.display = "none";
       }
 
-      if (loadingTitle) {
-        loadingTitle.textContent = "Building your Game Day Guide…";
-      }
       if (loadingSubtext) {
         loadingSubtext.style.opacity = "1";
         loadingSubtext.textContent = LOADING_MESSAGES[0];
       }
 
-      loadingShownAt = 0;
+      if (forceImmediate) {
+        loadingVisibleAt = 0;
+      }
+    }
+
+    function finishLoadingState() {
+      var remaining = Math.max(0, MIN_LOADING_VISIBLE_MS - (Date.now() - loadingVisibleAt));
+
+      return new Promise(function(resolve) {
+        setTimeout(function() {
+          stopLoadingState();
+          loadingVisibleAt = 0;
+          resolve();
+        }, remaining);
+      });
     }
 
     function buildGoogleMapsLink(name, address) {
@@ -3575,13 +3596,8 @@
       setRadius(5);
       document.getElementById("address").value = chosenQuery;
       hideFieldMatchResults();
-      startLoadingState();
-
-      window.requestAnimationFrame(function() {
-        window.setTimeout(function() {
-          runGuideWithQuery(chosenQuery, "query", { loadingAlreadyVisible: true });
-        }, 120);
-      });
+      document.getElementById("status").textContent = "Building your guide — results will appear below…";
+      runGuideWithQuery(chosenQuery, "query");
     }
 
     function selectMatchedFieldByIndex(index) {
@@ -3850,6 +3866,7 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
+      clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
@@ -3871,10 +3888,9 @@
       });
     }
 
-    function runGuideWithQuery(query, sourceType, options) {
+    function runGuideWithQuery(query, sourceType) {
       query = String(query || "").trim();
       sourceType = sourceType || "query";
-      options = options || {};
 
       if (!query) {
         document.getElementById("status").textContent = "Please enter an address or facility name.";
@@ -3889,13 +3905,12 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
+      clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
       latestShareUrl = "";
-      if (!options.loadingAlreadyVisible) {
-        startLoadingState();
-      }
+      startLoadingState();
 
       lastBuildParams = {
         query: query,
@@ -3904,8 +3919,8 @@
       };
 
       fetchBuildGuide(lastBuildParams)
-        .then(function(data) {
-          stopLoadingState();
+        .then(async function(data) {
+          await finishLoadingState();
           lastResults = Array.isArray(data) ? data : [];
           lastSourceType = sourceType;
           lastQueryOrGps = query;
@@ -3919,8 +3934,8 @@
           trackSuccessfulGuideBuild(sourceType, query, lastResults.length);
           maybeOfferInstallPrompt(500);
         })
-        .catch(function(err) {
-          stopLoadingState();
+        .catch(async function(err) {
+          await finishLoadingState();
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
           resetLoadMoreState();
@@ -3934,6 +3949,7 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
+      clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
@@ -3961,8 +3977,8 @@
           };
 
           fetchBuildGuide(lastBuildParams)
-            .then(function(data) {
-              stopLoadingState();
+            .then(async function(data) {
+              await finishLoadingState();
               lastResults = Array.isArray(data) ? data : [];
               lastSourceType = "gps";
               lastQueryOrGps = "GPS:" + lat + "," + lng;
@@ -3974,8 +3990,8 @@
               trackSuccessfulGuideBuild("gps", lastQueryOrGps, lastResults.length);
               maybeOfferInstallPrompt(500);
             })
-            .catch(function(err) {
-              stopLoadingState();
+            .catch(async function(err) {
+              await finishLoadingState();
               document.getElementById("status").textContent =
                 "Error: " + (err && err.message ? err.message : JSON.stringify(err));
               resetLoadMoreState();
@@ -4704,6 +4720,8 @@
       if (!lastResults.length) {
         hideLoadMoreControls();
         clearResultsContext();
+        clearRadiusResultsHint();
+      clearRadiusResultsHint();
         container.innerHTML =
           "<div class='card'>" +
             "<div class='card-name'>No results found</div>" +
@@ -4721,6 +4739,7 @@
 
       document.getElementById("topStops").innerHTML = "";
       updateResultsContext();
+      updateRadiusResultsHint();
       renderCategoryJumpBar(grouped);
 
       var allCategories = Object.keys(grouped);
@@ -4835,6 +4854,7 @@
       document.getElementById("pageSubtitle").textContent = "Find what you need near your game.";
       document.getElementById("searchPanel").style.display = "none";
       clearResultsContext();
+      clearRadiusResultsHint();
 
       var banner = document.getElementById("sharedBanner");
       var bannerText = document.getElementById("sharedBannerText");
