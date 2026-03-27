@@ -1869,9 +1869,7 @@
         <input id="address" placeholder="Enter field address or facility name" value="" />
         <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
         <div id="fieldMatchResults" class="match-results"></div>
-        <div class="helper-text">Pick your field first. Then choose a radius, tap a Quick Action, or tap Build Guide. Example: Field 4 USA Baseball Complex.</div>
-
-        <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
+<div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
           <div class="quick-row" id="recentSearchRow"></div>
         </div>
@@ -1961,6 +1959,7 @@
 
       <div class="share-modal-content">
         <div class="share-modal-title">Your GameDayGuide</div>
+        <div id="sharePreviewIcons" class="share-modal-preview"></div>
 
         <button class="action-btn share-btn" onclick="triggerNativeShare()">
           Share
@@ -3847,9 +3846,111 @@
 
 
 
+    
+    function getSelectedCategoryPreviewIcons() {
+      var selectedResults = getSelectedPlaces();
+      if (!selectedResults.length) return [];
+
+      var iconMap = {
+        "🍔 Food": "🍔",
+        "☕ Coffee": "☕",
+        "🍦 Ice Cream": "🍦",
+        "⛽ Gas": "⛽",
+        "🛒 Grocery": "🛒",
+        "🏨 Hotels": "🏨",
+        "🏧 ATM": "🏧",
+        "💊 Pharmacy": "💊",
+        "⚾ Sporting Goods": "⚾",
+        "🏥 Urgent Care / ER": "🏥",
+        "🦷 Emergency Dentist": "🦷",
+        "🍺 Breweries/Bars": "🍺"
+      };
+
+      var seen = {};
+      var icons = [];
+
+      selectedResults.forEach(function(place) {
+        var category = String((place && place[0]) || "");
+        var icon = iconMap[category] || "";
+        if (icon && !seen[icon] && icons.length < 3) {
+          seen[icon] = true;
+          icons.push(icon);
+        }
+      });
+
+      return icons;
+    }
+
+    function renderSharePreviewIcons() {
+      var wrap = document.getElementById("sharePreviewIcons");
+      if (!wrap) return;
+
+      var icons = getSelectedCategoryPreviewIcons();
+      if (!icons.length) {
+        wrap.classList.remove("active");
+        wrap.innerHTML = "";
+        return;
+      }
+
+      wrap.classList.add("active");
+      wrap.innerHTML = icons.map(function(icon) {
+        return "<div class='share-preview-icon'>" + icon + "</div>";
+      }).join("");
+    }
+
+    function initShareModalSwipe() {
+      var modal = document.getElementById("shareModal");
+      var sheet = modal ? modal.querySelector(".share-modal-sheet") : null;
+      if (!modal || !sheet || sheet.dataset.swipeReady === "true") return;
+
+      sheet.dataset.swipeReady = "true";
+
+      var startY = 0;
+      var currentY = 0;
+      var dragging = false;
+
+      function getY(evt) {
+        return evt.touches ? evt.touches[0].clientY : evt.clientY;
+      }
+
+      function start(evt) {
+        if (!modal.classList.contains("active")) return;
+        startY = getY(evt);
+        currentY = startY;
+        dragging = true;
+        sheet.classList.add("dragging");
+      }
+
+      function move(evt) {
+        if (!dragging) return;
+        currentY = getY(evt);
+        var delta = Math.max(0, currentY - startY);
+        sheet.style.transform = "translateY(" + delta + "px)";
+        if (delta > 0 && evt.cancelable) evt.preventDefault();
+      }
+
+      function end() {
+        if (!dragging) return;
+        dragging = false;
+        var delta = Math.max(0, currentY - startY);
+        sheet.classList.remove("dragging");
+
+        if (delta > 90) {
+          closeShareModal();
+        } else {
+          sheet.style.transform = "";
+        }
+      }
+
+      sheet.addEventListener("touchstart", start, { passive: true });
+      sheet.addEventListener("touchmove", move, { passive: false });
+      sheet.addEventListener("touchend", end);
+    }
+
+
     function openShareModal() {
-  renderSharePreviewIcons();
-  initShareModalSwipe();
+      renderSharePreviewIcons();
+      initShareModalSwipe();
       var modal = document.getElementById("shareModal");
       if (modal) {
         modal.classList.add("active");
@@ -3857,12 +3958,16 @@
     }
 
     function closeShareModal() {
-  const modal = document.getElementById("shareModal");
-  const sheet = modal ? modal.querySelector(".share-modal-sheet") : null;
-  if (sheet) {
-    sheet.classList.remove("dragging");
-    sheet.style.transform = "";
-  }
+      var modal = document.getElementById("shareModal");
+      var sheet = modal ? modal.querySelector(".share-modal-sheet") : null;
+      if (sheet) {
+        sheet.classList.remove("dragging");
+        sheet.style.transform = "";
+      }
+      if (modal) {
+        modal.classList.remove("active");
+      }
+    }
       var modal = document.getElementById("shareModal");
       if (modal) {
         modal.classList.remove("active");
