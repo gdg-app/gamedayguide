@@ -1272,6 +1272,27 @@
       margin: 0;
     }
 
+    .radius-results-hint {
+      display: none;
+      margin: 8px 0 14px;
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.92);
+      border: var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(10px);
+      color: #475564;
+      font-size: 13px;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    .radius-results-hint strong {
+      color: #1b2a3c;
+      font-weight: 800;
+    }
+
+
     .section-heading {
       margin-top: 22px;
       margin-bottom: 12px;
@@ -2028,7 +2049,7 @@
           <div class="loading-logo-shell">
             <img src="gdg-icon.png?v=3" alt="GameDayGuide Logo">
           </div>
-          <div class="loading-title">GDG Loading...</div>
+            <div class="loading-title">Building your Game Day Guide…</div>
           <div class="loading-subtext" id="loadingSubtext">Finding nearby game day stops...</div>
         </div>
       </div>
@@ -2053,6 +2074,7 @@
         </div>
       </div>
 
+      <div id="radiusResultsHint" class="radius-results-hint" style="display:none;"><strong>Want a wider search?</strong> Choose 2, 10, or 20 miles, then tap Build Guide.</div>
       <div id="resultsContext" class="results-context" style="display:none;"></div>
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
@@ -2197,10 +2219,10 @@
     ];
 
     const LOADING_MESSAGES = [
-      "Finding nearby game day stops...",
-      "Checking food, coffee, gas, and essentials...",
-      "Building your guide for this field...",
-      "Almost ready for game day..."
+      "Building your Game Day Guide… Your results will appear below.",
+      "Finding food, coffee, gas, and more near your field…",
+      "Pulling top nearby spots for game day…",
+      "Almost ready — your guide will appear below…"
     ];
 
     function getResultsContextText() {
@@ -2259,6 +2281,30 @@
       el.style.display = "none";
       el.innerHTML = "";
     }
+
+    function updateRadiusResultsHint() {
+      var hint = document.getElementById("radiusResultsHint");
+      if (!hint) return;
+
+      if (
+        currentSharedGuide ||
+        !lastResults ||
+        !lastResults.length ||
+        !lastBuildParams
+      ) {
+        hint.style.display = "none";
+        return;
+      }
+
+      hint.style.display = "block";
+    }
+
+    function clearRadiusResultsHint() {
+      var hint = document.getElementById("radiusResultsHint");
+      if (!hint) return;
+      hint.style.display = "none";
+    }
+
 
     function esc(s) {
       return String(s || "")
@@ -2824,7 +2870,7 @@
           subtextEl.textContent = LOADING_MESSAGES[loadingRotateIndex];
           subtextEl.style.opacity = "1";
         }, 180);
-      }, 2800);
+      }, 2400);
     }
 
     function stopLoadingState() {
@@ -3529,7 +3575,7 @@
       setRadius(5);
       document.getElementById("address").value = chosenQuery;
       hideFieldMatchResults();
-      document.getElementById("status").textContent = "Building guide…";
+      document.getElementById("status").textContent = "Building your guide — results will appear below…";
       runGuideWithQuery(chosenQuery, "query");
     }
 
@@ -3799,6 +3845,7 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
+      clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
@@ -3837,6 +3884,7 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
+      clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
@@ -3880,6 +3928,7 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
+      clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
@@ -4650,6 +4699,8 @@
       if (!lastResults.length) {
         hideLoadMoreControls();
         clearResultsContext();
+        clearRadiusResultsHint();
+      clearRadiusResultsHint();
         container.innerHTML =
           "<div class='card'>" +
             "<div class='card-name'>No results found</div>" +
@@ -4667,6 +4718,7 @@
 
       document.getElementById("topStops").innerHTML = "";
       updateResultsContext();
+      updateRadiusResultsHint();
       renderCategoryJumpBar(grouped);
 
       var allCategories = Object.keys(grouped);
@@ -4781,6 +4833,7 @@
       document.getElementById("pageSubtitle").textContent = "Find what you need near your game.";
       document.getElementById("searchPanel").style.display = "none";
       clearResultsContext();
+      clearRadiusResultsHint();
 
       var banner = document.getElementById("sharedBanner");
       var bannerText = document.getElementById("sharedBannerText");
