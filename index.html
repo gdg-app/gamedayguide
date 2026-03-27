@@ -757,7 +757,16 @@
       margin: 10px 0 14px;
     }
 
-    
+    .load-more-card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
+      border-radius: 16px;
+      box-shadow: var(--shadow-card);
+      padding: 10px 12px;
+      border: var(--border-soft);
+      backdrop-filter: blur(12px);
+    }
+
     .load-more-inline {
       display: flex;
       align-items: center;
@@ -766,43 +775,24 @@
       width: 100%;
     }
 
-    .load-more-inline-btn {
-      padding: 8px 12px;
-      min-height: 36px;
-      font-size: 13px;
-    }
-.load-more-card {
-      padding: 10px 12px;
-      border-radius: 14px;
-
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
-      border-radius: 18px;
-      box-shadow: var(--shadow-card);
-      padding: 14px 16px;
-      border: var(--border-soft);
-      backdrop-filter: blur(12px);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      flex-wrap: wrap;
-    }
-
     .load-more-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 800;
       color: #1c2a35;
-      margin-bottom: 2px;
+      margin: 0;
       letter-spacing: -0.02em;
     }
 
     .load-more-text {
+      display: none;
+    }
+
+    .load-more-inline-btn {
+      padding: 8px 12px;
+      min-height: 36px;
       font-size: 13px;
-      color: #5f6d79;
-      line-height: 1.4;
-      margin-bottom: 0;
-      flex: 1 1 260px;
+      width: auto;
+      flex: 0 0 auto;
     }
 
     .share-link-input {
@@ -1192,9 +1182,6 @@
     .card,
     .shared-banner,
     .load-more-card {
-      padding: 10px 12px;
-      border-radius: 14px;
-
       animation: gdgFadeUp 0.32s ease;
     }
 
@@ -1763,7 +1750,7 @@
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
         <div class="load-more-card">
           <div class="load-more-inline">
-            <span class="load-more-title">Need more nearby?</span>
+            <div class="load-more-title">Need more nearby?</div>
             <button type="button" class="secondary-btn load-more-inline-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More</button>
           </div>
         </div>
