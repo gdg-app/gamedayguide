@@ -575,12 +575,16 @@
     }
 
     .location-btn {
-      background: linear-gradient(180deg, #3f8f66 0%, var(--green) 100%);
-      box-shadow: 0 14px 24px rgba(33,89,60,0.18);
+      background: linear-gradient(180deg, #344350 0%, var(--blue) 100%);
     }
 
     .share-btn {
       background: linear-gradient(180deg, #3a4a57 0%, var(--share) 100%);
+    }
+
+    .soft-action-btn {
+      background: linear-gradient(180deg, #5c6a77 0%, #70808f 100%);
+      box-shadow: 0 10px 18px rgba(48,61,73,0.14);
     }
 
     .match-btn {
@@ -744,7 +748,7 @@
 
     #shareTools,
     #shareLinkBox {
-      margin: 10px 0 12px;
+      margin: 16px 0 18px;
     }
 
     #shareTools {
@@ -752,7 +756,7 @@
       border-radius: 18px;
       background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.9));
       border: var(--border-soft);
-      box-shadow: var(--shadow-card);
+      box-shadow: var(--shadow-soft);
       backdrop-filter: blur(12px);
     }
 
@@ -768,15 +772,15 @@
 
     .load-more-wrap {
       display: none;
-      margin: 10px 0 14px;
+      margin: 18px 0 22px;
     }
 
     .load-more-card {
       background:
         linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
       border-radius: 18px;
-      box-shadow: var(--shadow-card);
-      padding: 12px 14px;
+      box-shadow: var(--shadow-soft);
+      padding: 14px 14px;
       border: var(--border-soft);
       backdrop-filter: blur(12px);
     }
@@ -784,16 +788,16 @@
     .load-more-title {
       font-size: 16px;
       font-weight: 800;
-      color: #1c2a35;
+      color: #273544;
       margin-bottom: 4px;
       letter-spacing: -0.02em;
     }
 
     .load-more-text {
       font-size: 13px;
-      color: #5f6d79;
+      color: #667482;
       line-height: 1.4;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     #loadMoreBtn {
@@ -2078,7 +2082,7 @@
 
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
-          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share Guide</button>
+          <button type="button" class="action-btn soft-action-btn" onclick="shareGuide()">Share Guide</button>
           <button type="button" class="action-btn share-btn" id="shareSelectedBtn" onclick="shareSelectedPlaces()" style="display:none;">Share Picks</button>
           <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
         </div>
@@ -2092,11 +2096,9 @@
         <div class="load-more-card">
           <div class="load-more-title">Need more nearby?</div>
           <div class="load-more-text">Add pharmacy, hotels, ATM, and more.</div>
-          <button type="button" class="action-btn build-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More Categories</button>
+          <button type="button" class="action-btn soft-action-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More Categories</button>
         </div>
       </div>
-
-      <div id="radiusResultsHint" class="radius-results-hint" style="display:none;"><strong>Want a wider search?</strong> Choose 2, 10, or 20 miles, then tap Build Guide.</div>
       <div id="resultsContext" class="results-context" style="display:none;"></div>
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
@@ -2309,26 +2311,11 @@
     }
 
     function updateRadiusResultsHint() {
-      var hint = document.getElementById("radiusResultsHint");
-      if (!hint) return;
-
-      if (
-        currentSharedGuide ||
-        !lastResults ||
-        !lastResults.length ||
-        !lastBuildParams
-      ) {
-        hint.style.display = "none";
-        return;
-      }
-
-      hint.style.display = "block";
+      return;
     }
 
     function clearRadiusResultsHint() {
-      var hint = document.getElementById("radiusResultsHint");
-      if (!hint) return;
-      hint.style.display = "none";
+      return;
     }
 
 
