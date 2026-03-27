@@ -731,12 +731,12 @@
 
     #shareTools,
     #shareLinkBox {
-      margin: 14px 0 18px;
+      margin: 10px 0 12px;
     }
 
     #shareTools {
-      padding: 14px;
-      border-radius: 22px;
+      padding: 10px;
+      border-radius: 18px;
       background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(255,255,255,0.9));
       border: var(--border-soft);
       box-shadow: var(--shadow-card);
@@ -745,38 +745,48 @@
 
     .share-tools-row {
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    #shareSelectedBtn {
+      display: none !important;
     }
 
     .load-more-wrap {
       display: none;
-      margin: 14px 0 18px;
+      margin: 10px 0 14px;
     }
 
     .load-more-card {
       background:
         linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.93));
-      border-radius: 20px;
+      border-radius: 18px;
       box-shadow: var(--shadow-card);
-      padding: 16px;
+      padding: 12px 14px;
       border: var(--border-soft);
       backdrop-filter: blur(12px);
     }
 
     .load-more-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 800;
       color: #1c2a35;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       letter-spacing: -0.02em;
     }
 
     .load-more-text {
-      font-size: 14px;
+      font-size: 13px;
       color: #5f6d79;
-      line-height: 1.45;
-      margin-bottom: 12px;
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+
+    #loadMoreBtn {
+      min-height: 50px;
+      padding-top: 12px;
+      padding-bottom: 12px;
     }
 
     .share-link-input {
@@ -908,10 +918,10 @@
       position: fixed;
       left: 0;
       right: 0;
-      bottom: max(10px, env(safe-area-inset-bottom));
+      bottom: max(8px, env(safe-area-inset-bottom));
       z-index: 90;
       display: none;
-      padding: 0 12px;
+      padding: 0 10px;
       pointer-events: none;
     }
 
@@ -921,13 +931,13 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 22px;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 18px;
       background: rgba(18, 37, 56, 0.94);
       color: white;
-      box-shadow: 0 16px 36px rgba(8, 19, 34, 0.28);
-      border: 1px solid rgba(255,255,255,0.16);
+      box-shadow: 0 12px 28px rgba(8, 19, 34, 0.24);
+      border: 1px solid rgba(255,255,255,0.14);
       backdrop-filter: blur(14px);
       pointer-events: auto;
     }
@@ -937,29 +947,29 @@
     }
 
     .sticky-share-count {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       line-height: 1.2;
       color: white;
     }
 
     .sticky-share-text {
-      font-size: 13px;
-      line-height: 1.35;
-      color: rgba(255,255,255,0.82);
-      margin-top: 2px;
+      font-size: 12px;
+      line-height: 1.3;
+      color: rgba(255,255,255,0.8);
+      margin-top: 1px;
     }
 
     .sticky-share-btn {
       flex: 0 0 auto;
-      min-height: 46px;
-      padding: 12px 16px;
+      min-height: 42px;
+      padding: 10px 14px;
       white-space: nowrap;
       box-shadow: none;
     }
 
     body.has-sticky-share .app {
-      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 120px);
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 98px);
     }
 
     body.selected-share-mode .app {
@@ -992,20 +1002,28 @@
     }
 
     @media (max-width: 640px) {
-      .selection-nudge-card,
-      .sticky-share-inner {
+      .selection-nudge-card {
         align-items: stretch;
         flex-direction: column;
       }
 
-      .selection-nudge .secondary-btn,
-      .sticky-share-btn {
+      .selection-nudge .secondary-btn {
         width: 100%;
         justify-content: center;
       }
 
+      .sticky-share-inner {
+        align-items: center;
+        flex-direction: row;
+      }
+
+      .sticky-share-btn {
+        width: auto;
+        justify-content: center;
+      }
+
       .sticky-share-bar {
-        padding: 0 10px;
+        padding: 0 8px;
       }
     }
 
@@ -1691,7 +1709,7 @@
       }
 
       .share-tools-row {
-        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-columns: 1fr 1fr;
       }
 
       .top-stop-card {
@@ -1804,7 +1822,7 @@
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
         <div class="load-more-card">
           <div class="load-more-title">Need more nearby?</div>
-          <div class="load-more-text">Add pharmacy, grocery, hotels, ATM, sporting goods, emergency dentist, and more.</div>
+          <div class="load-more-text">Add pharmacy, hotels, ATM, and more.</div>
           <button type="button" class="action-btn build-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More Categories</button>
         </div>
       </div>
@@ -1820,7 +1838,7 @@
     <div class="sticky-share-inner">
       <div class="sticky-share-copy">
         <div id="stickyShareCount" class="sticky-share-count">1 place selected</div>
-        <div class="sticky-share-text">Share your picks without scrolling back up.</div>
+        <div class="sticky-share-text">Ready to share.</div>
       </div>
       <button type="button" class="action-btn share-btn sticky-share-btn" onclick="shareSelectedPlaces()">Share with Team</button>
     </div>
@@ -2127,13 +2145,8 @@
       var countLabel = count === 1 ? "1 place selected" : (count + " places selected");
 
       if (btn) {
-        if (!count || currentSharedGuide) {
-          btn.style.display = "none";
-          btn.textContent = "Share Picks";
-        } else {
-          btn.style.display = "inline-flex";
-          btn.textContent = count === 1 ? "Share 1 Selected Place" : ("Share " + count + " Selected Places");
-        }
+        btn.style.display = "none";
+        btn.textContent = count === 1 ? "Share 1 Selected Place" : ("Share " + count + " Selected Places");
       }
 
       if (stickyBar && stickyCount) {
@@ -3628,7 +3641,7 @@
           latestShareUrl = url;
           window.currentShareUrl = url;
           openShareModal();
-          document.getElementById("status").textContent = "Selected places share link ready.";
+          document.getElementById("status").textContent = "";
         })
         .catch(function(err) {
           document.getElementById("status").textContent =
