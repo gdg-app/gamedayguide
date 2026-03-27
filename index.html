@@ -275,7 +275,21 @@
       margin-bottom: 18px;
     }
 
-    
+    .search-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 28px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(23,58,103,0.08);
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin-bottom: 10px;
+    }
+
     .search-title {
       font-size: 31px;
       line-height: 1.05;
@@ -791,47 +805,6 @@
     }
 
 
-    .selection-nudge {
-      display: none;
-      margin: 10px 0 14px;
-    }
-
-    .selection-nudge-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 12px 14px;
-      border-radius: 18px;
-      background: rgba(255,255,255,0.92);
-      border: var(--border-soft);
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: blur(10px);
-    }
-
-    .selection-nudge-copy {
-      min-width: 0;
-    }
-
-    .selection-nudge-title {
-      font-size: 14px;
-      font-weight: 800;
-      color: #15324a;
-      line-height: 1.25;
-      margin-bottom: 2px;
-    }
-
-    .selection-nudge-text {
-      font-size: 13px;
-      color: #5f6d79;
-      line-height: 1.35;
-    }
-
-    .selection-nudge .secondary-btn {
-      flex: 0 0 auto;
-      white-space: nowrap;
-    }
-
     .sticky-share-bar {
       position: fixed;
       left: 0;
@@ -849,12 +822,12 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
-      padding: 14px 14px 14px 16px;
-      border-radius: 24px;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 22px;
       background: rgba(18, 37, 56, 0.94);
       color: white;
-      box-shadow: 0 18px 38px rgba(8, 19, 34, 0.30);
+      box-shadow: 0 16px 36px rgba(8, 19, 34, 0.28);
       border: 1px solid rgba(255,255,255,0.16);
       backdrop-filter: blur(14px);
       pointer-events: auto;
@@ -880,8 +853,8 @@
 
     .sticky-share-btn {
       flex: 0 0 auto;
-      min-height: 48px;
-      padding: 12px 18px;
+      min-height: 46px;
+      padding: 12px 16px;
       white-space: nowrap;
       box-shadow: none;
     }
@@ -919,14 +892,99 @@
       box-shadow: 0 5px 12px rgba(36,49,61,0.12);
     }
 
+
+    .share-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: none;
+    }
+
+    .share-modal.active {
+      display: block;
+    }
+
+    .share-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.42);
+      backdrop-filter: blur(4px);
+    }
+
+    .share-modal-sheet {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.99), rgba(255,255,255,0.95));
+      border-top-left-radius: 26px;
+      border-top-right-radius: 26px;
+      padding: 14px 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
+      box-shadow: 0 -12px 34px rgba(0,0,0,0.22);
+      transform: translateY(100%);
+      transition: transform 0.24s ease;
+      border-top: 1px solid rgba(255,255,255,0.5);
+    }
+
+    .share-modal.active .share-modal-sheet {
+      transform: translateY(0);
+    }
+
+    .share-modal-handle {
+      width: 42px;
+      height: 5px;
+      background: #d7dde3;
+      border-radius: 999px;
+      margin: 0 auto 14px;
+    }
+
+    .share-modal-title {
+      font-size: 20px;
+      line-height: 1.15;
+      font-weight: 800;
+      text-align: center;
+      color: #1c2a35;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .share-modal-subtitle {
+      font-size: 14px;
+      line-height: 1.45;
+      color: #5f6d79;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .share-modal-actions {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+    }
+
+    .share-modal-link {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 14px;
+      border: 1px solid #d7e0e7;
+      border-radius: 16px;
+      min-height: 52px;
+      background: #f7f5f1;
+      color: var(--text);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.75), 0 2px 8px rgba(8,25,18,0.04);
+      margin-bottom: 10px;
+    }
+
+    .share-modal-close {
+      margin-top: 2px;
+    }
+
     @media (max-width: 640px) {
-      .selection-nudge-card,
       .sticky-share-inner {
         align-items: stretch;
         flex-direction: column;
       }
 
-      .selection-nudge .secondary-btn,
       .sticky-share-btn {
         width: 100%;
         justify-content: center;
@@ -1222,35 +1280,19 @@
       word-break: break-word;
     }
 
-
     .select-place-btn {
       border: 0;
       border-radius: 999px;
-      width: 42px;
-      min-width: 42px;
-      height: 42px;
-      padding: 0;
+      padding: 10px 12px;
+      min-height: 40px;
+      white-space: nowrap;
       background: #e8eeea;
       color: var(--blue);
-      font-size: 18px;
-      font-weight: 900;
-      line-height: 1;
+      font-size: 13px;
+      font-weight: 800;
       cursor: pointer;
       box-shadow: 0 6px 14px rgba(36,49,61,0.08);
       flex: 0 0 auto;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease, color 0.14s ease;
-    }
-
-    .select-place-btn:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 8px 16px rgba(36,49,61,0.12);
-    }
-
-    .select-place-btn:active {
-      transform: scale(0.97);
     }
 
     .select-place-btn.selected {
@@ -1671,7 +1713,8 @@
 
       <div class="search-panel" id="searchPanel">
         <div class="search-intro">
-<h2 class="search-title">Find what you need near the game</h2>
+          <div class="search-kicker">Game Day, Made Easier.</div>
+          <h2 class="search-title">Find what you need near the game</h2>
           <p class="search-subtitle">Search by field, facility, or current location for food, coffee, gas, pharmacies, and more.</p>
         </div>
 
@@ -1732,7 +1775,6 @@
         </div>
       </div>
 
-      <div id="selectionNudge" class="selection-nudge" style="display:none;"></div>
       <div id="shareLinkBox" style="display:none;"></div>
 
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
@@ -1754,9 +1796,24 @@
     <div class="sticky-share-inner">
       <div class="sticky-share-copy">
         <div id="stickyShareCount" class="sticky-share-count">1 place selected</div>
-        <div class="sticky-share-text">Collect spots as you browse, then share in one tap.</div>
+        <div class="sticky-share-text">Share in one tap.</div>
       </div>
       <button type="button" class="action-btn share-btn sticky-share-btn" onclick="shareSelectedPlaces()">Share with Team</button>
+    </div>
+  </div>
+
+  <div id="shareModal" class="share-modal" aria-hidden="true">
+    <div class="share-modal-backdrop" onclick="closeShareModal()"></div>
+    <div class="share-modal-sheet">
+      <div class="share-modal-handle"></div>
+      <div class="share-modal-title">Share your selected spots</div>
+      <div class="share-modal-subtitle">Send a mini GameDayGuide to your team in one tap.</div>
+      <input id="shareModalLink" class="share-modal-link" type="text" readonly value="" />
+      <div class="share-modal-actions">
+        <button type="button" class="action-btn share-btn" onclick="triggerNativeShare()">Share</button>
+        <button type="button" class="secondary-btn" onclick="copyShareLink(latestShareUrl)">Copy Link</button>
+        <button type="button" class="secondary-btn share-modal-close" onclick="closeShareModal()">Close</button>
+      </div>
     </div>
   </div>
 
@@ -2034,7 +2091,6 @@
 
     function updateShareSelectedButton() {
       var btn = document.getElementById("shareSelectedBtn");
-      var nudge = document.getElementById("selectionNudge");
       var stickyBar = document.getElementById("stickyShareBar");
       var stickyCount = document.getElementById("stickyShareCount");
       var count = getSelectedPlaces().length;
@@ -2047,23 +2103,6 @@
         } else {
           btn.style.display = "inline-flex";
           btn.textContent = count === 1 ? "Share 1 Selected Spot" : ("Share " + count + " Selected Spots");
-        }
-      }
-
-      if (nudge) {
-        if (!count || currentSharedGuide) {
-          nudge.style.display = "none";
-          nudge.innerHTML = "";
-        } else {
-          nudge.style.display = "block";
-          nudge.innerHTML =
-            "<div class='selection-nudge-card'>" +
-              "<div class='selection-nudge-copy'>" +
-                "<div class='selection-nudge-title'>✔ " + esc(countLabel) + "</div>" +
-                "<div class='selection-nudge-text'>Keep browsing, then share your selected spots in one tap.</div>" +
-              "</div>" +
-              "<button type='button' class='secondary-btn' onclick='shareSelectedPlaces()'>Share with Team</button>" +
-            "</div>";
         }
       }
 
@@ -2408,6 +2447,12 @@
       setTimeout(function() {
         showInstallPrompt();
       }, Number(delayMs || 0));
+    }
+
+    function setupShareModal() {
+      document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") closeShareModal();
+      });
     }
 
     function setupInstallPrompt() {
@@ -3389,7 +3434,7 @@
       }
 
       if (!navigator.share) {
-        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link, Text, or Email instead.";
+        document.getElementById("status").textContent = "Sharing is not supported on this device/browser. Use Copy Link instead.";
         return;
       }
 
@@ -3403,14 +3448,16 @@
         url: latestShareUrl
       })
       .then(function() {
+        closeShareModal();
         document.getElementById("status").textContent = "Share sheet opened.";
       })
       .catch(function(err) {
         if (err && err.name === "AbortError") {
+          closeShareModal();
           document.getElementById("status").textContent = "Share canceled.";
           return;
         }
-        document.getElementById("status").textContent = "Could not open share options. You can still copy, text, or email the link below.";
+        document.getElementById("status").textContent = "Could not open share options. Use Copy Link instead.";
       });
     }
 
@@ -3516,11 +3563,11 @@
       var selectedResults = getSelectedPlaces();
 
       if (!selectedResults.length) {
-        document.getElementById("status").textContent = "Select at least one place first.";
+        document.getElementById("status").textContent = "Select at least one spot first.";
         return;
       }
 
-      document.getElementById("status").textContent = "Creating selected places share link…";
+      document.getElementById("status").textContent = "Creating selected spots share link…";
 
       postJson("/api/create-shared-guide", {
         shareType: "selected_places",
@@ -3541,17 +3588,34 @@
             return;
           }
 
-          var count = selectedResults.length;
-          var title = count === 1 ? "1 selected place ready to share" : (count + " selected places ready to share");
-          var meta = "Send this mini GameDayGuide list to your team chat.";
-
-          showShareLink(url, title, meta);
-          document.getElementById("status").textContent = "Selected places share link ready.";
+          latestShareUrl = url;
+          openShareModal(url);
+          document.getElementById("status").textContent = "Selected spots ready to share.";
         })
         .catch(function(err) {
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
         });
+    }
+
+    function openShareModal(url) {
+      var modal = document.getElementById("shareModal");
+      var input = document.getElementById("shareModalLink");
+      latestShareUrl = String(url || latestShareUrl || "").trim();
+
+      if (input) input.value = latestShareUrl || "";
+      if (modal) {
+        modal.classList.add("active");
+        modal.setAttribute("aria-hidden", "false");
+      }
+    }
+
+    function closeShareModal() {
+      var modal = document.getElementById("shareModal");
+      if (modal) {
+        modal.classList.remove("active");
+        modal.setAttribute("aria-hidden", "true");
+      }
     }
 
     function createSectionHeading(title) {
@@ -3911,9 +3975,7 @@
           var selectBtn = document.createElement("button");
           selectBtn.type = "button";
           selectBtn.className = "select-place-btn" + (isSelected ? " selected" : "");
-          selectBtn.textContent = isSelected ? "✓" : "+";
-          selectBtn.setAttribute("aria-label", isSelected ? "Remove from selected spots" : "Add to selected spots");
-          selectBtn.title = isSelected ? "Selected for sharing" : "Add to selected spots";
+          selectBtn.textContent = isSelected ? "Selected ✓" : "Select";
           selectBtn.onclick = function(rowCopy, buttonEl, cardEl) {
             return function(e) {
               var key;
@@ -3926,15 +3988,11 @@
               key = makePlaceKey(rowCopy);
 
               if (isPlaceSelectedByKey(key)) {
-                buttonEl.textContent = "✓";
-                buttonEl.setAttribute("aria-label", "Remove from selected spots");
-                buttonEl.title = "Selected for sharing";
+                buttonEl.textContent = "Selected ✓";
                 buttonEl.classList.add("selected");
                 cardEl.classList.add("selected-card");
               } else {
-                buttonEl.textContent = "+";
-                buttonEl.setAttribute("aria-label", "Add to selected spots");
-                buttonEl.title = "Add to selected spots";
+                buttonEl.textContent = "Select";
                 buttonEl.classList.remove("selected");
                 cardEl.classList.remove("selected-card");
               }
@@ -4343,6 +4401,7 @@
       updateInstallTipForMode();
       setupFieldMatchResults();
       setupAddressKeyActions();
+      setupShareModal();
       setupInstallPrompt();
       stopLoadingState();
 
