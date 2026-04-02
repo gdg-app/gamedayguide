@@ -1345,51 +1345,6 @@
     }
 
 
-    .results-share-prompt {
-      display: none;
-      margin: 8px 0 16px;
-      padding: 14px 16px;
-      border-radius: 20px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.92));
-      border: var(--border-soft);
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: blur(12px);
-    }
-
-    .results-share-prompt-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .results-share-prompt-copy {
-      min-width: 0;
-      flex: 1 1 220px;
-    }
-
-    .results-share-prompt-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: #22303b;
-      line-height: 1.25;
-      margin-bottom: 2px;
-    }
-
-    .results-share-prompt-text {
-      font-size: 13px;
-      color: #5f6d79;
-      line-height: 1.4;
-    }
-
-    .results-share-prompt-btn {
-      flex: 0 0 auto;
-      min-height: 46px;
-      white-space: nowrap;
-    }
-
-
     .section-heading {
       margin-top: 22px;
       margin-bottom: 12px;
@@ -1958,7 +1913,6 @@
         padding: 24px 20px 24px;
       }
 
-      body.home-mode #resultsSharePrompt,
       body.home-mode #shareTools,
       body.home-mode #shareLinkBox,
       body.home-mode #loadMoreWrap,
@@ -2075,7 +2029,7 @@
             <div class="title" id="pageTitle">GameDayGuide</div>
           </div>
         </div>
-        <div class="subtitle" id="pageSubtitle">Find what you need near your game.</div>
+        <div class="subtitle" id="pageSubtitle">Built for busy tournament days.</div>
       </div>
 
       <div id="homeScreenTip" class="tip-banner" style="display:none;">
@@ -2098,14 +2052,14 @@
 
       <div class="search-panel" id="searchPanel">
         <div class="search-intro">
-<h2 class="search-title">Find what you need near the game</h2>
+<h2 class="search-title">Find food, coffee, and essentials near your field</h2>
           <p class="search-subtitle">Search by field, facility, or current location for food, coffee, gas, pharmacies, and more.</p>
         </div>
 
         <label>Field or facility</label>
-        <input id="address" placeholder="Enter field address or facility name" value="" />
+        <input id="address" placeholder='Enter field name (ex: "Field 4 USA Baseball Complex")' value="" />
         <div class="entry-stack">
-          <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Matching Fields</button>
+          <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Your Field</button>
           <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
         </div>
 
@@ -2158,7 +2112,7 @@
 
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
-          <button type="button" class="action-btn soft-action-btn" onclick="shareGuide()">Share with Team</button>
+          <button type="button" class="action-btn soft-action-btn" onclick="shareGuide()">Share Guide</button>
           <button type="button" class="action-btn share-btn" id="shareSelectedBtn" onclick="shareSelectedPlaces()" style="display:none;">Share Picks</button>
           <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
         </div>
@@ -2176,15 +2130,6 @@
         </div>
       </div>
       <div id="resultsContext" class="results-context" style="display:none;"></div>
-      <div id="resultsSharePrompt" class="results-share-prompt" style="display:none;">
-        <div class="results-share-prompt-inner">
-          <div class="results-share-prompt-copy">
-            <div class="results-share-prompt-title">Built for your game</div>
-            <div class="results-share-prompt-text">Send this guide to the group chat so everyone has the same options.</div>
-          </div>
-          <button type="button" class="action-btn share-btn results-share-prompt-btn" onclick="shareGuide()">Share with Team</button>
-        </div>
-      </div>
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
       <div id="results"></div>
@@ -2211,14 +2156,14 @@
 
       <div class="share-modal-content">
         <div id="shareModalMain">
-          <div class="share-modal-title">Share with Team</div>
+          <div class="share-modal-title">Your GameDayGuide</div>
           <div class="share-modal-subtitle" id="shareModalSubtitle">Send your picks to your team</div>
           <div class="share-modal-preview" id="shareModalPreview"></div>
           <div class="share-modal-count" id="shareModalCount">0 places included</div>
 
           <div class="share-modal-actions" id="shareModalActions">
             <button class="action-btn share-btn" onclick="triggerNativeShare()">
-              Share with Team
+              Share
             </button>
 
             <button class="secondary-btn" onclick="copyShareLink()">
@@ -2332,8 +2277,8 @@
 
     const LOADING_MESSAGES = [
       "Building your Game Day Guide… Your results will appear below.",
+      "Finding the best spots near your field…",
       "Finding food, coffee, gas, and more near your field…",
-      "Pulling top nearby spots for game day…",
       "Almost ready — your guide will appear below…"
     ];
     const MIN_LOADING_VISIBLE_MS = 1600;
@@ -2394,17 +2339,6 @@
       if (!el) return;
       el.style.display = "none";
       el.innerHTML = "";
-    }
-
-    function updateResultsSharePrompt() {
-      var el = document.getElementById("resultsSharePrompt");
-      if (!el) return;
-
-      if (lastResults && lastResults.length && !currentSharedGuide) {
-        el.style.display = "block";
-      } else {
-        el.style.display = "none";
-      }
     }
 
     function updateRadiusResultsHint() {
@@ -4011,30 +3945,6 @@
       }
     }
 
-    function scrollToGuideResults() {
-      var context = document.getElementById("resultsContext");
-      var topStops = document.getElementById("topStops");
-      var jumpBar = document.getElementById("categoryJumpBar");
-      var results = document.getElementById("results");
-      var target = null;
-
-      if (context && context.style.display !== "none" && context.innerHTML.trim()) {
-        target = context;
-      } else if (topStops && topStops.children.length) {
-        target = topStops;
-      } else if (jumpBar && jumpBar.children.length) {
-        target = jumpBar;
-      } else if (results && results.children.length) {
-        target = results;
-      }
-
-      if (!target) return;
-
-      window.setTimeout(function() {
-        smoothScrollToElement(target);
-      }, 120);
-    }
-
     function focusCategorySection(section, options) {
       options = options || {};
       if (!section) return;
@@ -4130,9 +4040,7 @@
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
-      updateResultsSharePrompt();
       clearResultsContext();
-      updateResultsSharePrompt();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4173,7 +4081,6 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
-      updateResultsSharePrompt();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4202,9 +4109,6 @@
           updateGuideButtonVisibility();
           render(lastResults);
           applyPendingQuickCategory();
-          if (!pendingQuickCategory) {
-            scrollToGuideResults();
-          }
           trackSuccessfulGuideBuild(sourceType, query, lastResults.length);
           maybeOfferInstallPrompt(500);
         })
@@ -4223,7 +4127,6 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
-      updateResultsSharePrompt();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4264,9 +4167,6 @@
               updateGuideButtonVisibility();
               render(lastResults);
               applyPendingQuickCategory();
-              if (!pendingQuickCategory) {
-                scrollToGuideResults();
-              }
               trackSuccessfulGuideBuild("gps", lastQueryOrGps, lastResults.length);
               maybeOfferInstallPrompt(500);
             })
@@ -5005,14 +4905,13 @@
       lastResults = Array.isArray(data) ? data : [];
       shareTools.style.display = lastResults.length && !currentSharedGuide ? "block" : "none";
       updateShareSelectedButton();
-      updateResultsSharePrompt();
 
       if (!lastResults.length) {
         hideLoadMoreControls();
         updateGuideButtonVisibility();
         clearResultsContext();
-        updateResultsSharePrompt();
         clearRadiusResultsHint();
+      clearRadiusResultsHint();
         container.innerHTML =
           "<div class='card'>" +
             "<div class='card-name'>No results found</div>" +
@@ -5030,7 +4929,6 @@
 
       document.getElementById("topStops").innerHTML = "";
       updateResultsContext();
-      updateResultsSharePrompt();
       updateRadiusResultsHint();
       renderCategoryJumpBar(grouped);
 
@@ -5148,7 +5046,6 @@
       document.getElementById("searchPanel").style.display = "none";
       updateGuideButtonVisibility();
       clearResultsContext();
-      updateResultsSharePrompt();
       clearRadiusResultsHint();
 
       var banner = document.getElementById("sharedBanner");
@@ -5379,7 +5276,6 @@
       document.getElementById("searchPanel").style.display = "block";
       hasBuiltGuide = false;
       updateGuideButtonVisibility();
-      updateResultsSharePrompt();
       document.body.classList.add("home-mode");
       setRadius(5);
       focusAddressField();
