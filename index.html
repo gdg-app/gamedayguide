@@ -1296,62 +1296,6 @@
       }
     }
 
-
-    .results-share-prompt {
-      display: none;
-      margin: 8px 0 14px;
-      padding: 14px 16px;
-      border-radius: 20px;
-      background: rgba(255,255,255,0.92);
-      border: var(--border-soft);
-      box-shadow: var(--shadow-soft);
-      backdrop-filter: blur(10px);
-    }
-
-    .results-share-prompt-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .results-share-copy {
-      min-width: 0;
-      flex: 1 1 220px;
-    }
-
-    .results-share-title {
-      font-size: 14px;
-      font-weight: 800;
-      color: #1b2a3c;
-      line-height: 1.25;
-      margin-bottom: 2px;
-    }
-
-    .results-share-text {
-      font-size: 13px;
-      color: #5f6d79;
-      line-height: 1.35;
-    }
-
-    .results-share-prompt .action-btn {
-      width: auto;
-      min-width: 170px;
-      box-shadow: 0 10px 18px rgba(26,33,40,0.14);
-    }
-
-    @media (max-width: 640px) {
-      .results-share-prompt-inner {
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .results-share-prompt .action-btn {
-        width: 100%;
-      }
-    }
-
     .results-context {
       display: none;
       margin: 6px 0 14px;
@@ -2109,11 +2053,9 @@
       <div class="search-panel" id="searchPanel">
         <div class="search-intro">
 <h2 class="search-title">Find food, coffee, and essentials near your field</h2>
-          <p class="search-subtitle">Search by field, facility, or current location for food, coffee, gas, pharmacies, and more.</p>
         </div>
 
-        <label>Field or facility</label>
-        <input id="address" placeholder='Enter field name (ex: "Field 4 USA Baseball Complex")' value="" />
+        <input id="address" placeholder='Enter field name (e.g., "Field 4 USA Baseball Complex")' value="" />
         <div class="entry-stack">
           <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Your Field</button>
           <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
@@ -2130,7 +2072,7 @@
         </div>
 
         <div id="fieldMatchResults" class="match-results"></div>
-        <div class="helper-text">Pick your field and GDG will build a guide automatically. You can change the radius and rebuild anytime. Example: Field 4 USA Baseball Complex.</div>
+        <div class="helper-text">Enter a field and we’ll build your guide.</div>
 
         <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
@@ -2168,7 +2110,7 @@
 
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
-          <button type="button" class="action-btn soft-action-btn" onclick="shareGuide()">Share with Team</button>
+          <button type="button" class="action-btn soft-action-btn" onclick="shareGuide()">Share Guide</button>
           <button type="button" class="action-btn share-btn" id="shareSelectedBtn" onclick="shareSelectedPlaces()" style="display:none;">Share Picks</button>
           <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
         </div>
@@ -2185,7 +2127,6 @@
           <button type="button" class="action-btn soft-action-btn" id="loadMoreBtn" onclick="loadMoreCategories()">Load More Categories</button>
         </div>
       </div>
-      <div id="resultsSharePrompt" class="results-share-prompt" style="display:none;"></div>
       <div id="resultsContext" class="results-context" style="display:none;"></div>
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
@@ -2213,14 +2154,14 @@
 
       <div class="share-modal-content">
         <div id="shareModalMain">
-          <div class="share-modal-title">Share with Team</div>
+          <div class="share-modal-title">Your GameDayGuide</div>
           <div class="share-modal-subtitle" id="shareModalSubtitle">Send your picks to your team</div>
           <div class="share-modal-preview" id="shareModalPreview"></div>
           <div class="share-modal-count" id="shareModalCount">0 places included</div>
 
           <div class="share-modal-actions" id="shareModalActions">
             <button class="action-btn share-btn" onclick="triggerNativeShare()">
-              Share with Team
+              Share
             </button>
 
             <button class="secondary-btn" onclick="copyShareLink()">
@@ -2393,36 +2334,6 @@
 
     function clearResultsContext() {
       var el = document.getElementById("resultsContext");
-      if (!el) return;
-      el.style.display = "none";
-      el.innerHTML = "";
-    }
-
-
-    function updateResultsSharePrompt() {
-      var el = document.getElementById("resultsSharePrompt");
-      if (!el) return;
-
-      if (!lastResults || !lastResults.length || currentSharedGuide) {
-        el.style.display = "none";
-        el.innerHTML = "";
-        return;
-      }
-
-      el.innerHTML =
-        "<div class='results-share-prompt-inner'>" +
-          "<div class='results-share-copy'>" +
-            "<div class='results-share-title'>Built for your game</div>" +
-            "<div class='results-share-text'>Send this guide to the group chat.</div>" +
-          "</div>" +
-          "<button type='button' class='action-btn share-btn' onclick='shareGuide()'>Share with Team</button>" +
-        "</div>";
-
-      el.style.display = "block";
-    }
-
-    function clearResultsSharePrompt() {
-      var el = document.getElementById("resultsSharePrompt");
       if (!el) return;
       el.style.display = "none";
       el.innerHTML = "";
@@ -4032,34 +3943,6 @@
       }
     }
 
-
-    function scrollToGuideResults() {
-      var sharePrompt = document.getElementById("resultsSharePrompt");
-      var context = document.getElementById("resultsContext");
-      var topStops = document.getElementById("topStops");
-      var jumpBar = document.getElementById("categoryJumpBar");
-      var results = document.getElementById("results");
-      var target = null;
-
-      if (sharePrompt && sharePrompt.style.display !== "none" && sharePrompt.innerHTML.trim()) {
-        target = sharePrompt;
-      } else if (context && context.style.display !== "none" && context.innerHTML.trim()) {
-        target = context;
-      } else if (topStops && topStops.children.length) {
-        target = topStops;
-      } else if (jumpBar && jumpBar.children.length) {
-        target = jumpBar;
-      } else if (results && results.children.length) {
-        target = results;
-      }
-
-      if (!target) return;
-
-      window.setTimeout(function() {
-        smoothScrollToElement(target);
-      }, 120);
-    }
-
     function focusCategorySection(section, options) {
       options = options || {};
       if (!section) return;
@@ -4155,14 +4038,11 @@
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
-      clearResultsSharePrompt();
-      clearResultsSharePrompt();
       clearResultsContext();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
-      clearResultsSharePrompt();
       hideFieldMatchResults();
       renderRecentSearches();
       document.body.classList.add("home-mode");
@@ -4198,7 +4078,6 @@
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
-      clearResultsSharePrompt();
       clearResultsContext();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
@@ -4228,9 +4107,6 @@
           updateGuideButtonVisibility();
           render(lastResults);
           applyPendingQuickCategory();
-          if (!pendingQuickCategory) {
-            scrollToGuideResults();
-          }
           trackSuccessfulGuideBuild(sourceType, query, lastResults.length);
           maybeOfferInstallPrompt(500);
         })
@@ -4248,7 +4124,6 @@
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
-      clearResultsSharePrompt();
       clearResultsContext();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
@@ -4290,9 +4165,6 @@
               updateGuideButtonVisibility();
               render(lastResults);
               applyPendingQuickCategory();
-              if (!pendingQuickCategory) {
-                scrollToGuideResults();
-              }
               trackSuccessfulGuideBuild("gps", lastQueryOrGps, lastResults.length);
               maybeOfferInstallPrompt(500);
             })
@@ -5030,13 +4902,11 @@
 
       lastResults = Array.isArray(data) ? data : [];
       shareTools.style.display = lastResults.length && !currentSharedGuide ? "block" : "none";
-      updateResultsSharePrompt();
       updateShareSelectedButton();
 
       if (!lastResults.length) {
         hideLoadMoreControls();
         updateGuideButtonVisibility();
-        clearResultsSharePrompt();
         clearResultsContext();
         clearRadiusResultsHint();
       clearRadiusResultsHint();
@@ -5173,8 +5043,6 @@
       document.getElementById("pageSubtitle").textContent = "Find what you need near your game.";
       document.getElementById("searchPanel").style.display = "none";
       updateGuideButtonVisibility();
-      clearResultsSharePrompt();
-      clearResultsSharePrompt();
       clearResultsContext();
       clearRadiusResultsHint();
 
@@ -5221,7 +5089,6 @@
       document.getElementById("searchPanel").style.display = "none";
       updateGuideButtonVisibility();
       document.getElementById("shareTools").style.display = "none";
-      clearResultsSharePrompt();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
@@ -5321,7 +5188,6 @@
       document.getElementById("sharedBanner").style.display = "block";
       document.querySelector("#sharedBanner .shared-banner-title").textContent = "Shared guide";
       document.getElementById("shareTools").style.display = "none";
-      clearResultsSharePrompt();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
