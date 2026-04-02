@@ -1082,7 +1082,7 @@ async function collectAllRows(loc, radiusMiles, apiKey, mode) {
   }
 
   if (activeCategories.includes("🍔 Food")) {
-    const foodRows = buildSpecialCategoryRows("🍔 Food", foodPlaces, loc, radiusMiles, 25);
+    const foodRows = buildSpecialCategoryRows("🍔 Food", foodPlaces, loc, radiusMiles, 35);
     allRows = allRows.concat(foodRows);
   }
 
@@ -1177,7 +1177,7 @@ function summarizeForLog(value) {
 
 function getGuideCacheTtlSeconds(mode) {
   if (normalizeMode(mode) === "full") {
-    return 12 * 60 * 60; // 12 hours
+    return 24 * 60 * 60; // 24 hours
   }
   return 24 * 60 * 60; // 24 hours
 }
