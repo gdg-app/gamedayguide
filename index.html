@@ -3945,6 +3945,30 @@
       }
     }
 
+    function scrollToGuideResults() {
+      var context = document.getElementById("resultsContext");
+      var topStops = document.getElementById("topStops");
+      var jumpBar = document.getElementById("categoryJumpBar");
+      var results = document.getElementById("results");
+      var target = null;
+
+      if (context && context.style.display !== "none" && context.innerHTML.trim()) {
+        target = context;
+      } else if (topStops && topStops.children.length) {
+        target = topStops;
+      } else if (jumpBar && jumpBar.children.length) {
+        target = jumpBar;
+      } else if (results && results.children.length) {
+        target = results;
+      }
+
+      if (!target) return;
+
+      window.setTimeout(function() {
+        smoothScrollToElement(target);
+      }, 120);
+    }
+
     function focusCategorySection(section, options) {
       options = options || {};
       if (!section) return;
@@ -4109,6 +4133,9 @@
           updateGuideButtonVisibility();
           render(lastResults);
           applyPendingQuickCategory();
+          if (!pendingQuickCategory) {
+            scrollToGuideResults();
+          }
           trackSuccessfulGuideBuild(sourceType, query, lastResults.length);
           maybeOfferInstallPrompt(500);
         })
@@ -4167,6 +4194,9 @@
               updateGuideButtonVisibility();
               render(lastResults);
               applyPendingQuickCategory();
+              if (!pendingQuickCategory) {
+                scrollToGuideResults();
+              }
               trackSuccessfulGuideBuild("gps", lastQueryOrGps, lastResults.length);
               maybeOfferInstallPrompt(500);
             })
