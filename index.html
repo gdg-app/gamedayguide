@@ -1345,6 +1345,51 @@
     }
 
 
+    .results-share-prompt {
+      display: none;
+      margin: 8px 0 16px;
+      padding: 14px 16px;
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.92));
+      border: var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(12px);
+    }
+
+    .results-share-prompt-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .results-share-prompt-copy {
+      min-width: 0;
+      flex: 1 1 220px;
+    }
+
+    .results-share-prompt-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #22303b;
+      line-height: 1.25;
+      margin-bottom: 2px;
+    }
+
+    .results-share-prompt-text {
+      font-size: 13px;
+      color: #5f6d79;
+      line-height: 1.4;
+    }
+
+    .results-share-prompt-btn {
+      flex: 0 0 auto;
+      min-height: 46px;
+      white-space: nowrap;
+    }
+
+
     .section-heading {
       margin-top: 22px;
       margin-bottom: 12px;
@@ -1913,6 +1958,7 @@
         padding: 24px 20px 24px;
       }
 
+      body.home-mode #resultsSharePrompt,
       body.home-mode #shareTools,
       body.home-mode #shareLinkBox,
       body.home-mode #loadMoreWrap,
@@ -2112,7 +2158,7 @@
 
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
-          <button type="button" class="action-btn soft-action-btn" onclick="shareGuide()">Share Guide</button>
+          <button type="button" class="action-btn soft-action-btn" onclick="shareGuide()">Share with Team</button>
           <button type="button" class="action-btn share-btn" id="shareSelectedBtn" onclick="shareSelectedPlaces()" style="display:none;">Share Picks</button>
           <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
         </div>
@@ -2130,6 +2176,15 @@
         </div>
       </div>
       <div id="resultsContext" class="results-context" style="display:none;"></div>
+      <div id="resultsSharePrompt" class="results-share-prompt" style="display:none;">
+        <div class="results-share-prompt-inner">
+          <div class="results-share-prompt-copy">
+            <div class="results-share-prompt-title">Built for your game</div>
+            <div class="results-share-prompt-text">Send this guide to the group chat so everyone has the same options.</div>
+          </div>
+          <button type="button" class="action-btn share-btn results-share-prompt-btn" onclick="shareGuide()">Share with Team</button>
+        </div>
+      </div>
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
       <div id="results"></div>
@@ -2156,14 +2211,14 @@
 
       <div class="share-modal-content">
         <div id="shareModalMain">
-          <div class="share-modal-title">Your GameDayGuide</div>
+          <div class="share-modal-title">Share with Team</div>
           <div class="share-modal-subtitle" id="shareModalSubtitle">Send your picks to your team</div>
           <div class="share-modal-preview" id="shareModalPreview"></div>
           <div class="share-modal-count" id="shareModalCount">0 places included</div>
 
           <div class="share-modal-actions" id="shareModalActions">
             <button class="action-btn share-btn" onclick="triggerNativeShare()">
-              Share
+              Share with Team
             </button>
 
             <button class="secondary-btn" onclick="copyShareLink()">
@@ -2339,6 +2394,17 @@
       if (!el) return;
       el.style.display = "none";
       el.innerHTML = "";
+    }
+
+    function updateResultsSharePrompt() {
+      var el = document.getElementById("resultsSharePrompt");
+      if (!el) return;
+
+      if (lastResults && lastResults.length && !currentSharedGuide) {
+        el.style.display = "block";
+      } else {
+        el.style.display = "none";
+      }
     }
 
     function updateRadiusResultsHint() {
@@ -4064,7 +4130,9 @@
       document.getElementById("results").innerHTML = "";
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
+      updateResultsSharePrompt();
       clearResultsContext();
+      updateResultsSharePrompt();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4105,6 +4173,7 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
+      updateResultsSharePrompt();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4154,6 +4223,7 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
+      updateResultsSharePrompt();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4935,13 +5005,14 @@
       lastResults = Array.isArray(data) ? data : [];
       shareTools.style.display = lastResults.length && !currentSharedGuide ? "block" : "none";
       updateShareSelectedButton();
+      updateResultsSharePrompt();
 
       if (!lastResults.length) {
         hideLoadMoreControls();
         updateGuideButtonVisibility();
         clearResultsContext();
+        updateResultsSharePrompt();
         clearRadiusResultsHint();
-      clearRadiusResultsHint();
         container.innerHTML =
           "<div class='card'>" +
             "<div class='card-name'>No results found</div>" +
@@ -4959,6 +5030,7 @@
 
       document.getElementById("topStops").innerHTML = "";
       updateResultsContext();
+      updateResultsSharePrompt();
       updateRadiusResultsHint();
       renderCategoryJumpBar(grouped);
 
@@ -5076,6 +5148,7 @@
       document.getElementById("searchPanel").style.display = "none";
       updateGuideButtonVisibility();
       clearResultsContext();
+      updateResultsSharePrompt();
       clearRadiusResultsHint();
 
       var banner = document.getElementById("sharedBanner");
@@ -5306,6 +5379,7 @@
       document.getElementById("searchPanel").style.display = "block";
       hasBuiltGuide = false;
       updateGuideButtonVisibility();
+      updateResultsSharePrompt();
       document.body.classList.add("home-mode");
       setRadius(5);
       focusAddressField();
