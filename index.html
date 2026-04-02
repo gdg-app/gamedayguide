@@ -2053,11 +2053,10 @@
       <div class="search-panel" id="searchPanel">
         <div class="search-intro">
 <h2 class="search-title">Find food, coffee, and essentials near your field</h2>
-          <p class="search-subtitle">Search by field, facility, or current location for food, coffee, gas, pharmacies, and more.</p>
+          
         </div>
 
-        <label>Field or facility</label>
-        <input id="address" placeholder='Enter field name (ex: "Field 4 USA Baseball Complex")' value="" />
+        <input id="address" placeholder='Enter field name (e.g., "Field 4 USA Baseball Complex")' value="" />
         <div class="entry-stack">
           <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Your Field</button>
           <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
@@ -2074,7 +2073,7 @@
         </div>
 
         <div id="fieldMatchResults" class="match-results"></div>
-        <div class="helper-text">Pick your field and GDG will build a guide automatically. You can change the radius and rebuild anytime. Example: Field 4 USA Baseball Complex.</div>
+        <div class="helper-text">Enter a field and we’ll build your guide.</div>
 
         <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
