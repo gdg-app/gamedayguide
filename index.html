@@ -1063,6 +1063,51 @@
       border-radius: 999px;
     }
 
+
+    .results-share-prompt {
+      display: none;
+      margin: 12px 0 16px;
+    }
+
+    .results-share-prompt-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.92));
+      border: var(--border-soft);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(12px);
+    }
+
+    .results-share-prompt-copy {
+      min-width: 0;
+    }
+
+    .results-share-prompt-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: #1c2a35;
+      line-height: 1.25;
+      margin-bottom: 2px;
+    }
+
+    .results-share-prompt-text {
+      font-size: 13px;
+      color: #5f6d79;
+      line-height: 1.35;
+    }
+
+    .results-share-prompt .action-btn {
+      width: auto;
+      min-height: 46px;
+      white-space: nowrap;
+      flex: 0 0 auto;
+      box-shadow: 0 10px 18px rgba(36,49,61,0.16);
+    }
+
     .sticky-share-bar {
       position: fixed;
       left: 0;
@@ -1264,6 +1309,17 @@
         align-items: stretch;
         flex-direction: column;
       }
+
+      .results-share-prompt-card {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .results-share-prompt .action-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
 
       .selection-nudge .secondary-btn {
         width: 100%;
@@ -2110,7 +2166,7 @@
 
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
-          <button type="button" class="action-btn soft-action-btn" onclick="shareGuide()">Share Guide</button>
+          <button type="button" class="action-btn soft-action-btn" onclick="shareGuide()">Share with Team</button>
           <button type="button" class="action-btn share-btn" id="shareSelectedBtn" onclick="shareSelectedPlaces()" style="display:none;">Share Picks</button>
           <button type="button" class="secondary-btn" onclick="startNewGuide()">Start New Guide</button>
         </div>
@@ -2118,6 +2174,16 @@
 
       <div id="shareSection" style="display:none;">
         <div id="shareLinkBox" style="display:none;"></div>
+      </div>
+
+      <div id="resultsSharePrompt" class="results-share-prompt" style="display:none;">
+        <div class="results-share-prompt-card">
+          <div class="results-share-prompt-copy">
+            <div class="results-share-prompt-title">Built for your game</div>
+            <div class="results-share-prompt-text">Send this guide to the group chat.</div>
+          </div>
+          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share with Team</button>
+        </div>
       </div>
 
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
@@ -2154,14 +2220,14 @@
 
       <div class="share-modal-content">
         <div id="shareModalMain">
-          <div class="share-modal-title">Your GameDayGuide</div>
+          <div class="share-modal-title">Share with Team</div>
           <div class="share-modal-subtitle" id="shareModalSubtitle">Send your picks to your team</div>
           <div class="share-modal-preview" id="shareModalPreview"></div>
           <div class="share-modal-count" id="shareModalCount">0 places included</div>
 
           <div class="share-modal-actions" id="shareModalActions">
             <button class="action-btn share-btn" onclick="triggerNativeShare()">
-              Share
+              Share with Team
             </button>
 
             <button class="secondary-btn" onclick="copyShareLink()">
@@ -2345,6 +2411,56 @@
 
     function clearRadiusResultsHint() {
       return;
+    }
+
+
+    function updateResultsSharePrompt() {
+      var prompt = document.getElementById("resultsSharePrompt");
+      if (!prompt) return;
+
+      if (currentSharedGuide || !lastResults || !lastResults.length) {
+        prompt.style.display = "none";
+        return;
+      }
+
+      prompt.style.display = "block";
+    }
+
+    function scrollToGuideResults() {
+      if (pendingQuickCategory) return;
+
+      var target =
+        document.getElementById("resultsSharePrompt") ||
+        document.getElementById("resultsContext") ||
+        document.getElementById("topStops") ||
+        document.getElementById("categoryJumpBar") ||
+        document.getElementById("results");
+
+      if (!target) return;
+
+      window.setTimeout(function() {
+        var rect = target.getBoundingClientRect();
+        var hasVisibleHeight = rect.height > 0 || target.children.length > 0 || (target.textContent || "").trim();
+        if (!hasVisibleHeight) return;
+
+        var appCard = document.querySelector(".app-card");
+        var appRect = appCard ? appCard.getBoundingClientRect() : null;
+        var offset = 20;
+        if (appRect && appRect.top > 0) {
+          offset = Math.max(appRect.top + 18, 20);
+        }
+
+        var top = window.pageYOffset + rect.top - offset;
+
+        try {
+          window.scrollTo({
+            top: Math.max(top, 0),
+            behavior: "smooth"
+          });
+        } catch (e) {
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 120);
     }
 
 
@@ -4043,6 +4159,7 @@
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
+      var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
       hideFieldMatchResults();
       renderRecentSearches();
       document.body.classList.add("home-mode");
@@ -4106,7 +4223,9 @@
           document.body.classList.remove("home-mode");
           updateGuideButtonVisibility();
           render(lastResults);
+          var hadPendingQuickCategory = !!pendingQuickCategory;
           applyPendingQuickCategory();
+          if (!hadPendingQuickCategory) scrollToGuideResults();
           trackSuccessfulGuideBuild(sourceType, query, lastResults.length);
           maybeOfferInstallPrompt(500);
         })
@@ -4164,7 +4283,9 @@
               document.body.classList.remove("home-mode");
               updateGuideButtonVisibility();
               render(lastResults);
+              var hadPendingQuickCategory = !!pendingQuickCategory;
               applyPendingQuickCategory();
+              if (!hadPendingQuickCategory) scrollToGuideResults();
               trackSuccessfulGuideBuild("gps", lastQueryOrGps, lastResults.length);
               maybeOfferInstallPrompt(500);
             })
@@ -4902,10 +5023,12 @@
 
       lastResults = Array.isArray(data) ? data : [];
       shareTools.style.display = lastResults.length && !currentSharedGuide ? "block" : "none";
+      updateResultsSharePrompt();
       updateShareSelectedButton();
 
       if (!lastResults.length) {
         hideLoadMoreControls();
+        updateResultsSharePrompt();
         updateGuideButtonVisibility();
         clearResultsContext();
         clearRadiusResultsHint();
@@ -5042,6 +5165,8 @@
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Find what you need near your game.";
       document.getElementById("searchPanel").style.display = "none";
+      var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
+      var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
       updateGuideButtonVisibility();
       clearResultsContext();
       clearRadiusResultsHint();
@@ -5087,6 +5212,7 @@
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "A few game day stops, shared with you.";
       document.getElementById("searchPanel").style.display = "none";
+      var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
       updateGuideButtonVisibility();
       document.getElementById("shareTools").style.display = "none";
       document.getElementById("shareLinkBox").style.display = "none";
