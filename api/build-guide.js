@@ -123,6 +123,16 @@ export default async function handler(req, res) {
   }
 }
 
+const DRIVE_TIME_CATEGORY_LABELS = [
+  "🍔 Food",
+  "☕ Coffee",
+  "🍺 Breweries/Bars",
+  "⛽ Gas",
+  "🏥 Urgent Care / ER"
+];
+const DRIVE_TIME_CANDIDATE_LIMIT = 6;
+const DRIVE_TIME_TOP_COUNT = 3;
+
 function toFiniteNumber(value) {
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
@@ -846,7 +856,20 @@ function buildRowFromPlace(category, p, loc, radiusMiles) {
     "https://www.google.com/maps/search/?api=1&query=" +
     encodeURIComponent((p.name || "") + " " + address);
 
-  return [category, p.name || "", p.rating || "", address, openNow, link, dist];
+  return [
+    category,
+    p.name || "",
+    p.rating || "",
+    address,
+    openNow,
+    link,
+    dist,
+    p.place_id || "",
+    "",
+    "",
+    placeLat,
+    placeLng
+  ];
 }
 
 function parseStandardCategoryResponse(request, res, loc, radiusMiles, limit) {
@@ -956,6 +979,181 @@ function buildSpecialCategoryRows(category, places, loc, radiusMiles, limit) {
   return rows.slice(0, limit);
 }
 
+function buildDistanceMatrixUrl(origin, destinations, apiKey) {
+  return (
+    "https://maps.googleapis.com/maps/api/distancematrix/json?origins=" +
+    encodeURIComponent(origin.lat + "," + origin.lng) +
+    "&destinations=" +
+    encodeURIComponent(destinations.map(function(item) {
+      return item.lat + "," + item.lng;
+    }).join("|")) +
+    "&mode=driving&key=" + encodeURIComponent(apiKey)
+  );
+}
+
+async function fetchDriveTimesForRows(origin, rows, apiKey) {
+  const eligibleRows = (rows || []).filter(function(row) {
+    return isValidLatLng(row[10], row[11]);
+  });
+
+  if (!eligibleRows.length) return {};
+
+  const url = buildDistanceMatrixUrl(origin, eligibleRows.map(function(row) {
+    return { lat: row[10], lng: row[11] };
+  }), apiKey);
+
+  const data = await fetchJson(url);
+  if (data.status !== "OK") {
+    throw new Error(
+      "Distance Matrix failed: " +
+        data.status +
+        (data.error_message ? " - " + data.error_message : "")
+    );
+  }
+
+  const elements = data.rows && data.rows[0] && Array.isArray(data.rows[0].elements)
+    ? data.rows[0].elements
+    : [];
+
+  const byKey = {};
+  for (let i = 0; i < eligibleRows.length; i++) {
+    const row = eligibleRows[i];
+    const el = elements[i] || null;
+    if (!el || el.status !== "OK" || !el.duration) continue;
+
+    const rowKey = buildRowKey(row);
+    const driveTimeMinutes = Math.max(1, Math.round(Number(el.duration.value || 0) / 60));
+    const driveDistanceMiles = el.distance && Number.isFinite(Number(el.distance.value))
+      ? Number(el.distance.value) / 1609.34
+      : "";
+
+    byKey[rowKey] = {
+      driveTimeMinutes,
+      driveDistanceMiles
+    };
+  }
+
+  return byKey;
+}
+
+function buildRowKey(row) {
+  return String(row[7] || ((row[0] || "") + "|" + (row[1] || "") + "|" + (row[3] || ""))).trim();
+}
+
+function cloneRow(row) {
+  return Array.isArray(row) ? row.slice() : [];
+}
+
+function compareByDriveTimeThenDistance(a, b) {
+  const ta = Number(a[8]);
+  const tb = Number(b[8]);
+  const hasTa = Number.isFinite(ta) && ta > 0;
+  const hasTb = Number.isFinite(tb) && tb > 0;
+
+  if (hasTa && hasTb && ta !== tb) return ta - tb;
+  if (hasTa && !hasTb) return -1;
+  if (!hasTa && hasTb) return 1;
+
+  const da = typeof a[6] === "number" ? a[6] : 9999;
+  const db = typeof b[6] === "number" ? b[6] : 9999;
+  if (da < db) return -1;
+  if (da > db) return 1;
+
+  const na = String(a[1] || "").toLowerCase();
+  const nb = String(b[1] || "").toLowerCase();
+  return na < nb ? -1 : na > nb ? 1 : 0;
+}
+
+async function applyDriveTimeEnhancements(rows, origin, apiKey) {
+  const grouped = {};
+  const categoryOrder = [];
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = cloneRow(rows[i]);
+    const category = String(row[0] || "");
+    if (!grouped[category]) {
+      grouped[category] = [];
+      categoryOrder.push(category);
+    }
+    grouped[category].push(row);
+  }
+
+  const candidates = [];
+  for (let i = 0; i < DRIVE_TIME_CATEGORY_LABELS.length; i++) {
+    const category = DRIVE_TIME_CATEGORY_LABELS[i];
+    const categoryRows = grouped[category] || [];
+    for (let j = 0; j < categoryRows.length && j < DRIVE_TIME_CANDIDATE_LIMIT; j++) {
+      candidates.push(categoryRows[j]);
+    }
+  }
+
+  let driveTimeByKey = {};
+  try {
+    driveTimeByKey = await fetchDriveTimesForRows(origin, candidates, apiKey);
+  } catch (err) {
+    console.error(
+      "[GDG DRIVE] ENRICH_ERROR " +
+        (err && err.message ? err.message : String(err))
+    );
+    return rows;
+  }
+
+  for (let i = 0; i < DRIVE_TIME_CATEGORY_LABELS.length; i++) {
+    const category = DRIVE_TIME_CATEGORY_LABELS[i];
+    const originalRows = grouped[category] || [];
+    if (!originalRows.length) continue;
+
+    const candidateRows = originalRows.slice(0, DRIVE_TIME_CANDIDATE_LIMIT).map(function(row) {
+      const cloned = cloneRow(row);
+      const key = buildRowKey(cloned);
+      const drive = driveTimeByKey[key];
+      if (drive) {
+        cloned[8] = drive.driveTimeMinutes;
+        cloned[9] = drive.driveDistanceMiles;
+      } else {
+        cloned[8] = "";
+        cloned[9] = "";
+      }
+      return cloned;
+    });
+
+    const promoted = candidateRows
+      .filter(function(row) {
+        return Number.isFinite(Number(row[8])) && Number(row[8]) > 0;
+      })
+      .sort(compareByDriveTimeThenDistance)
+      .slice(0, DRIVE_TIME_TOP_COUNT);
+
+    const promotedKeys = {};
+    for (let j = 0; j < promoted.length; j++) {
+      promotedKeys[buildRowKey(promoted[j])] = true;
+    }
+
+    const remainder = [];
+    for (let j = 0; j < originalRows.length; j++) {
+      const row = cloneRow(originalRows[j]);
+      const key = buildRowKey(row);
+      if (promotedKeys[key]) continue;
+      row[8] = "";
+      row[9] = "";
+      remainder.push(row);
+    }
+
+    grouped[category] = promoted.concat(remainder);
+  }
+
+  const flattened = [];
+  for (let i = 0; i < categoryOrder.length; i++) {
+    const category = categoryOrder[i];
+    const categoryRows = grouped[category] || [];
+    for (let j = 0; j < categoryRows.length; j++) {
+      flattened.push(categoryRows[j]);
+    }
+  }
+
+  return flattened;
+}
+
 function sortRows(rows) {
   rows.sort(function(a, b) {
     const catA = categorySortKey(a[0]);
@@ -963,6 +1161,15 @@ function sortRows(rows) {
 
     if (catA < catB) return -1;
     if (catA > catB) return 1;
+
+    const ta = Number(a[8]);
+    const tb = Number(b[8]);
+    const hasTa = Number.isFinite(ta) && ta > 0;
+    const hasTb = Number.isFinite(tb) && tb > 0;
+
+    if (hasTa && hasTb && ta !== tb) return ta - tb;
+    if (hasTa && !hasTb) return -1;
+    if (!hasTa && hasTb) return 1;
 
     const da = typeof a[6] === "number" ? a[6] : 9999;
     const db = typeof b[6] === "number" ? b[6] : 9999;
@@ -1086,7 +1293,8 @@ async function collectAllRows(loc, radiusMiles, apiKey, mode) {
     allRows = allRows.concat(foodRows);
   }
 
-  return sortRows(allRows);
+  const enrichedRows = await applyDriveTimeEnhancements(allRows, loc, apiKey);
+  return sortRows(enrichedRows);
 }
 
 function buildGuideCacheContext(params) {
@@ -1109,7 +1317,7 @@ function buildGuideCacheContext(params) {
     const roundedLng = roundCacheCoordinate(lng);
 
     const key = [
-      "guide:v1",
+      "guide:v2",
       "gps",
       roundedLat,
       roundedLng,
@@ -1130,7 +1338,7 @@ function buildGuideCacheContext(params) {
   }
 
   const key = [
-    "guide:v1",
+    "guide:v2",
     normalizedQuery,
     String(radiusMiles),
     mode
