@@ -459,6 +459,7 @@ async function buildFieldIntel(context) {
   const apiKey = context.apiKey;
 
   const corpus = buildVenueCorpus(details);
+  const profile = buildVenueProfile(venue, details);
   const intel = {
     parking: { status: "unknown", source: "none" },
     restrooms: { status: "unknown", source: "none" },
@@ -530,6 +531,8 @@ async function buildFieldIntel(context) {
     };
   }
 
+  applyHeuristicFallbacks(intel, profile);
+
   return intel;
 }
 
@@ -555,6 +558,61 @@ function buildVenueCorpus(details) {
   }
 
   return normalizeSearchText(bits.join(" "));
+}
+
+function buildVenueProfile(venue, details) {
+  const name = String((details && details.name) || (venue && venue.name) || "").trim();
+  const address = String((details && details.formatted_address) || (venue && venue.address) || "").trim();
+  const combined = normalizeSearchText([name, address].join(" "));
+  const types = Array.isArray(details && details.types) ? details.types.map(normalizeSearchText) : [];
+  const joinedTypes = types.join(" ");
+
+  const hasAny = function(terms) {
+    return terms.some(function(term) {
+      const norm = normalizeSearchText(term);
+      return combined.includes(norm) || joinedTypes.includes(norm);
+    });
+  };
+
+  const isSportsVenue = looksLikeSportsFacilityText([name, address, joinedTypes].join(" "));
+  const isSchoolVenue = hasAny(["school", "high school", "middle school", "junior high", "campus"]);
+  const isBaseballVenue = hasAny(["baseball", "ballpark", "diamond", "stadium", "training complex"]);
+  const isParkVenue = hasAny(["park", "athletic park", "recreation park", "sports complex", "athletic complex", "sportsplex"]);
+
+  return {
+    name,
+    address,
+    isSportsVenue,
+    isSchoolVenue,
+    isBaseballVenue,
+    isParkVenue,
+    strongConcessionsLikelihood: isBaseballVenue || hasAny(["tournament", "sports complex", "athletic complex", "stadium", "training complex"])
+  };
+}
+
+function applyHeuristicFallbacks(intel, profile) {
+  if (!profile || !profile.isSportsVenue) return;
+
+  if (intel.parking.status === "unknown") {
+    intel.parking = {
+      status: "available",
+      source: "heuristic"
+    };
+  }
+
+  if (intel.restrooms.status === "unknown" && (profile.isSchoolVenue || profile.isParkVenue || profile.isBaseballVenue)) {
+    intel.restrooms = {
+      status: "mentioned",
+      source: "heuristic"
+    };
+  }
+
+  if (intel.concessions.status === "unknown" && (profile.strongConcessionsLikelihood || profile.isSchoolVenue || profile.isParkVenue)) {
+    intel.concessions = {
+      status: "mentioned",
+      source: "heuristic"
+    };
+  }
 }
 
 function textHasAny(haystack, terms) {
