@@ -472,7 +472,8 @@ async function buildFieldIntel(context) {
       lng: venue.lng,
       apiKey,
       keyword: "playground",
-      radiusMeters: 800
+      radiusMeters: 800,
+      validator: isValidPlaygroundAmenity
     });
 
     if (nearestPlayground) {
@@ -489,7 +490,8 @@ async function buildFieldIntel(context) {
       lng: venue.lng,
       apiKey,
       keyword: "parking",
-      radiusMeters: 300
+      radiusMeters: 300,
+      validator: isValidParkingAmenity
     });
 
     if (nearbyParking) {
@@ -574,6 +576,7 @@ async function findNearestNearbyAmenity(params) {
   const apiKey = params.apiKey;
   const keyword = String(params.keyword || "").trim();
   const radiusMeters = Number(params.radiusMeters || 500);
+  const validator = typeof params.validator === "function" ? params.validator : null;
 
   if (!keyword || !isValidLatLng(lat, lng)) return null;
 
@@ -582,7 +585,8 @@ async function findNearestNearbyAmenity(params) {
     lat + "," + lng +
     "&radius=" + radiusMeters +
     "&keyword=" + encodeURIComponent(keyword) +
-    "&key=" + encodeURIComponent(apiKey);
+    "&key=" +
+    encodeURIComponent(apiKey);
 
   const data = await fetchJson(url);
 
@@ -600,19 +604,82 @@ async function findNearestNearbyAmenity(params) {
   for (const place of results) {
     if (!place.geometry || !place.geometry.location) continue;
 
+    const name = String(place.name || "").trim();
+    const address = String(place.vicinity || place.formatted_address || "").trim();
+    const types = Array.isArray(place.types) ? place.types : [];
+
+    if (validator && !validator({ name, address, types })) continue;
+
     const placeLat = Number(place.geometry.location.lat);
     const placeLng = Number(place.geometry.location.lng);
     const distanceMeters = haversineMeters(lat, lng, placeLat, placeLng);
 
     if (!best || distanceMeters < best.distanceMeters) {
       best = {
-        name: String(place.name || "").trim(),
+        name,
         distanceMeters
       };
     }
   }
 
   return best;
+}
+
+function isValidParkingAmenity(place) {
+  const text = normalizeSearchText(
+    [place && place.name, place && place.address].join(" ")
+  );
+  const types = Array.isArray(place && place.types) ? place.types : [];
+
+  const strongInclude = [
+    "parking", "parking lot", "public parking", "stadium parking",
+    "school parking", "athletic complex parking", "ballpark parking"
+  ];
+
+  const weakExclude = [
+    "dog park", "park", "playground", "adcom", "restaurant", "coffee",
+    "brewery", "bar", "church", "office", "worldwide", "medical"
+  ];
+
+  for (const term of weakExclude) {
+    if (text.includes(term) && !text.includes("parking")) return false;
+  }
+
+  for (const term of strongInclude) {
+    if (text.includes(term)) return true;
+  }
+
+  return (
+    types.includes("parking") ||
+    types.includes("parking_lot") ||
+    types.includes("premise_parking")
+  );
+}
+
+function isValidPlaygroundAmenity(place) {
+  const text = normalizeSearchText(
+    [place && place.name, place && place.address].join(" ")
+  );
+  const types = Array.isArray(place && place.types) ? place.types : [];
+
+  const includeTerms = [
+    "playground", "park playground", "community playground", "recreation playground"
+  ];
+
+  const excludeTerms = [
+    "play space", "playspace", "indoor playground", "indoor play",
+    "kids gym", "gymnastics", "trampoline", "jump", "birthday", "adventure park"
+  ];
+
+  for (const term of excludeTerms) {
+    if (text.includes(term)) return false;
+  }
+
+  for (const term of includeTerms) {
+    if (text.includes(term)) return true;
+  }
+
+  return types.includes("playground") || types.includes("park");
 }
 
 function roundMiles(value) {
