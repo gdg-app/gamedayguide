@@ -130,7 +130,7 @@ const DRIVE_TIME_CATEGORY_LABELS = [
   "⛽ Gas",
   "🏥 Urgent Care / ER"
 ];
-const DRIVE_TIME_CANDIDATE_LIMIT = 6;
+const DRIVE_TIME_CANDIDATE_LIMIT = 4;
 const DRIVE_TIME_TOP_COUNT = 3;
 
 function toFiniteNumber(value) {
