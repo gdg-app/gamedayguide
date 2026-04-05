@@ -4212,6 +4212,8 @@
       fetchBuildGuide(lastBuildParams)
         .then(async function(data) {
           await finishLoadingState();
+  if (lastQuery) loadFieldIntel(lastQuery);
+  else if (lastLat && lastLng) loadFieldIntel(null, lastLat, lastLng);
           lastResults = Array.isArray(data) ? data : [];
           lastSourceType = sourceType;
           lastQueryOrGps = query;
@@ -4231,6 +4233,8 @@
         })
         .catch(async function(err) {
           await finishLoadingState();
+  if (lastQuery) loadFieldIntel(lastQuery);
+  else if (lastLat && lastLng) loadFieldIntel(null, lastLat, lastLng);
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
           resetLoadMoreState();
@@ -4274,6 +4278,8 @@
           fetchBuildGuide(lastBuildParams)
             .then(async function(data) {
               await finishLoadingState();
+  if (lastQuery) loadFieldIntel(lastQuery);
+  else if (lastLat && lastLng) loadFieldIntel(null, lastLat, lastLng);
               lastResults = Array.isArray(data) ? data : [];
               lastSourceType = "gps";
               lastQueryOrGps = "GPS:" + lat + "," + lng;
@@ -4291,6 +4297,8 @@
             })
             .catch(async function(err) {
               await finishLoadingState();
+  if (lastQuery) loadFieldIntel(lastQuery);
+  else if (lastLat && lastLng) loadFieldIntel(null, lastLat, lastLng);
               document.getElementById("status").textContent =
                 "Error: " + (err && err.message ? err.message : JSON.stringify(err));
               resetLoadMoreState();
@@ -5409,7 +5417,57 @@
     window.addEventListener("load", function() {
       initializeApp();
     });
-  </script>
+  
+// FIELD INTEL INTEGRATION
+async function loadFieldIntel(query, lat, lng) {
+  try {
+    let url = "/api/field-intel?";
+    if (query) url += "query=" + encodeURIComponent(query);
+    else if (lat && lng) url += "lat=" + lat + "&lng=" + lng;
+
+    const res = await fetch(url);
+    const json = await res.json();
+    if (!json.ok || !json.data) return;
+
+    renderFieldIntel(json.data);
+  } catch (e) {
+    console.log("Field Intel failed silently");
+  }
+}
+
+function renderFieldIntel(data) {
+  const el = document.getElementById("fieldIntel");
+  if (!el) return;
+
+  function formatStatus(label, item) {
+    if (!item || item.status === "unknown") return `${label}: Unknown`;
+    if (item.status === "mentioned") return `${label}: Mentioned`;
+    if (item.status === "available") return `${label}: Available`;
+    if (item.status === "nearby" && item.distanceMiles) {
+      return `${label}: ${item.distanceMiles} mi away`;
+    }
+    return `${label}: ${item.status}`;
+  }
+
+  el.innerHTML = `
+    <div style="margin:16px 0;padding:14px;border-radius:12px;background:#111;color:#fff;">
+      <div style="font-weight:600;margin-bottom:8px;">Field Intel</div>
+      <div style="font-size:14px;line-height:1.6;">
+        ${formatStatus("Parking", data.parking)}<br>
+        ${formatStatus("Restrooms", data.restrooms)}<br>
+        ${formatStatus("Concessions", data.concessions)}<br>
+        ${formatStatus("Playground", data.playground)}
+      </div>
+      <div style="font-size:11px;opacity:0.6;margin-top:8px;">
+        Auto-generated from venue data
+      </div>
+    </div>
+  `;
+
+  el.style.display = "block";
+}
+
+</script>
 
   <div style="
     text-align:center;
