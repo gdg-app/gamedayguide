@@ -3,6 +3,44 @@ import crypto from "crypto";
 
 export default async function handler(req, res) {
   try {
+    // TEMP TEST MODE
+    if (req.method === "GET" && req.query && req.query.test === "1") {
+      const sheets = await getSheetsClient();
+      const spreadsheetId = String(process.env.GOOGLE_SHEETS_SPREADSHEET_ID || "").trim();
+
+      if (!spreadsheetId) {
+        return res.status(500).json({
+          ok: false,
+          error: "Missing GOOGLE_SHEETS_SPREADSHEET_ID"
+        });
+      }
+
+      const now = new Date();
+      const tipId = "test_" + Date.now();
+
+      await sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: "venue_tips!A:I",
+        valueInputOption: "RAW",
+        insertDataOption: "INSERT_ROWS",
+        requestBody: {
+          values: [[
+            tipId,
+            now.toISOString(),
+            "test_place_123",
+            "Test Field",
+            "123 Test St",
+            "Bring chairs. Not much shade.",
+            "seating, shade",
+            "active",
+            "test_session"
+          ]]
+        }
+      });
+
+      return res.status(200).json({ ok: true, test: true });
+    }
+
     if (req.method !== "POST") {
       return res.status(405).json({ ok: false, error: "Method not allowed" });
     }
@@ -152,4 +190,3 @@ async function getSheetsClient() {
 
   return google.sheets({ version: "v4", auth });
 }
-
