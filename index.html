@@ -2303,64 +2303,60 @@
     }
 
 
-/* 2026-04-05 GDG Top Stops Compression (CSS-only) */
-.top-stop-card {
-  padding: 12px 12px 10px;
-  margin-bottom: 10px;
-  min-width: 84%;
-}
+    .venue-confirm-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(7, 16, 13, 0.52);
+      backdrop-filter: blur(6px);
+    }
 
-.top-stop-label {
-  font-size: 11px;
-  margin-bottom: 4px;
-  opacity: 0.8;
-}
+    .venue-confirm-overlay.open {
+      display: flex;
+    }
 
-.top-stop-name {
-  font-size: 16px;
-  line-height: 1.2;
-  margin-bottom: 6px;
-}
+    .venue-confirm-card {
+      width: min(100%, 420px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.94));
+      border-radius: 24px;
+      border: var(--border-soft);
+      box-shadow: var(--shadow);
+      padding: 18px 16px 16px;
+      position: relative;
+    }
 
-.top-stop-meta {
-  font-size: 13px;
-  margin-bottom: 6px;
-}
+    .venue-confirm-title {
+      font-size: 24px;
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      font-weight: 800;
+      color: #1c2a35;
+      margin: 0 0 8px;
+      max-width: 14ch;
+    }
 
-.top-stop-address {
-  font-size: 13px;
-  line-height: 1.35;
-  margin-bottom: 8px;
-  min-height: 0;
-}
+    .venue-confirm-address {
+      font-size: 14px;
+      color: #5f6d79;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
 
-.top-stop-time-distance {
-  gap: 2px;
-  margin-bottom: 6px;
-}
+    .venue-confirm-actions {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+    }
 
-.top-stop-time-distance-row {
-  font-size: 13px;
-  line-height: 1.2;
-}
-
-.top-stop-card .card-actions {
-  gap: 6px;
-}
-
-.top-stop-card .location-action-btn,
-.top-stop-card .directions-btn {
-  min-height: 40px;
-  padding: 8px 10px;
-  font-size: 13px;
-  border-radius: 12px;
-}
-
-@media (min-width: 768px) {
-  .top-stop-card {
-    min-width: 240px;
-  }
-}
+    .venue-confirm-secondary {
+      background: #eef2f7;
+      color: #4f5d69;
+      box-shadow: none;
+    }
 
 </style>
 </head>
@@ -2564,6 +2560,18 @@
     </div>
   </div>
 
+
+  <div id="venueConfirmOverlay" class="venue-confirm-overlay" aria-hidden="true">
+    <div class="venue-confirm-card" role="dialog" aria-modal="true" aria-labelledby="venueConfirmTitle">
+      <div id="venueConfirmTitle" class="venue-confirm-title">Are you at this field?</div>
+      <div id="venueConfirmAddress" class="venue-confirm-address"></div>
+      <div class="venue-confirm-actions">
+        <button type="button" class="action-btn location-btn" id="venueConfirmYesBtn">Yes, build my guide</button>
+        <button type="button" class="action-btn venue-confirm-secondary" id="venueConfirmNoBtn">Not quite</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SHARED_GUIDE = null;
 
@@ -2590,6 +2598,8 @@
     let hasBuiltGuide = false;
     let lastFieldIntelData = null;
     let lastVenueTips = [];
+    let pendingGpsBuild = null;
+    let detectedGpsVenue = null;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
@@ -4486,6 +4496,146 @@
       }
     }
 
+
+    function showVenueConfirmOverlay(venue, lat, lng) {
+      var overlay = document.getElementById("venueConfirmOverlay");
+      var title = document.getElementById("venueConfirmTitle");
+      var address = document.getElementById("venueConfirmAddress");
+
+      detectedGpsVenue = venue || null;
+      pendingGpsBuild = {
+        lat: lat,
+        lng: lng
+      };
+
+      if (title) {
+        title.textContent = "Are you at " + String((venue && venue.venueName) || "this field").trim() + "?";
+      }
+      if (address) {
+        address.textContent = String((venue && venue.venueAddress) || "").trim();
+      }
+
+      if (overlay) {
+        overlay.classList.add("open");
+        overlay.setAttribute("aria-hidden", "false");
+      }
+
+      finishLoadingState().then(function() {
+        document.getElementById("status").textContent = "";
+      });
+    }
+
+    function hideVenueConfirmOverlay() {
+      var overlay = document.getElementById("venueConfirmOverlay");
+      if (overlay) {
+        overlay.classList.remove("open");
+        overlay.setAttribute("aria-hidden", "true");
+      }
+    }
+
+    function continueGpsGuideBuild(lat, lng) {
+      var radius = getRadiusMiles();
+
+      lastBuildParams = {
+        lat: lat,
+        lng: lng,
+        radiusMiles: radius,
+        mode: "core"
+      };
+
+      startLoadingState();
+
+      fetchBuildGuide(lastBuildParams)
+        .then(async function(data) {
+          await finishLoadingState();
+          lastResults = Array.isArray(data) ? data : [];
+          lastSourceType = "gps";
+          lastQueryOrGps = "GPS:" + lat + "," + lng;
+          hasLoadedFullCategories = false;
+          hasBuiltGuide = true;
+          document.getElementById("status").textContent = "Done.";
+          document.body.classList.remove("home-mode");
+          updateGuideButtonVisibility();
+          render(lastResults);
+          loadFieldIntel({ lat: lat, lng: lng });
+          var hadPendingQuickCategory = !!pendingQuickCategory;
+          applyPendingQuickCategory();
+          if (!hadPendingQuickCategory) scrollToGuideResults();
+          trackSuccessfulGuideBuild("gps", lastQueryOrGps, lastResults.length);
+          maybeOfferInstallPrompt(500);
+        })
+        .catch(async function(err) {
+          await finishLoadingState();
+          document.getElementById("status").textContent =
+            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+          resetLoadMoreState();
+        });
+    }
+
+    async function detectNearbyVenueForGps(lat, lng) {
+      try {
+        var data = await getJson("/api/field-intel?lat=" + encodeURIComponent(String(lat)) + "&lng=" + encodeURIComponent(String(lng)));
+        var venueName = String((data && data.venueName) || "").trim();
+        var placeId = String((data && data.placeId) || "").trim();
+        var source = String((data && data.source) || "").trim().toLowerCase();
+
+        if (!venueName || !placeId || !source || source === "none") return null;
+        return data;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function handleVenueConfirmYes() {
+      if (!pendingGpsBuild) {
+        hideVenueConfirmOverlay();
+        return;
+      }
+
+      var lat = pendingGpsBuild.lat;
+      var lng = pendingGpsBuild.lng;
+      hideVenueConfirmOverlay();
+      continueGpsGuideBuild(lat, lng);
+    }
+
+    function handleVenueConfirmNo() {
+      if (!pendingGpsBuild) {
+        hideVenueConfirmOverlay();
+        return;
+      }
+
+      var lat = pendingGpsBuild.lat;
+      var lng = pendingGpsBuild.lng;
+      hideVenueConfirmOverlay();
+      continueGpsGuideBuild(lat, lng);
+    }
+
+    function setupVenueConfirmOverlay() {
+      var overlay = document.getElementById("venueConfirmOverlay");
+      var yesBtn = document.getElementById("venueConfirmYesBtn");
+      var noBtn = document.getElementById("venueConfirmNoBtn");
+      var card = overlay ? overlay.querySelector(".venue-confirm-card") : null;
+
+      if (!overlay || !yesBtn || !noBtn) return;
+
+      yesBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleVenueConfirmYes();
+      });
+
+      noBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        handleVenueConfirmNo();
+      });
+
+      overlay.addEventListener("click", function(e) {
+        if (card && card.contains(e.target)) return;
+        handleVenueConfirmNo();
+      });
+    }
+
     function runGuide() {
       var rawQuery = (document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
@@ -4617,6 +4767,9 @@
       document.getElementById("shareTools").style.display = "none";
       latestShareUrl = "";
       hideFieldMatchResults();
+      hideVenueConfirmOverlay();
+      pendingGpsBuild = null;
+      detectedGpsVenue = null;
       startLoadingState();
 
       if (!navigator.geolocation) {
@@ -4629,39 +4782,18 @@
         function(pos) {
           var lat = pos.coords.latitude;
           var lng = pos.coords.longitude;
-          var radius = getRadiusMiles();
 
-          lastBuildParams = {
-            lat: lat,
-            lng: lng,
-            radiusMiles: radius,
-            mode: "core"
-          };
+          detectNearbyVenueForGps(lat, lng)
+            .then(function(venue) {
+              if (venue && venue.venueName) {
+                showVenueConfirmOverlay(venue, lat, lng);
+                return;
+              }
 
-          fetchBuildGuide(lastBuildParams)
-            .then(async function(data) {
-              await finishLoadingState();
-              lastResults = Array.isArray(data) ? data : [];
-              lastSourceType = "gps";
-              lastQueryOrGps = "GPS:" + lat + "," + lng;
-              hasLoadedFullCategories = false;
-              hasBuiltGuide = true;
-              document.getElementById("status").textContent = "Done.";
-              document.body.classList.remove("home-mode");
-              updateGuideButtonVisibility();
-              render(lastResults);
-              loadFieldIntel({ lat: lat, lng: lng });
-              var hadPendingQuickCategory = !!pendingQuickCategory;
-              applyPendingQuickCategory();
-              if (!hadPendingQuickCategory) scrollToGuideResults();
-              trackSuccessfulGuideBuild("gps", lastQueryOrGps, lastResults.length);
-              maybeOfferInstallPrompt(500);
+              continueGpsGuideBuild(lat, lng);
             })
-            .catch(async function(err) {
-              await finishLoadingState();
-              document.getElementById("status").textContent =
-                "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-              resetLoadMoreState();
+            .catch(function() {
+              continueGpsGuideBuild(lat, lng);
             });
         },
         function(err) {
@@ -5969,6 +6101,7 @@
       setupFieldMatchResults();
       setupAddressKeyActions();
       setupInstallPrompt();
+      setupVenueConfirmOverlay();
       stopLoadingState();
       updateGuideButtonVisibility();
 
