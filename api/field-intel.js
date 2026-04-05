@@ -593,25 +593,42 @@ function buildVenueProfile(venue, details) {
 function applyHeuristicFallbacks(intel, profile) {
   if (!profile || !profile.isSportsVenue) return;
 
+  const isStrongVenue =
+    profile.isBaseballVenue || profile.strongConcessionsLikelihood;
+
+  const isModerateVenue =
+    profile.isParkVenue || profile.isSchoolVenue;
+
   if (intel.parking.status === "unknown") {
-    intel.parking = {
-      status: "available",
-      source: "heuristic"
-    };
+    if (isStrongVenue || isModerateVenue) {
+      intel.parking = {
+        status: "available",
+        source: "heuristic"
+      };
+    }
   }
 
-  if (intel.restrooms.status === "unknown" && (profile.isSchoolVenue || profile.isParkVenue || profile.isBaseballVenue)) {
-    intel.restrooms = {
-      status: "mentioned",
-      source: "heuristic"
-    };
+  if (intel.restrooms.status === "unknown") {
+    if (isStrongVenue) {
+      intel.restrooms = {
+        status: "mentioned",
+        source: "heuristic"
+      };
+    } else if (profile.isSchoolVenue) {
+      intel.restrooms = {
+        status: "mentioned",
+        source: "heuristic_soft"
+      };
+    }
   }
 
-  if (intel.concessions.status === "unknown" && (profile.strongConcessionsLikelihood || profile.isSchoolVenue || profile.isParkVenue)) {
-    intel.concessions = {
-      status: "mentioned",
-      source: "heuristic"
-    };
+  if (intel.concessions.status === "unknown") {
+    if (isStrongVenue) {
+      intel.concessions = {
+        status: "mentioned",
+        source: "heuristic"
+      };
+    }
   }
 }
 
