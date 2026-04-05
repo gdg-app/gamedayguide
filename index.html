@@ -788,7 +788,7 @@
     }
 
     .load-more-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 800;
       color: #273544;
       margin-bottom: 4px;
@@ -979,7 +979,7 @@
       border-radius: 999px;
       background: #eef4fb;
       color: var(--blue);
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 800;
       box-shadow: 0 4px 10px rgba(16,43,77,0.08);
     }
@@ -2088,7 +2088,7 @@
     }
 
     .field-intel-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 800;
       color: #1c2a35;
       margin-bottom: 10px;
@@ -2130,7 +2130,7 @@
 
     .field-intel-note {
       margin-top: 10px;
-      font-size: 12px;
+      font-size: 11px;
       color: #7a8793;
       line-height: 1.4;
     }
@@ -5427,14 +5427,19 @@
     }
 
     function formatFieldIntelValue(label, item) {
-      if (!item || item.status === "unknown") return "Unknown";
+      if (!item || item.status === "unknown") return "No info yet";
+      if (label === "Parking" && item.status === "available") return "Parking likely available";
+      if (label === "Parking" && item.status === "mentioned") return "Parking mentioned";
+      if (label === "Restrooms" && item.status === "mentioned") return "Restrooms mentioned";
+      if (label === "Concessions" && item.status === "mentioned") return "Concessions mentioned";
       if (label === "Playground" && item.status === "nearby" && Number.isFinite(Number(item.distanceMiles))) {
-        return Number(item.distanceMiles).toFixed(1) + " mi away";
+        return "Playground nearby (" + Number(item.distanceMiles).toFixed(1) + " mi)";
       }
-      if (item.status === "available") return "Available";
+      if (label === "Playground" && item.status === "nearby") return "Playground nearby";
+      if (item.status === "available") return "Likely available";
       if (item.status === "mentioned") return "Mentioned";
       if (item.status === "nearby") return "Nearby";
-      return String(item.status || "Unknown");
+      return "No info yet";
     }
 
     function hasUsefulFieldIntel(data) {
@@ -5455,26 +5460,26 @@
       }
 
       var rows = [
-        { label: "Parking", item: data.parking },
-        { label: "Restrooms", item: data.restrooms },
-        { label: "Concessions", item: data.concessions },
-        { label: "Playground", item: data.playground }
+        { icon: "🚗", label: "Parking", item: data.parking },
+        { icon: "🚻", label: "Restrooms", item: data.restrooms },
+        { icon: "🍔", label: "Concessions", item: data.concessions },
+        { icon: "🛝", label: "Playground", item: data.playground }
       ];
 
       el.innerHTML =
         "<div class='field-intel-card'>" +
-          "<div class='field-intel-title'>Field Intel</div>" +
+          "<div class='field-intel-title'>Game Day Tips</div>" +
           "<div class='field-intel-grid'>" +
             rows.map(function(row) {
               return (
                 "<div class='field-intel-row'>" +
-                  "<div class='field-intel-label'>" + esc(row.label) + "</div>" +
+                  "<div class='field-intel-label'>" + esc(row.icon + " " + row.label) + "</div>" +
                   "<div class='field-intel-value'>" + esc(formatFieldIntelValue(row.label, row.item)) + "</div>" +
                 "</div>"
               );
             }).join("") +
           "</div>" +
-          "<div class='field-intel-note'>Auto-generated from venue data.</div>" +
+          "<div class='field-intel-note'>Based on venue info.</div>" +
         "</div>";
 
       el.style.display = "block";
