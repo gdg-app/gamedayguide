@@ -2237,6 +2237,50 @@
       color: #b42318;
     }
 
+
+    .parent-tips-wrap {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(10,22,14,0.08);
+    }
+
+    .parent-tips-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #1f2c37;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .parent-tips-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .parent-tip-item {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      color: #55626f;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .parent-tip-bullet {
+      flex: 0 0 auto;
+      color: var(--blue);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-top: 1px;
+    }
+
+    .parent-tips-note {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #7a8793;
+      line-height: 1.35;
+    }
+
 </style>
 </head>
 <body>
@@ -2464,6 +2508,7 @@
     let selectionHelperTimer = null;
     let hasBuiltGuide = false;
     let lastFieldIntelData = null;
+    let lastVenueTips = [];
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
@@ -5526,23 +5571,24 @@
       var el = document.getElementById("fieldIntel");
       if (!el) return;
       lastFieldIntelData = null;
+      lastVenueTips = [];
       el.style.display = "none";
       el.innerHTML = "";
     }
 
     function formatFieldIntelValue(label, item) {
       if (!item || item.status === "unknown") return "No info yet";
-      if (label === "Parking" && item.status === "available") return "Parking likely available";
-      if (label === "Parking" && item.status === "mentioned") return "Parking mentioned";
-      if (label === "Restrooms" && item.status === "mentioned") return "Restrooms mentioned";
-      if (label === "Concessions" && item.status === "mentioned") return "Concessions mentioned";
+      if (label === "Parking" && item.status === "available") return "likely available";
+      if (label === "Parking" && item.status === "mentioned") return "likely available";
+      if (label === "Restrooms" && item.status === "mentioned") return "on site";
+      if (label === "Concessions" && item.status === "mentioned") return "may be available";
       if (label === "Playground" && item.status === "nearby" && Number.isFinite(Number(item.distanceMiles))) {
-        return "Playground nearby (" + Number(item.distanceMiles).toFixed(1) + " mi)";
+        return "nearby (" + Number(item.distanceMiles).toFixed(1) + " mi)";
       }
-      if (label === "Playground" && item.status === "nearby") return "Playground nearby";
-      if (item.status === "available") return "Likely available";
-      if (item.status === "mentioned") return "Mentioned";
-      if (item.status === "nearby") return "Nearby";
+      if (label === "Playground" && item.status === "nearby") return "nearby";
+      if (item.status === "available") return "likely available";
+      if (item.status === "mentioned") return "noted";
+      if (item.status === "nearby") return "nearby";
       return "No info yet";
     }
 
@@ -5552,6 +5598,53 @@
       return keys.some(function(key) {
         return data[key] && data[key].status && data[key].status !== "unknown";
       });
+    }
+
+
+    function sanitizeParentTipText(text) {
+      return String(text || "").trim();
+    }
+
+    function renderParentTipsSection() {
+      var tips = Array.isArray(lastVenueTips) ? lastVenueTips : [];
+      if (!tips.length) return "";
+
+      var itemsHtml = tips.map(function(tip) {
+        return (
+          "<div class='parent-tip-item'>" +
+            "<div class='parent-tip-bullet'>•</div>" +
+            "<div>" + esc(sanitizeParentTipText(tip.tipText || "")) + "</div>" +
+          "</div>"
+        );
+      }).join("");
+
+      return (
+        "<div class='parent-tips-wrap'>" +
+          "<div class='parent-tips-title'>💬 From parents</div>" +
+          "<div class='parent-tips-list'>" + itemsHtml + "</div>" +
+          "<div class='parent-tips-note'>Anonymous tips from families who know this venue.</div>" +
+        "</div>"
+      );
+    }
+
+    async function loadVenueTipsForFieldIntel() {
+      var data = lastFieldIntelData || {};
+      var placeId = String(data.placeId || "").trim();
+
+      if (!placeId) {
+        lastVenueTips = [];
+        renderFieldIntel(lastFieldIntelData);
+        return;
+      }
+
+      try {
+        var tips = await getJson("/api/get-venue-tips?placeId=" + encodeURIComponent(placeId));
+        lastVenueTips = Array.isArray(tips) ? tips : [];
+      } catch (e) {
+        lastVenueTips = [];
+      }
+
+      renderFieldIntel(lastFieldIntelData);
     }
 
     function openFieldTipForm() {
@@ -5635,7 +5728,8 @@
         if (input) input.value = "";
         setTimeout(function() {
           closeFieldTipForm();
-        }, 1200);
+          loadVenueTipsForFieldIntel();
+        }, 900);
       } catch (err) {
         if (status) {
           status.textContent = "Could not submit tip. Please try again.";
@@ -5662,15 +5756,22 @@
       lastFieldIntelData = data || {};
 
       var rows = [
-        { icon: "🚗", label: "Parking", item: data.parking },
+        { icon: "🅿️", label: "Parking", item: data.parking },
         { icon: "🚻", label: "Restrooms", item: data.restrooms },
         { icon: "🍔", label: "Concessions", item: data.concessions },
         { icon: "🛝", label: "Playground", item: data.playground }
-      ];
+      ].filter(function(row) {
+        return row.item && row.item.status && row.item.status !== "unknown";
+      });
+
+      if (!rows.length && !lastVenueTips.length) {
+        clearFieldIntel();
+        return;
+      }
 
       el.innerHTML =
         "<div class='field-intel-card'>" +
-          "<div class='field-intel-title'>Game Day Tips</div>" +
+          "<div class='field-intel-title'>Quick field insights</div>" +
           "<div class='field-intel-grid'>" +
             rows.map(function(row) {
               return (
@@ -5681,6 +5782,7 @@
               );
             }).join("") +
           "</div>" +
+          renderParentTipsSection() +
           "<div class='field-tip-actions'>" +
             "<button type='button' class='field-tip-link-btn' onclick='openFieldTipForm()'>+ Add a quick tip</button>" +
           "</div>" +
@@ -5693,7 +5795,7 @@
             "</div>" +
             "<div id='fieldTipStatus' class='field-tip-status'></div>" +
           "</div>" +
-          "<div class='field-intel-note'>Based on venue info.</div>" +
+          "<div class='field-intel-note'>Based on local venue data and parent tips.</div>" +
         "</div>";
 
       el.style.display = "block";
@@ -5717,6 +5819,7 @@
 
         var data = await getJson("/api/field-intel?" + qs.toString());
         renderFieldIntel(data);
+        loadVenueTipsForFieldIntel();
       } catch (e) {
         clearFieldIntel();
         console.log("Field Intel failed silently");
