@@ -2071,6 +2071,70 @@
 .app-container { padding: 14px; }
 .card { box-shadow: 0 4px 14px rgba(0,0,0,0.06); }
 
+
+    .field-intel-wrap {
+      display: none;
+      margin: 14px 0 16px;
+    }
+
+    .field-intel-card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.94));
+      border-radius: 22px;
+      box-shadow: var(--shadow-card);
+      padding: 16px 18px;
+      border: var(--border-soft);
+      backdrop-filter: blur(12px);
+    }
+
+    .field-intel-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #1c2a35;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+
+    .field-intel-grid {
+      display: grid;
+      gap: 8px;
+    }
+
+    .field-intel-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+      line-height: 1.35;
+      color: #465463;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(10,22,14,0.06);
+    }
+
+    .field-intel-row:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .field-intel-label {
+      font-weight: 700;
+      color: #22303b;
+    }
+
+    .field-intel-value {
+      text-align: right;
+      color: #5f6d79;
+      font-weight: 600;
+    }
+
+    .field-intel-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #7a8793;
+      line-height: 1.4;
+    }
+
 </style>
 </head>
 <body>
@@ -2194,6 +2258,7 @@
         </div>
       </div>
       <div id="resultsContext" class="results-context" style="display:none;"></div>
+      <div id="fieldIntel" class="field-intel-wrap" style="display:none;"></div>
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
       <div id="results"></div>
@@ -4155,6 +4220,7 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
+      clearFieldIntel();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4196,6 +4262,7 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
+      clearFieldIntel();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4212,8 +4279,6 @@
       fetchBuildGuide(lastBuildParams)
         .then(async function(data) {
           await finishLoadingState();
-  if (lastQuery) loadFieldIntel(lastQuery);
-  else if (lastLat && lastLng) loadFieldIntel(null, lastLat, lastLng);
           lastResults = Array.isArray(data) ? data : [];
           lastSourceType = sourceType;
           lastQueryOrGps = query;
@@ -4225,6 +4290,7 @@
           document.body.classList.remove("home-mode");
           updateGuideButtonVisibility();
           render(lastResults);
+          loadFieldIntel({ query: query });
           var hadPendingQuickCategory = !!pendingQuickCategory;
           applyPendingQuickCategory();
           if (!hadPendingQuickCategory) scrollToGuideResults();
@@ -4233,8 +4299,6 @@
         })
         .catch(async function(err) {
           await finishLoadingState();
-  if (lastQuery) loadFieldIntel(lastQuery);
-  else if (lastLat && lastLng) loadFieldIntel(null, lastLat, lastLng);
           document.getElementById("status").textContent =
             "Error: " + (err && err.message ? err.message : JSON.stringify(err));
           resetLoadMoreState();
@@ -4248,6 +4312,7 @@
       document.getElementById("topStops").innerHTML = "";
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
+      clearFieldIntel();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4278,8 +4343,6 @@
           fetchBuildGuide(lastBuildParams)
             .then(async function(data) {
               await finishLoadingState();
-  if (lastQuery) loadFieldIntel(lastQuery);
-  else if (lastLat && lastLng) loadFieldIntel(null, lastLat, lastLng);
               lastResults = Array.isArray(data) ? data : [];
               lastSourceType = "gps";
               lastQueryOrGps = "GPS:" + lat + "," + lng;
@@ -4289,6 +4352,7 @@
               document.body.classList.remove("home-mode");
               updateGuideButtonVisibility();
               render(lastResults);
+              loadFieldIntel({ lat: lat, lng: lng });
               var hadPendingQuickCategory = !!pendingQuickCategory;
               applyPendingQuickCategory();
               if (!hadPendingQuickCategory) scrollToGuideResults();
@@ -4297,8 +4361,6 @@
             })
             .catch(async function(err) {
               await finishLoadingState();
-  if (lastQuery) loadFieldIntel(lastQuery);
-  else if (lastLat && lastLng) loadFieldIntel(null, lastLat, lastLng);
               document.getElementById("status").textContent =
                 "Error: " + (err && err.message ? err.message : JSON.stringify(err));
               resetLoadMoreState();
@@ -5177,6 +5239,7 @@
       var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
       updateGuideButtonVisibility();
       clearResultsContext();
+      clearFieldIntel();
       clearRadiusResultsHint();
 
       var banner = document.getElementById("sharedBanner");
@@ -5222,6 +5285,7 @@
       document.getElementById("searchPanel").style.display = "none";
       var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
       updateGuideButtonVisibility();
+      clearFieldIntel();
       document.getElementById("shareTools").style.display = "none";
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -5319,6 +5383,7 @@
       document.getElementById("pageSubtitle").textContent = "Find what you need near your game.";
       document.getElementById("searchPanel").style.display = "none";
       updateGuideButtonVisibility();
+      clearFieldIntel();
       document.getElementById("sharedBanner").style.display = "block";
       document.querySelector("#sharedBanner .shared-banner-title").textContent = "Shared guide";
       document.getElementById("shareTools").style.display = "none";
@@ -5352,6 +5417,94 @@
       updateInstallTipForMode();
       maybeOfferInstallPrompt(700);
     }
+
+
+    function clearFieldIntel() {
+      var el = document.getElementById("fieldIntel");
+      if (!el) return;
+      el.style.display = "none";
+      el.innerHTML = "";
+    }
+
+    function formatFieldIntelValue(label, item) {
+      if (!item || item.status === "unknown") return "Unknown";
+      if (label === "Playground" && item.status === "nearby" && Number.isFinite(Number(item.distanceMiles))) {
+        return Number(item.distanceMiles).toFixed(1) + " mi away";
+      }
+      if (item.status === "available") return "Available";
+      if (item.status === "mentioned") return "Mentioned";
+      if (item.status === "nearby") return "Nearby";
+      return String(item.status || "Unknown");
+    }
+
+    function hasUsefulFieldIntel(data) {
+      if (!data) return false;
+      var keys = ["parking", "restrooms", "concessions", "playground"];
+      return keys.some(function(key) {
+        return data[key] && data[key].status && data[key].status !== "unknown";
+      });
+    }
+
+    function renderFieldIntel(data) {
+      var el = document.getElementById("fieldIntel");
+      if (!el) return;
+
+      if (!hasUsefulFieldIntel(data)) {
+        clearFieldIntel();
+        return;
+      }
+
+      var rows = [
+        { label: "Parking", item: data.parking },
+        { label: "Restrooms", item: data.restrooms },
+        { label: "Concessions", item: data.concessions },
+        { label: "Playground", item: data.playground }
+      ];
+
+      el.innerHTML =
+        "<div class='field-intel-card'>" +
+          "<div class='field-intel-title'>Field Intel</div>" +
+          "<div class='field-intel-grid'>" +
+            rows.map(function(row) {
+              return (
+                "<div class='field-intel-row'>" +
+                  "<div class='field-intel-label'>" + esc(row.label) + "</div>" +
+                  "<div class='field-intel-value'>" + esc(formatFieldIntelValue(row.label, row.item)) + "</div>" +
+                "</div>"
+              );
+            }).join("") +
+          "</div>" +
+          "<div class='field-intel-note'>Auto-generated from venue data.</div>" +
+        "</div>";
+
+      el.style.display = "block";
+    }
+
+    async function loadFieldIntel(params) {
+      try {
+        var query = String((params && params.query) || "").trim();
+        var lat = params && params.lat;
+        var lng = params && params.lng;
+        var qs = new URLSearchParams();
+
+        if (query) {
+          qs.set("query", query);
+        } else if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          qs.set("lat", String(lat));
+          qs.set("lng", String(lng));
+        } else {
+          clearFieldIntel();
+          return;
+        }
+
+        var data = await getJson("/api/field-intel?" + qs.toString());
+        renderFieldIntel(data);
+      } catch (e) {
+        clearFieldIntel();
+        console.log("Field Intel failed silently");
+      }
+    }
+
 
     async function initializeApp() {
       renderRecentSearches();
@@ -5417,57 +5570,7 @@
     window.addEventListener("load", function() {
       initializeApp();
     });
-  
-// FIELD INTEL INTEGRATION
-async function loadFieldIntel(query, lat, lng) {
-  try {
-    let url = "/api/field-intel?";
-    if (query) url += "query=" + encodeURIComponent(query);
-    else if (lat && lng) url += "lat=" + lat + "&lng=" + lng;
-
-    const res = await fetch(url);
-    const json = await res.json();
-    if (!json.ok || !json.data) return;
-
-    renderFieldIntel(json.data);
-  } catch (e) {
-    console.log("Field Intel failed silently");
-  }
-}
-
-function renderFieldIntel(data) {
-  const el = document.getElementById("fieldIntel");
-  if (!el) return;
-
-  function formatStatus(label, item) {
-    if (!item || item.status === "unknown") return `${label}: Unknown`;
-    if (item.status === "mentioned") return `${label}: Mentioned`;
-    if (item.status === "available") return `${label}: Available`;
-    if (item.status === "nearby" && item.distanceMiles) {
-      return `${label}: ${item.distanceMiles} mi away`;
-    }
-    return `${label}: ${item.status}`;
-  }
-
-  el.innerHTML = `
-    <div style="margin:16px 0;padding:14px;border-radius:12px;background:#111;color:#fff;">
-      <div style="font-weight:600;margin-bottom:8px;">Field Intel</div>
-      <div style="font-size:14px;line-height:1.6;">
-        ${formatStatus("Parking", data.parking)}<br>
-        ${formatStatus("Restrooms", data.restrooms)}<br>
-        ${formatStatus("Concessions", data.concessions)}<br>
-        ${formatStatus("Playground", data.playground)}
-      </div>
-      <div style="font-size:11px;opacity:0.6;margin-top:8px;">
-        Auto-generated from venue data
-      </div>
-    </div>
-  `;
-
-  el.style.display = "block";
-}
-
-</script>
+  </script>
 
   <div style="
     text-align:center;
