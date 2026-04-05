@@ -2135,6 +2135,108 @@
       line-height: 1.4;
     }
 
+
+    .field-tip-actions {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .field-tip-link-btn {
+      border: 0;
+      background: rgba(255,255,255,0.96);
+      color: var(--blue);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .field-tip-link-btn:hover {
+      background: #eef4fb;
+    }
+
+    .field-tip-form {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(10,22,14,0.08);
+    }
+
+    .field-tip-input {
+      width: 100%;
+      min-height: 92px;
+      resize: vertical;
+      padding: 12px 14px;
+      border: 1px solid #d7e0e7;
+      border-radius: 16px;
+      background: #f7f5f1;
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.45;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+    }
+
+    .field-tip-input:focus {
+      outline: none;
+      border-color: #8ec2ff;
+      box-shadow: 0 0 0 4px rgba(25,118,210,0.12);
+      background: white;
+    }
+
+    .field-tip-help {
+      font-size: 12px;
+      color: #6b7785;
+      line-height: 1.4;
+      margin-top: 8px;
+    }
+
+    .field-tip-button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .field-tip-submit-btn,
+    .field-tip-cancel-btn {
+      border: 0;
+      border-radius: 14px;
+      min-height: 42px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .field-tip-submit-btn {
+      background: linear-gradient(180deg, #344350 0%, var(--blue) 100%);
+      color: white;
+      box-shadow: 0 10px 18px rgba(16,43,77,0.16);
+    }
+
+    .field-tip-cancel-btn {
+      background: #eef2f7;
+      color: #4f5d69;
+    }
+
+    .field-tip-status {
+      display: none;
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #2d7a52;
+      line-height: 1.35;
+    }
+
+    .field-tip-status.error {
+      color: #b42318;
+    }
+
 </style>
 </head>
 <body>
@@ -2361,6 +2463,7 @@
     let hasShownShareSuccess = false;
     let selectionHelperTimer = null;
     let hasBuiltGuide = false;
+    let lastFieldIntelData = null;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
@@ -5422,6 +5525,7 @@
     function clearFieldIntel() {
       var el = document.getElementById("fieldIntel");
       if (!el) return;
+      lastFieldIntelData = null;
       el.style.display = "none";
       el.innerHTML = "";
     }
@@ -5450,6 +5554,102 @@
       });
     }
 
+    function openFieldTipForm() {
+      var form = document.getElementById("fieldTipForm");
+      var input = document.getElementById("fieldTipInput");
+      var status = document.getElementById("fieldTipStatus");
+      if (!form || !input) return;
+      form.style.display = "block";
+      if (status) {
+        status.style.display = "none";
+        status.textContent = "";
+        status.classList.remove("error");
+      }
+      setTimeout(function() {
+        try { input.focus({ preventScroll: true }); } catch (e) { try { input.focus(); } catch (err) {} }
+      }, 60);
+    }
+
+    function closeFieldTipForm() {
+      var form = document.getElementById("fieldTipForm");
+      var input = document.getElementById("fieldTipInput");
+      var status = document.getElementById("fieldTipStatus");
+      if (form) form.style.display = "none";
+      if (input) input.value = "";
+      if (status) {
+        status.style.display = "none";
+        status.textContent = "";
+        status.classList.remove("error");
+      }
+    }
+
+    async function submitFieldTip() {
+      var input = document.getElementById("fieldTipInput");
+      var status = document.getElementById("fieldTipStatus");
+      var submitBtn = document.getElementById("fieldTipSubmitBtn");
+      var data = lastFieldIntelData || {};
+      var tipText = String(input && input.value || "").trim();
+
+      if (!data.placeId || !data.venueName) {
+        if (status) {
+          status.textContent = "Venue info is not ready yet.";
+          status.classList.add("error");
+          status.style.display = "block";
+        }
+        return;
+      }
+
+      if (!tipText) {
+        if (status) {
+          status.textContent = "Add a quick tip first.";
+          status.classList.add("error");
+          status.style.display = "block";
+        }
+        return;
+      }
+
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = "Submitting...";
+      }
+      if (status) {
+        status.textContent = "";
+        status.style.display = "none";
+        status.classList.remove("error");
+      }
+
+      try {
+        await postJson("/api/add-venue-tip", {
+          venuePlaceId: String(data.placeId || "").trim(),
+          venueName: String(data.venueName || "").trim(),
+          venueAddress: String(data.venueAddress || "").trim(),
+          tipText: tipText,
+          sessionId: getAnonId()
+        });
+
+        if (status) {
+          status.textContent = "Thanks — your tip was added.";
+          status.classList.remove("error");
+          status.style.display = "block";
+        }
+        if (input) input.value = "";
+        setTimeout(function() {
+          closeFieldTipForm();
+        }, 1200);
+      } catch (err) {
+        if (status) {
+          status.textContent = "Could not submit tip. Please try again.";
+          status.classList.add("error");
+          status.style.display = "block";
+        }
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Submit Tip";
+        }
+      }
+    }
+
     function renderFieldIntel(data) {
       var el = document.getElementById("fieldIntel");
       if (!el) return;
@@ -5458,6 +5658,8 @@
         clearFieldIntel();
         return;
       }
+
+      lastFieldIntelData = data || {};
 
       var rows = [
         { icon: "🚗", label: "Parking", item: data.parking },
@@ -5479,12 +5681,23 @@
               );
             }).join("") +
           "</div>" +
+          "<div class='field-tip-actions'>" +
+            "<button type='button' class='field-tip-link-btn' onclick='openFieldTipForm()'>+ Add a quick tip</button>" +
+          "</div>" +
+          "<div id='fieldTipForm' class='field-tip-form'>" +
+            "<textarea id='fieldTipInput' class='field-tip-input' placeholder='Parking, shade, seating, restrooms — anything helpful for the next parent'></textarea>" +
+            "<div class='field-tip-help'>Keep it short and specific.</div>" +
+            "<div class='field-tip-button-row'>" +
+              "<button type='button' id='fieldTipSubmitBtn' class='field-tip-submit-btn' onclick='submitFieldTip()'>Submit Tip</button>" +
+              "<button type='button' class='field-tip-cancel-btn' onclick='closeFieldTipForm()'>Cancel</button>" +
+            "</div>" +
+            "<div id='fieldTipStatus' class='field-tip-status'></div>" +
+          "</div>" +
           "<div class='field-intel-note'>Based on venue info.</div>" +
         "</div>";
 
       el.style.display = "block";
     }
-
     async function loadFieldIntel(params) {
       try {
         var query = String((params && params.query) || "").trim();
