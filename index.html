@@ -2395,12 +2395,12 @@
 
       <div class="search-panel" id="searchPanel">
         <div class="search-intro">
-<h2 class="search-title">Find food, coffee, and essentials near your field</h2>
+<h2 class="search-title">Find food, coffee, and essentials near your game</h2>
         </div>
 
-        <input id="address" placeholder='Enter field name (e.g., "Field 4 USA Baseball Complex")' value="" />
+        <input id="address" placeholder='Enter game location or venue (e.g., "Field 4 USA Baseball Complex")' value="" />
         <div class="entry-stack">
-          <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Your Field</button>
+          <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Your Venue</button>
           <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
         </div>
 
@@ -2415,7 +2415,7 @@
         </div>
 
         <div id="fieldMatchResults" class="match-results"></div>
-        <div class="helper-text">Enter a field and we’ll build your guide.</div>
+        <div class="helper-text">Enter your game location and we’ll build your guide.</div>
 
         <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
@@ -2563,7 +2563,7 @@
 
   <div id="venueConfirmOverlay" class="venue-confirm-overlay" aria-hidden="true">
     <div class="venue-confirm-card" role="dialog" aria-modal="true" aria-labelledby="venueConfirmTitle">
-      <div id="venueConfirmTitle" class="venue-confirm-title">Are you at this field?</div>
+      <div id="venueConfirmTitle" class="venue-confirm-title">Are you at this venue?</div>
       <div id="venueConfirmAddress" class="venue-confirm-address"></div>
       <div class="venue-confirm-actions">
         <button type="button" class="action-btn location-btn" id="venueConfirmYesBtn">Yes, build my guide</button>
@@ -2645,8 +2645,8 @@
 
     const LOADING_MESSAGES = [
       "Building your Game Day Guide… Your results will appear below.",
-      "Finding the best spots near your field…",
-      "Finding food, coffee, gas, and more near your field…",
+      "Finding the best spots near your game…",
+      "Finding food, coffee, gas, and more near your game…",
       "Almost ready — your guide will appear below…"
     ];
     const MIN_LOADING_VISIBLE_MS = 1600;
@@ -6039,7 +6039,7 @@
 
       el.innerHTML =
         "<div class='field-intel-card'>" +
-          "<div class='field-intel-title'>Quick field insights (based on local data)</div>" +
+          "<div class='field-intel-title'>Quick venue insights (based on local data)</div>" +
           "<div class='field-intel-grid'>" +
             rows.map(function(row) {
               return (
