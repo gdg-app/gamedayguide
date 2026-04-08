@@ -3862,21 +3862,9 @@
     }
 
     function parseBuildGuideResponse(result) {
-      if (Array.isArray(result)) {
-        return { rows: result, center: null };
-      }
-      if (result && Array.isArray(result.rows)) {
-        return {
-          rows: result.rows,
-          center: result.center || null
-        };
-      }
-      if (result && Array.isArray(result.data)) {
-        return { rows: result.data, center: result.center || null };
-      }
-      if (result && result.ok && Array.isArray(result.results)) {
-        return { rows: result.results, center: result.center || null };
-      }
+      if (Array.isArray(result)) return result;
+      if (result && Array.isArray(result.data)) return result.data;
+      if (result && result.ok && Array.isArray(result.results)) return result.results;
       if (result && result.error) throw new Error(result.error);
       throw new Error("Build guide failed.");
     }
@@ -4785,7 +4773,7 @@
       fetchBuildGuide(lastBuildParams)
         .then(async function(data) {
           await finishLoadingState();
-          lastResults = Array.isArray(data.rows) ? data.rows : [];
+          lastResults = Array.isArray(data) ? data : [];
           lastSourceType = sourceType;
           lastQueryOrGps = query;
           hasLoadedFullCategories = false;
@@ -4797,7 +4785,7 @@
           updateGuideButtonVisibility();
           render(lastResults);
           loadFieldIntel({ query: query });
-          loadWeather(data.center ? { lat: data.center.lat, lng: data.center.lng } : { query: query });
+          loadWeather({ query: query });
           var hadPendingQuickCategory = !!pendingQuickCategory;
           applyPendingQuickCategory();
           if (!hadPendingQuickCategory) scrollToGuideResults();
@@ -4882,7 +4870,7 @@
         fetchBuildGuide(lastBuildParams)
           .then(async function(data) {
             await finishLoadingState();
-            lastResults = Array.isArray(data.rows) ? data.rows : [];
+            lastResults = Array.isArray(data) ? data : [];
             lastSourceType = "query";
             lastQueryOrGps = query;
             hasLoadedFullCategories = false;
@@ -4897,7 +4885,7 @@
             if (Number.isFinite(weatherLat) && Number.isFinite(weatherLng)) {
               loadWeather({ lat: weatherLat, lng: weatherLng, query: query });
             } else {
-              loadWeather(data.center ? { lat: data.center.lat, lng: data.center.lng } : { query: query });
+              loadWeather({ query: query });
             }
             var hadPendingQuickCategory = !!pendingQuickCategory;
             applyPendingQuickCategory();
@@ -4924,7 +4912,7 @@
       fetchBuildGuide(lastBuildParams)
         .then(async function(data) {
           await finishLoadingState();
-          lastResults = Array.isArray(data.rows) ? data.rows : [];
+          lastResults = Array.isArray(data) ? data : [];
           lastSourceType = "gps";
           lastQueryOrGps = "GPS:" + lat + "," + lng;
           hasLoadedFullCategories = false;
@@ -4934,7 +4922,7 @@
           updateGuideButtonVisibility();
           render(lastResults);
           loadFieldIntel({ lat: lat, lng: lng });
-          loadWeather(data.center ? { lat: data.center.lat, lng: data.center.lng } : { lat: lat, lng: lng });
+          loadWeather({ lat: lat, lng: lng });
           var hadPendingQuickCategory = !!pendingQuickCategory;
           applyPendingQuickCategory();
           if (!hadPendingQuickCategory) scrollToGuideResults();
@@ -5742,7 +5730,7 @@
       topStopsContainer.innerHTML = "";
       jumpBarContainer.innerHTML = "";
 
-      lastResults = Array.isArray(data.rows) ? data.rows : [];
+      lastResults = Array.isArray(data) ? data : [];
       shareTools.style.display = lastResults.length && !currentSharedGuide ? "block" : "none";
       updateResultsSharePrompt();
       updateShareSelectedButton();
