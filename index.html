@@ -2303,6 +2303,38 @@
     }
 
 
+    .weather-wrap {
+      display: none;
+      margin: 12px 0 16px;
+    }
+
+    .weather-card {
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.94));
+      border-radius: 22px;
+      box-shadow: var(--shadow-card);
+      padding: 14px 18px;
+      border: var(--border-soft);
+      backdrop-filter: blur(12px);
+    }
+
+    .weather-topline {
+      font-size: 15px;
+      font-weight: 800;
+      color: #1c2a35;
+      margin-bottom: 4px;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+    }
+
+    .weather-subline {
+      font-size: 13px;
+      color: #5f6d79;
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+
 /* 2026-04-05 GDG Top Stops Compression (CSS-only) */
 .top-stop-card {
   padding: 12px 12px 10px;
@@ -2486,6 +2518,7 @@
       </div>
       <div id="resultsContext" class="results-context" style="display:none;"></div>
       <div id="fieldIntel" class="field-intel-wrap" style="display:none;"></div>
+      <div id="weatherBox" class="weather-wrap" style="display:none;"></div>
       <div id="topStops"></div>
       <div id="categoryJumpBar"></div>
       <div id="results"></div>
@@ -4545,6 +4578,7 @@
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
       clearFieldIntel();
+      clearWeather();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4587,6 +4621,7 @@
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
       clearFieldIntel();
+      clearWeather();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4615,6 +4650,7 @@
           updateGuideButtonVisibility();
           render(lastResults);
           loadFieldIntel({ query: query });
+          loadWeather({ query: query });
           var hadPendingQuickCategory = !!pendingQuickCategory;
           applyPendingQuickCategory();
           if (!hadPendingQuickCategory) scrollToGuideResults();
@@ -4637,6 +4673,7 @@
       document.getElementById("categoryJumpBar").innerHTML = "";
       clearResultsContext();
       clearFieldIntel();
+      clearWeather();
       clearRadiusResultsHint();
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -4677,6 +4714,7 @@
               updateGuideButtonVisibility();
               render(lastResults);
               loadFieldIntel({ lat: lat, lng: lng });
+              loadWeather({ lat: lat, lng: lng });
               var hadPendingQuickCategory = !!pendingQuickCategory;
               applyPendingQuickCategory();
               if (!hadPendingQuickCategory) scrollToGuideResults();
@@ -5547,6 +5585,7 @@
       updateGuideButtonVisibility();
       clearResultsContext();
       clearFieldIntel();
+      clearWeather();
       clearRadiusResultsHint();
 
       var banner = document.getElementById("sharedBanner");
@@ -5593,6 +5632,7 @@
       var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
       updateGuideButtonVisibility();
       clearFieldIntel();
+      clearWeather();
       document.getElementById("shareTools").style.display = "none";
       document.getElementById("shareLinkBox").style.display = "none";
       document.getElementById("shareLinkBox").innerHTML = "";
@@ -5691,6 +5731,7 @@
       document.getElementById("searchPanel").style.display = "none";
       updateGuideButtonVisibility();
       clearFieldIntel();
+      clearWeather();
       document.getElementById("sharedBanner").style.display = "block";
       document.querySelector("#sharedBanner .shared-banner-title").textContent = "Shared guide";
       document.getElementById("shareTools").style.display = "none";
@@ -5723,6 +5764,163 @@
       document.getElementById("status").textContent = "Shared spot";
       updateInstallTipForMode();
       maybeOfferInstallPrompt(700);
+    }
+
+
+
+    function clearWeather() {
+      var el = document.getElementById("weatherBox");
+      if (!el) return;
+      el.style.display = "none";
+      el.innerHTML = "";
+    }
+
+    function formatWeatherHourLabel(dateObj) {
+      if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) return "";
+      var hour = dateObj.getHours();
+      var suffix = hour >= 12 ? "pm" : "am";
+      var displayHour = hour % 12;
+      if (displayHour === 0) displayHour = 12;
+      return displayHour + suffix;
+    }
+
+    function mapWeatherCodeToDisplay(code) {
+      if ([0].indexOf(code) !== -1) return { icon: "☀️", label: "Sunny" };
+      if ([1, 2].indexOf(code) !== -1) return { icon: "⛅", label: "Partly cloudy" };
+      if ([3].indexOf(code) !== -1) return { icon: "☁️", label: "Cloudy" };
+      if ([45, 48].indexOf(code) !== -1) return { icon: "🌫️", label: "Foggy" };
+      if ([51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82].indexOf(code) !== -1) return { icon: "🌧️", label: "Rain likely" };
+      if ([71, 73, 75, 77, 85, 86].indexOf(code) !== -1) return { icon: "❄️", label: "Snow possible" };
+      if ([95, 96, 99].indexOf(code) !== -1) return { icon: "⛈️", label: "Storms possible" };
+      return { icon: "⛅", label: "Partly cloudy" };
+    }
+
+    function buildWeatherMessage(weatherData) {
+      if (!weatherData || !weatherData.current || !weatherData.hourly) return null;
+
+      var tempC = Number(weatherData.current.temperature_2m);
+      var tempF = Number.isFinite(tempC) ? Math.round((tempC * 9 / 5) + 32) : null;
+      var code = Number(weatherData.current.weathercode);
+      var display = mapWeatherCodeToDisplay(code);
+
+      var times = Array.isArray(weatherData.hourly.time) ? weatherData.hourly.time : [];
+      var precipProb = Array.isArray(weatherData.hourly.precipitation_probability) ? weatherData.hourly.precipitation_probability : [];
+      var windSpeeds = Array.isArray(weatherData.hourly.windspeed_10m) ? weatherData.hourly.windspeed_10m : [];
+      var now = new Date();
+      var upcoming = [];
+
+      for (var i = 0; i < times.length; i++) {
+        var dt = new Date(times[i]);
+        if (isNaN(dt.getTime()) || dt < now) continue;
+        upcoming.push({
+          time: dt,
+          precipProb: Number(precipProb[i] || 0),
+          windSpeed: Number(windSpeeds[i] || 0)
+        });
+        if (upcoming.length >= 6) break;
+      }
+
+      var message = "Dry through afternoon";
+      var firstRain = upcoming.find(function(item) { return item.precipProb >= 40; });
+      var firstWind = upcoming.find(function(item) { return item.windSpeed >= 12; });
+
+      if (firstRain) {
+        message = "Showers around " + formatWeatherHourLabel(firstRain.time);
+      } else if (tempF !== null && tempF >= 85) {
+        message = "Hot through mid-afternoon";
+      } else if (firstWind) {
+        message = "Breezy conditions";
+      }
+
+      if (tempF === null) return null;
+
+      return {
+        icon: display.icon,
+        tempF: tempF,
+        label: display.label,
+        message: message
+      };
+    }
+
+    function renderWeather(weather) {
+      var el = document.getElementById("weatherBox");
+      if (!el) return;
+
+      if (!weather) {
+        clearWeather();
+        return;
+      }
+
+      el.innerHTML =
+        "<div class='weather-card'>" +
+          "<div class='weather-topline'>" + esc(weather.icon + " " + weather.tempF + "°F — " + weather.label) + "</div>" +
+          "<div class='weather-subline'>" + esc(weather.message) + "</div>" +
+        "</div>";
+      el.style.display = "block";
+    }
+
+    async function fetchOpenMeteoForecast(lat, lng) {
+      var url = "https://api.open-meteo.com/v1/forecast" +
+        "?latitude=" + encodeURIComponent(lat) +
+        "&longitude=" + encodeURIComponent(lng) +
+        "&current=temperature_2m,weathercode" +
+        "&hourly=precipitation_probability,windspeed_10m" +
+        "&temperature_unit=celsius" +
+        "&wind_speed_unit=mph" +
+        "&forecast_days=1" +
+        "&timezone=auto";
+
+      var response = await fetch(url, { method: "GET" });
+      if (!response.ok) {
+        throw new Error("Weather forecast unavailable.");
+      }
+      return response.json();
+    }
+
+    async function geocodeWeatherQuery(query) {
+      var cleaned = String(query || "").trim();
+      if (!cleaned) return null;
+
+      var url = "https://geocoding-api.open-meteo.com/v1/search?count=1&language=en&format=json&name=" + encodeURIComponent(cleaned);
+      var response = await fetch(url, { method: "GET" });
+      if (!response.ok) {
+        throw new Error("Weather location unavailable.");
+      }
+
+      var data = await response.json();
+      if (!data || !Array.isArray(data.results) || !data.results.length) {
+        return null;
+      }
+
+      return {
+        lat: data.results[0].latitude,
+        lng: data.results[0].longitude
+      };
+    }
+
+    async function loadWeather(options) {
+      try {
+        clearWeather();
+
+        var lat = options && options.lat;
+        var lng = options && options.lng;
+        var query = String((options && options.query) || "").trim();
+
+        if (!(Number.isFinite(lat) && Number.isFinite(lng))) {
+          if (!query) return;
+          var geo = await geocodeWeatherQuery(query);
+          if (!geo) return;
+          lat = geo.lat;
+          lng = geo.lng;
+        }
+
+        var forecast = await fetchOpenMeteoForecast(lat, lng);
+        var weather = buildWeatherMessage(forecast);
+        renderWeather(weather);
+      } catch (e) {
+        clearWeather();
+        console.log("Weather failed silently");
+      }
     }
 
 
@@ -5928,6 +6126,7 @@
 
       if (!rows.length && !lastVenueTips.length) {
         clearFieldIntel();
+      clearWeather();
         return;
       }
 
@@ -5976,6 +6175,7 @@
           qs.set("lng", String(lng));
         } else {
           clearFieldIntel();
+      clearWeather();
           return;
         }
 
@@ -5984,6 +6184,7 @@
         loadVenueTipsForFieldIntel();
       } catch (e) {
         clearFieldIntel();
+      clearWeather();
         console.log("Field Intel failed silently");
       }
     }
