@@ -41,7 +41,10 @@ export default async function handler(req, res) {
             " rows=" +
             cachedRows.length
         );
-        return res.status(200).json(cachedRows);
+        return res.status(200).json({
+          rows: cachedRows,
+          center: isValidLatLng(lat, lng) ? { lat, lng } : null
+        });
       }
 
       console.log(
