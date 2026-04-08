@@ -4842,10 +4842,63 @@
       var lat = buildOptions.lat;
       var lng = buildOptions.lng;
       var query = String(buildOptions.query || "").trim();
+      var weatherLat = buildOptions.weatherLat;
+      var weatherLng = buildOptions.weatherLng;
       var radius = getRadiusMiles();
 
       if (query) {
-        runGuideWithQuery(query, "query");
+        resetSelectedPlaces();
+        resetLoadMoreState();
+        document.getElementById("results").innerHTML = "";
+        document.getElementById("topStops").innerHTML = "";
+        document.getElementById("categoryJumpBar").innerHTML = "";
+        clearResultsContext();
+        clearFieldIntel();
+        clearWeather();
+        clearRadiusResultsHint();
+        document.getElementById("shareLinkBox").style.display = "none";
+        document.getElementById("shareLinkBox").innerHTML = "";
+        document.getElementById("shareTools").style.display = "none";
+        latestShareUrl = "";
+
+        lastBuildParams = {
+          query: query,
+          radiusMiles: radius,
+          mode: "core"
+        };
+
+        fetchBuildGuide(lastBuildParams)
+          .then(async function(data) {
+            await finishLoadingState();
+            lastResults = Array.isArray(data) ? data : [];
+            lastSourceType = "query";
+            lastQueryOrGps = query;
+            hasLoadedFullCategories = false;
+            hasBuiltGuide = true;
+            saveRecentSearch(query);
+            renderRecentSearches();
+            document.getElementById("status").textContent = "Done.";
+            document.body.classList.remove("home-mode");
+            updateGuideButtonVisibility();
+            render(lastResults);
+            loadFieldIntel({ query: query });
+            if (Number.isFinite(weatherLat) && Number.isFinite(weatherLng)) {
+              loadWeather({ lat: weatherLat, lng: weatherLng, query: query });
+            } else {
+              loadWeather({ query: query });
+            }
+            var hadPendingQuickCategory = !!pendingQuickCategory;
+            applyPendingQuickCategory();
+            if (!hadPendingQuickCategory) scrollToGuideResults();
+            trackSuccessfulGuideBuild("query", query, lastResults.length);
+            maybeOfferInstallPrompt(500);
+          })
+          .catch(async function(err) {
+            await finishLoadingState();
+            document.getElementById("status").textContent =
+              "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+            resetLoadMoreState();
+          });
         return;
       }
 
@@ -4902,7 +4955,7 @@
 
       document.getElementById("address").value = venue.query;
       document.getElementById("status").textContent = "Building your guide — results will appear below…";
-      beginGpsGuideBuild({ query: venue.query });
+      beginGpsGuideBuild({ query: venue.query, weatherLat: pending.lat, weatherLng: pending.lng });
     }
 
     function declineDetectedVenue() {
