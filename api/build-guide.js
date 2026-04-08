@@ -109,7 +109,7 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.status(200).json(rows);
+    return res.status(200).json({ rows: rows, center: loc });
   } catch (err) {
     console.error(
       "[GDG CACHE] ERROR " +
