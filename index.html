@@ -2777,6 +2777,32 @@
         .replace(/'/g, "&#039;");
     }
 
+    function safeLocalStorageGet(key) {
+      try {
+        return safeLocalStorageGet(key);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function safeLocalStorageSet(key, value) {
+      try {
+        localStorage.setItem(key, value);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function safeLocalStorageRemove(key) {
+      try {
+        localStorage.removeItem(key);
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
     function getRowPlaceId(row) {
       return String((row && row[7]) || "").trim();
     }
@@ -2887,10 +2913,10 @@
     function getAnonId() {
       try {
         var key = "gamedayguide_anon_id";
-        var existing = localStorage.getItem(key);
+        var existing = safeLocalStorageGet(key);
         if (existing) return existing;
         var id = "u_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
-        localStorage.setItem(key, id);
+        safeLocalStorageSet(key, id);
         return id;
       } catch (e) {
         return "u_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -3249,7 +3275,7 @@
 
     function dismissInstallTip() {
       try {
-        localStorage.setItem("gamedayguide_hide_install_tip", "1");
+        safeLocalStorageSet("gamedayguide_hide_install_tip", "1");
       } catch (e) {}
       document.getElementById("homeScreenTip").style.display = "none";
     }
@@ -3279,7 +3305,7 @@
 
     function getRecentSearches() {
       try {
-        var raw = localStorage.getItem(RECENT_SEARCH_KEY);
+        var raw = safeLocalStorageGet(RECENT_SEARCH_KEY);
         var list = raw ? JSON.parse(raw) : [];
         return Array.isArray(list) ? list : [];
       } catch (e) {
@@ -3298,7 +3324,7 @@
 
         list.unshift(query);
         list = list.slice(0, 6);
-        localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(list));
+        safeLocalStorageSet(RECENT_SEARCH_KEY, JSON.stringify(list));
       } catch (e) {}
     }
 
@@ -3313,8 +3339,8 @@
       if (isStandaloneMode()) return false;
 
       try {
-        if (localStorage.getItem(INSTALL_PROMPT_SHOWN_KEY) === "1") return false;
-        if (localStorage.getItem(INSTALL_PROMPT_DISMISSED_KEY) === "1") return false;
+        if (safeLocalStorageGet(INSTALL_PROMPT_SHOWN_KEY) === "1") return false;
+        if (safeLocalStorageGet(INSTALL_PROMPT_DISMISSED_KEY) === "1") return false;
       } catch (e) {}
 
       return true;
@@ -3367,7 +3393,7 @@
       steps.innerHTML = getInstallStepCardsHtml();
 
       try {
-        localStorage.setItem(INSTALL_PROMPT_SHOWN_KEY, "1");
+        safeLocalStorageSet(INSTALL_PROMPT_SHOWN_KEY, "1");
       } catch (e) {}
 
       modal.classList.add("open");
@@ -3382,7 +3408,7 @@
       }
 
       try {
-        localStorage.setItem(INSTALL_PROMPT_DISMISSED_KEY, "1");
+        safeLocalStorageSet(INSTALL_PROMPT_DISMISSED_KEY, "1");
       } catch (e) {}
     }
 
