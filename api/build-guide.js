@@ -41,10 +41,7 @@ export default async function handler(req, res) {
             " rows=" +
             cachedRows.length
         );
-        return res.status(200).json({
-          rows: cachedRows,
-          center: isValidLatLng(lat, lng) ? { lat, lng } : null
-        });
+        return res.status(200).json(cachedRows);
       }
 
       console.log(
@@ -112,7 +109,7 @@ export default async function handler(req, res) {
       }
     }
 
-    return res.status(200).json({ rows: rows, center: loc });
+    return res.status(200).json(rows);
   } catch (err) {
     console.error(
       "[GDG CACHE] ERROR " +
