@@ -3862,9 +3862,21 @@
     }
 
     function parseBuildGuideResponse(result) {
-      if (Array.isArray(result)) return result;
-      if (result && Array.isArray(result.data)) return result.data;
-      if (result && result.ok && Array.isArray(result.results)) return result.results;
+      if (Array.isArray(result)) {
+        return { rows: result, center: null };
+      }
+      if (result && Array.isArray(result.rows)) {
+        return {
+          rows: result.rows,
+          center: result.center || null
+        };
+      }
+      if (result && Array.isArray(result.data)) {
+        return { rows: result.data, center: result.center || null };
+      }
+      if (result && result.ok && Array.isArray(result.results)) {
+        return { rows: result.results, center: result.center || null };
+      }
       if (result && result.error) throw new Error(result.error);
       throw new Error("Build guide failed.");
     }
