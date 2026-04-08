@@ -4784,8 +4784,20 @@
           document.body.classList.remove("home-mode");
           updateGuideButtonVisibility();
           render(lastResults);
-          loadFieldIntel({ query: query });
-          loadWeather({ query: query });
+          loadFieldIntel({ query: query })
+            .then(function(fieldIntelData) {
+              var weatherQuery = query;
+              if (fieldIntelData) {
+                var venueName = String((fieldIntelData && fieldIntelData.venueName) || "").trim();
+                var venueAddress = String((fieldIntelData && fieldIntelData.venueAddress) || "").trim();
+                var strongerWeatherQuery = [venueName, venueAddress].filter(Boolean).join(" ").trim();
+                if (strongerWeatherQuery) weatherQuery = strongerWeatherQuery;
+              }
+              loadWeather({ query: weatherQuery });
+            })
+            .catch(function() {
+              loadWeather({ query: query });
+            });
           var hadPendingQuickCategory = !!pendingQuickCategory;
           applyPendingQuickCategory();
           if (!hadPendingQuickCategory) scrollToGuideResults();
@@ -4881,12 +4893,30 @@
             document.body.classList.remove("home-mode");
             updateGuideButtonVisibility();
             render(lastResults);
-            loadFieldIntel({ query: query });
-            if (Number.isFinite(weatherLat) && Number.isFinite(weatherLng)) {
-              loadWeather({ lat: weatherLat, lng: weatherLng, query: query });
-            } else {
-              loadWeather({ query: query });
-            }
+            loadFieldIntel({ query: query })
+              .then(function(fieldIntelData) {
+                if (Number.isFinite(weatherLat) && Number.isFinite(weatherLng)) {
+                  loadWeather({ lat: weatherLat, lng: weatherLng, query: query });
+                  return;
+                }
+
+                var weatherQuery = query;
+                if (fieldIntelData) {
+                  var venueName = String((fieldIntelData && fieldIntelData.venueName) || "").trim();
+                  var venueAddress = String((fieldIntelData && fieldIntelData.venueAddress) || "").trim();
+                  var strongerWeatherQuery = [venueName, venueAddress].filter(Boolean).join(" ").trim();
+                  if (strongerWeatherQuery) weatherQuery = strongerWeatherQuery;
+                }
+
+                loadWeather({ query: weatherQuery });
+              })
+              .catch(function() {
+                if (Number.isFinite(weatherLat) && Number.isFinite(weatherLng)) {
+                  loadWeather({ lat: weatherLat, lng: weatherLng, query: query });
+                } else {
+                  loadWeather({ query: query });
+                }
+              });
             var hadPendingQuickCategory = !!pendingQuickCategory;
             applyPendingQuickCategory();
             if (!hadPendingQuickCategory) scrollToGuideResults();
@@ -6475,9 +6505,11 @@
         var data = await getJson("/api/field-intel?" + qs.toString());
         renderFieldIntel(data);
         loadVenueTipsForFieldIntel();
+        return data || null;
       } catch (e) {
         clearFieldIntel();
         console.log("Field Intel failed silently");
+        return null;
       }
     }
 
