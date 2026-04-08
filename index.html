@@ -4773,7 +4773,7 @@
       fetchBuildGuide(lastBuildParams)
         .then(async function(data) {
           await finishLoadingState();
-          lastResults = Array.isArray(data) ? data : [];
+          lastResults = Array.isArray(data.rows) ? data.rows : [];
           lastSourceType = sourceType;
           lastQueryOrGps = query;
           hasLoadedFullCategories = false;
@@ -4785,7 +4785,7 @@
           updateGuideButtonVisibility();
           render(lastResults);
           loadFieldIntel({ query: query });
-          loadWeather({ query: query });
+          loadWeather(data.center ? { lat: data.center.lat, lng: data.center.lng } : { query: query });
           var hadPendingQuickCategory = !!pendingQuickCategory;
           applyPendingQuickCategory();
           if (!hadPendingQuickCategory) scrollToGuideResults();
@@ -4870,7 +4870,7 @@
         fetchBuildGuide(lastBuildParams)
           .then(async function(data) {
             await finishLoadingState();
-            lastResults = Array.isArray(data) ? data : [];
+            lastResults = Array.isArray(data.rows) ? data.rows : [];
             lastSourceType = "query";
             lastQueryOrGps = query;
             hasLoadedFullCategories = false;
@@ -4885,7 +4885,7 @@
             if (Number.isFinite(weatherLat) && Number.isFinite(weatherLng)) {
               loadWeather({ lat: weatherLat, lng: weatherLng, query: query });
             } else {
-              loadWeather({ query: query });
+              loadWeather(data.center ? { lat: data.center.lat, lng: data.center.lng } : { query: query });
             }
             var hadPendingQuickCategory = !!pendingQuickCategory;
             applyPendingQuickCategory();
@@ -4912,7 +4912,7 @@
       fetchBuildGuide(lastBuildParams)
         .then(async function(data) {
           await finishLoadingState();
-          lastResults = Array.isArray(data) ? data : [];
+          lastResults = Array.isArray(data.rows) ? data.rows : [];
           lastSourceType = "gps";
           lastQueryOrGps = "GPS:" + lat + "," + lng;
           hasLoadedFullCategories = false;
@@ -4922,7 +4922,7 @@
           updateGuideButtonVisibility();
           render(lastResults);
           loadFieldIntel({ lat: lat, lng: lng });
-          loadWeather({ lat: lat, lng: lng });
+          loadWeather(data.center ? { lat: data.center.lat, lng: data.center.lng } : { lat: lat, lng: lng });
           var hadPendingQuickCategory = !!pendingQuickCategory;
           applyPendingQuickCategory();
           if (!hadPendingQuickCategory) scrollToGuideResults();
@@ -5730,7 +5730,7 @@
       topStopsContainer.innerHTML = "";
       jumpBarContainer.innerHTML = "";
 
-      lastResults = Array.isArray(data) ? data : [];
+      lastResults = Array.isArray(data.rows) ? data.rows : [];
       shareTools.style.display = lastResults.length && !currentSharedGuide ? "block" : "none";
       updateResultsSharePrompt();
       updateShareSelectedButton();
