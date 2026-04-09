@@ -2739,6 +2739,7 @@
     let lastVenueTips = [];
     let pendingGpsBuild = null;
     let detectedGpsVenue = null;
+    let lastResolvedGuideCenter = null;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
@@ -3894,6 +3895,14 @@
         );
       }
 
+      var centerLat = Number(response.headers.get("X-GDG-Center-Lat"));
+      var centerLng = Number(response.headers.get("X-GDG-Center-Lng"));
+      if (Number.isFinite(centerLat) && Number.isFinite(centerLng)) {
+        lastResolvedGuideCenter = { lat: centerLat, lng: centerLng };
+      } else {
+        lastResolvedGuideCenter = null;
+      }
+
       return parseBuildGuideResponse(result);
     }
 
@@ -4700,6 +4709,7 @@
       currentSharedGuide = null;
       latestShareUrl = "";
       hasBuiltGuide = false;
+      lastResolvedGuideCenter = null;
       resetSelectedPlaces();
       resetLoadMoreState();
 
@@ -4762,6 +4772,7 @@
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
       latestShareUrl = "";
+      lastResolvedGuideCenter = null;
       startLoadingState();
 
       lastBuildParams = {
@@ -5016,6 +5027,7 @@
       document.getElementById("shareLinkBox").innerHTML = "";
       document.getElementById("shareTools").style.display = "none";
       latestShareUrl = "";
+      lastResolvedGuideCenter = null;
       hideFieldMatchResults();
       closeVenueConfirmOverlay();
       pendingGpsBuild = null;
