@@ -2595,16 +2595,6 @@
         <div id="shareLinkBox" style="display:none;"></div>
       </div>
 
-      <div id="resultsSharePrompt" class="results-share-prompt" style="display:none;">
-        <div class="results-share-prompt-card">
-          <div class="results-share-prompt-copy">
-            <div class="results-share-prompt-title">Built for your game</div>
-            <div class="results-share-prompt-text">Send this guide to the group chat.</div>
-          </div>
-          <button type="button" class="action-btn share-btn" onclick="shareGuide()">Share with Team</button>
-        </div>
-      </div>
-
       <div id="loadMoreWrap" class="load-more-wrap" style="display:none;">
         <div class="load-more-card">
           <div class="load-more-title">Need more nearby?</div>
@@ -2864,22 +2854,13 @@
 
 
     function updateResultsSharePrompt() {
-      var prompt = document.getElementById("resultsSharePrompt");
-      if (!prompt) return;
-
-      if (currentSharedGuide || !lastResults || !lastResults.length) {
-        prompt.style.display = "none";
-        return;
-      }
-
-      prompt.style.display = "block";
+      return;
     }
 
     function scrollToGuideResults() {
       if (pendingQuickCategory) return;
 
       var target =
-        document.getElementById("resultsSharePrompt") ||
         document.getElementById("resultsContext") ||
         document.getElementById("topStops") ||
         document.getElementById("categoryJumpBar") ||
