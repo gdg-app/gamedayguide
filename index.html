@@ -6466,6 +6466,10 @@
         return;
       }
 
+      el.style.transition = "opacity 0.45s ease, transform 0.45s ease";
+      el.style.opacity = "0";
+      el.style.transform = "translateY(6px)";
+
       el.innerHTML =
         "<div class='field-intel-card'>" +
           "<div class='field-intel-title'>Quick field insights (based on local data)</div>" +
@@ -6496,6 +6500,11 @@
         "</div>";
 
       el.style.display = "block";
+
+      requestAnimationFrame(function() {
+        el.style.opacity = "1";
+        el.style.transform = "translateY(0)";
+      });
     }
     async function loadFieldIntel(params) {
       try {
