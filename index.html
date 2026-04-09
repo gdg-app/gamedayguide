@@ -2789,6 +2789,11 @@
       "Finding food, coffee, gas, and more near your field…",
       "Almost ready — your guide will appear below…"
     ];
+    const GPS_LOADING_MESSAGES = [
+      "Finding your location…",
+      "Checking for a nearby venue…",
+      "Building your Game Day Guide… Your results will appear below."
+    ];
     const MIN_LOADING_VISIBLE_MS = 1600;
     const LOADING_ROTATE_MS = 2400;
 
@@ -3657,6 +3662,19 @@
           resolve();
         }, remaining);
       });
+    }
+
+    function setLoadingSubtext(message) {
+      var loadingWrap = document.getElementById("loadingState");
+      var loadingSubtext = document.getElementById("loadingSubtext");
+      if (!loadingWrap || loadingWrap.style.display === "none" || !loadingSubtext) return;
+      loadingSubtext.style.opacity = "1";
+      loadingSubtext.textContent = String(message || LOADING_MESSAGES[0]);
+    }
+
+    function startGpsLoadingState(message) {
+      startLoadingState();
+      setLoadingSubtext(message || GPS_LOADING_MESSAGES[0]);
     }
 
     function buildGoogleMapsLink(name, address) {
@@ -5032,7 +5050,9 @@
       closeVenueConfirmOverlay();
       pendingGpsBuild = null;
       detectedGpsVenue = null;
-      document.getElementById("status").textContent = "Finding your location…";
+
+      startGpsLoadingState(GPS_LOADING_MESSAGES[0]);
+      document.getElementById("status").textContent = "";
 
       if (!navigator.geolocation) {
         stopLoadingState();
@@ -5046,21 +5066,20 @@
           var lng = pos.coords.longitude;
 
           try {
-            document.getElementById("status").textContent = "Checking for a nearby venue…";
+            setLoadingSubtext(GPS_LOADING_MESSAGES[1]);
             pendingGpsBuild = { lat: lat, lng: lng };
             var detectedVenue = await detectNearbyVenueFromGps(lat, lng);
 
             if (detectedVenue && detectedVenue.venueName) {
+              stopLoadingState(true);
               openVenueConfirmOverlay(detectedVenue);
               return;
             }
 
-            startLoadingState();
-            document.getElementById("status").textContent = "";
+            setLoadingSubtext(GPS_LOADING_MESSAGES[2]);
             beginGpsGuideBuild({ lat: lat, lng: lng });
           } catch (err) {
-            startLoadingState();
-            document.getElementById("status").textContent = "";
+            setLoadingSubtext(GPS_LOADING_MESSAGES[2]);
             beginGpsGuideBuild({ lat: lat, lng: lng });
           }
         },
