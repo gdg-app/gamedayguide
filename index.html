@@ -2730,6 +2730,8 @@
     let pendingGpsBuild = null;
     let detectedGpsVenue = null;
     let lastResolvedGuideCenter = null;
+    let fieldIntelPlaceholderTimer = null;
+    let fieldIntelRequestToken = 0;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
@@ -4780,6 +4782,8 @@
         mode: "core"
       };
 
+      var fieldIntelPromise = loadFieldIntel({ query: query });
+
       fetchBuildGuide(lastBuildParams)
         .then(async function(data) {
           await finishLoadingState();
@@ -4794,7 +4798,7 @@
           document.body.classList.remove("home-mode");
           updateGuideButtonVisibility();
           render(lastResults);
-          loadFieldIntel({ query: query })
+          fieldIntelPromise
             .then(function(fieldIntelData) {
               var weatherQuery = query;
               if (fieldIntelData) {
@@ -4889,6 +4893,8 @@
           mode: "core"
         };
 
+        var fieldIntelPromise = loadFieldIntel({ query: query });
+
         fetchBuildGuide(lastBuildParams)
           .then(async function(data) {
             await finishLoadingState();
@@ -4903,7 +4909,7 @@
             document.body.classList.remove("home-mode");
             updateGuideButtonVisibility();
             render(lastResults);
-            loadFieldIntel({ query: query })
+            fieldIntelPromise
               .then(function(fieldIntelData) {
                 if (Number.isFinite(weatherLat) && Number.isFinite(weatherLng)) {
                   loadWeather({ lat: weatherLat, lng: weatherLng, query: query });
@@ -4949,6 +4955,8 @@
         mode: "core"
       };
 
+      var fieldIntelPromise = loadFieldIntel({ lat: lat, lng: lng });
+
       fetchBuildGuide(lastBuildParams)
         .then(async function(data) {
           await finishLoadingState();
@@ -4961,7 +4969,7 @@
           document.body.classList.remove("home-mode");
           updateGuideButtonVisibility();
           render(lastResults);
-          loadFieldIntel({ lat: lat, lng: lng });
+          fieldIntelPromise.catch(function() { return null; });
           loadWeather({ lat: lat, lng: lng });
           var hadPendingQuickCategory = !!pendingQuickCategory;
           applyPendingQuickCategory();
@@ -6263,10 +6271,13 @@
 
     function clearFieldIntel() {
       var el = document.getElementById("fieldIntel");
+      clearFieldIntelPlaceholderTimer();
       if (!el) return;
       lastFieldIntelData = null;
       lastVenueTips = [];
       el.style.display = "none";
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0)";
       el.innerHTML = "";
     }
 
@@ -6446,10 +6457,37 @@
       }
     }
 
+    function clearFieldIntelPlaceholderTimer() {
+      if (fieldIntelPlaceholderTimer) {
+        clearTimeout(fieldIntelPlaceholderTimer);
+        fieldIntelPlaceholderTimer = null;
+      }
+    }
+
+    function showFieldIntelPlaceholder(requestToken) {
+      if (requestToken !== fieldIntelRequestToken) return;
+      var el = document.getElementById("fieldIntel");
+      if (!el) return;
+
+      el.innerHTML =
+        "<div class='field-intel-card'>" +
+          "<div class='field-intel-title'>Quick field insights (based on local data)</div>" +
+          "<div class='field-intel-grid'>" +
+            "<div class='field-intel-row'><div class='field-intel-label'>Checking field details…</div><div class='field-intel-value'>Loading</div></div>" +
+            "<div class='field-intel-row'><div class='field-intel-label'>Parking</div><div class='field-intel-value'>…</div></div>" +
+            "<div class='field-intel-row'><div class='field-intel-label'>Restrooms</div><div class='field-intel-value'>…</div></div>" +
+          "</div>" +
+        "</div>";
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0)";
+      el.style.display = "block";
+    }
+
     function renderFieldIntel(data) {
       var el = document.getElementById("fieldIntel");
       if (!el) return;
 
+      clearFieldIntelPlaceholderTimer();
       lastFieldIntelData = data || {};
 
       var rows = [
@@ -6512,6 +6550,12 @@
         var lat = params && params.lat;
         var lng = params && params.lng;
         var qs = new URLSearchParams();
+        var requestToken = ++fieldIntelRequestToken;
+
+        clearFieldIntelPlaceholderTimer();
+        fieldIntelPlaceholderTimer = setTimeout(function() {
+          showFieldIntelPlaceholder(requestToken);
+        }, 200);
 
         if (query) {
           qs.set("query", query);
@@ -6519,16 +6563,22 @@
           qs.set("lat", String(lat));
           qs.set("lng", String(lng));
         } else {
-          clearFieldIntel();
+          if (requestToken === fieldIntelRequestToken) {
+            clearFieldIntel();
+          }
           return;
         }
 
         var data = await getJson("/api/field-intel?" + qs.toString());
+        if (requestToken !== fieldIntelRequestToken) return null;
+        clearFieldIntelPlaceholderTimer();
         renderFieldIntel(data);
         loadVenueTipsForFieldIntel();
         return data || null;
       } catch (e) {
-        clearFieldIntel();
+        if (requestToken === fieldIntelRequestToken) {
+          clearFieldIntel();
+        }
         console.log("Field Intel failed silently");
         return null;
       }
