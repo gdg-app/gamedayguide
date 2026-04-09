@@ -41,6 +41,19 @@ export default async function handler(req, res) {
             " rows=" +
             cachedRows.length
         );
+
+        let cacheLoc = null;
+        if (isValidLatLng(lat, lng)) {
+          cacheLoc = { lat, lng };
+        } else if (query) {
+          try {
+            cacheLoc = await resolveLocation(query, apiKey);
+          } catch (_err) {
+            cacheLoc = null;
+          }
+        }
+
+        applyGuideCenterHeaders(res, cacheLoc);
         return res.status(200).json(cachedRows);
       }
 
@@ -109,6 +122,7 @@ export default async function handler(req, res) {
       }
     }
 
+    applyGuideCenterHeaders(res, loc);
     return res.status(200).json(rows);
   } catch (err) {
     console.error(
@@ -1389,6 +1403,19 @@ function getGuideCacheTtlSeconds(mode) {
   }
   return 24 * 60 * 60; // 24 hours
 }
+
+function applyGuideCenterHeaders(res, loc) {
+  if (!res || !loc) return;
+  if (!Number.isFinite(Number(loc.lat)) || !Number.isFinite(Number(loc.lng))) return;
+
+  try {
+    res.setHeader("X-GDG-Center-Lat", String(loc.lat));
+    res.setHeader("X-GDG-Center-Lng", String(loc.lng));
+  } catch (e) {
+    // Ignore header issues and preserve guide response behavior.
+  }
+}
+
 
 async function tryGetCachedGuideRows(cacheKey) {
   if (!cacheKey || !hasGuideCacheConfig()) return null;
