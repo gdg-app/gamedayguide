@@ -876,7 +876,7 @@
     .share-modal {
       position: fixed;
       inset: 0;
-      z-index: 10060;
+      z-index: 9999;
       display: none;
     }
 
@@ -2490,315 +2490,6 @@
   }
 }
 
-
-/* 2026-04-10 Decision Mode */
-.decision-entry-card {
-  margin: 0 0 16px;
-  padding: 16px 16px 14px;
-  border-radius: 22px;
-  background: linear-gradient(180deg, rgba(21,38,58,0.06), rgba(47,111,222,0.02));
-  border: 1px solid rgba(47,111,222,0.14);
-  box-shadow: 0 10px 22px rgba(16,43,77,0.08);
-}
-
-.decision-entry-top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.decision-entry-copy {
-  min-width: 0;
-}
-
-.decision-entry-eyebrow {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #56708a;
-  margin-bottom: 6px;
-}
-
-.decision-entry-title {
-  font-size: 19px;
-  line-height: 1.12;
-  letter-spacing: -0.03em;
-  font-weight: 800;
-  color: #15263a;
-  margin-bottom: 6px;
-}
-
-.decision-entry-text {
-  font-size: 14px;
-  line-height: 1.45;
-  color: #5b6a78;
-}
-
-.decision-entry-btn {
-  flex: 0 0 auto;
-  min-height: 50px;
-  padding: 12px 16px;
-  border-radius: 16px;
-  box-shadow: 0 12px 22px rgba(16,43,77,0.18);
-}
-
-.decision-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 10040;
-  display: none;
-}
-
-.decision-modal.active {
-  display: block;
-}
-
-.decision-modal-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.42);
-}
-
-.decision-modal-sheet {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: #fff;
-  border-top-left-radius: 28px;
-  border-top-right-radius: 28px;
-  padding: 14px 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
-  box-shadow: 0 -14px 34px rgba(0,0,0,0.22);
-  transform: translateY(100%);
-  transition: transform 0.25s ease;
-  max-height: calc(100dvh - 24px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.decision-modal.active .decision-modal-sheet {
-  transform: translateY(0);
-}
-
-.decision-modal-handle {
-  width: 42px;
-  height: 5px;
-  border-radius: 999px;
-  background: #d8d8d8;
-  margin: 0 auto 14px;
-}
-
-.decision-modal-close {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  width: 34px;
-  height: 34px;
-  border: 0;
-  border-radius: 999px;
-  background: rgba(0,0,0,0.06);
-  color: #4f5d69;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.decision-modal-title {
-  font-size: 22px;
-  line-height: 1.12;
-  letter-spacing: -0.03em;
-  font-weight: 800;
-  color: #1c2a35;
-  text-align: center;
-  margin-bottom: 6px;
-}
-
-.decision-modal-subtitle {
-  font-size: 14px;
-  line-height: 1.45;
-  color: #5f6d79;
-  text-align: center;
-  margin-bottom: 16px;
-}
-
-.decision-choice-grid {
-  display: grid;
-  gap: 10px;
-}
-
-.decision-choice-btn {
-  width: 100%;
-  border: 1px solid #dde5ed;
-  background: linear-gradient(180deg, #fff, #f6f8fb);
-  border-radius: 18px;
-  padding: 14px 14px;
-  text-align: left;
-  cursor: pointer;
-  box-shadow: 0 8px 18px rgba(10,22,14,0.06);
-}
-
-.decision-choice-btn:active {
-  transform: scale(0.99);
-}
-
-.decision-choice-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: #1c2a35;
-  margin-bottom: 3px;
-}
-
-.decision-choice-text {
-  font-size: 13px;
-  line-height: 1.4;
-  color: #64717d;
-}
-
-.decision-loading {
-  display: none;
-  text-align: center;
-  padding: 18px 6px 10px;
-}
-
-.decision-loading.active {
-  display: block;
-}
-
-.decision-loading-pulse {
-  width: 58px;
-  height: 58px;
-  border-radius: 18px;
-  margin: 0 auto 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(180deg, rgba(47,111,222,0.12), rgba(47,111,222,0.05));
-  box-shadow: 0 10px 24px rgba(47,111,222,0.12);
-  animation: gdgPulse 2.2s ease-in-out infinite;
-  font-size: 28px;
-}
-
-.decision-loading-title {
-  font-size: 20px;
-  font-weight: 800;
-  color: #1c2a35;
-  letter-spacing: -0.03em;
-  margin-bottom: 6px;
-}
-
-.decision-loading-text {
-  font-size: 14px;
-  color: #5f6d79;
-  line-height: 1.45;
-}
-
-.decision-result {
-  display: none;
-}
-
-.decision-result.active {
-  display: block;
-}
-
-.decision-result-card {
-  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.96));
-  border: 1px solid #e0e7ef;
-  border-radius: 22px;
-  padding: 18px 16px 16px;
-  box-shadow: 0 12px 26px rgba(10,22,14,0.08);
-}
-
-.decision-result-label {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #5d7388;
-  margin-bottom: 8px;
-}
-
-.decision-result-name {
-  font-size: 24px;
-  line-height: 1.08;
-  letter-spacing: -0.04em;
-  font-weight: 800;
-  color: #1c2a35;
-  margin-bottom: 8px;
-}
-
-.decision-result-meta {
-  font-size: 14px;
-  color: #465463;
-  line-height: 1.45;
-  margin-bottom: 10px;
-}
-
-.decision-result-reason {
-  font-size: 14px;
-  color: #5f6d79;
-  line-height: 1.45;
-  margin-bottom: 12px;
-}
-
-.decision-tag-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
-}
-
-.decision-tag {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 32px;
-  padding: 6px 11px;
-  border-radius: 999px;
-  background: #edf3fb;
-  color: #2e5b94;
-  font-size: 12px;
-  font-weight: 800;
-  box-shadow: 0 3px 8px rgba(16,43,77,0.06);
-}
-
-.decision-result-actions {
-  display: grid;
-  gap: 10px;
-  grid-template-columns: 1fr;
-}
-
-.decision-result-note {
-  font-size: 12px;
-  color: #71808d;
-  line-height: 1.4;
-  text-align: center;
-  margin-top: 12px;
-}
-
-@media (min-width: 768px) {
-  .decision-result-actions {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .decision-entry-top {
-    flex-direction: column;
-  }
-
-  .decision-entry-btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
-
 </style>
 </head>
 <body>
@@ -2837,17 +2528,6 @@
       <div class="search-panel" id="searchPanel">
         <div class="search-intro">
 <h2 class="search-title">Find food, coffee, and essentials near your field</h2>
-        </div>
-
-        <div class="decision-entry-card">
-          <div class="decision-entry-top">
-            <div class="decision-entry-copy">
-              <div class="decision-entry-eyebrow">Decision Mode</div>
-              <div class="decision-entry-title">Need help deciding where to eat?</div>
-              <div class="decision-entry-text">Tap once, choose the vibe, and GDG gives you one strong pick.</div>
-            </div>
-            <button type="button" class="action-btn build-btn decision-entry-btn" onclick="openDecisionMode()">Pick for Me</button>
-          </div>
         </div>
 
         <input id="address" placeholder='Enter venue name or address' value="" />
@@ -2995,42 +2675,7 @@
     </div>
   </div>
 
-  
-  <div id="decisionModal" class="decision-modal" aria-hidden="true">
-    <div class="decision-modal-backdrop" onclick="closeDecisionModal()"></div>
-    <div class="decision-modal-sheet">
-      <button type="button" class="decision-modal-close" aria-label="Close" onclick="closeDecisionModal()">✕</button>
-      <div class="decision-modal-handle"></div>
-
-      <div id="decisionChooser">
-        <div class="decision-modal-title">What’s the vibe right now?</div>
-                <div class="decision-choice-grid">
-          <button type="button" class="decision-choice-btn" onclick="chooseDecisionVibe('quick_easy')">
-            <div class="decision-choice-title">🔴 Quick & Easy</div>
-            <div class="decision-choice-text">Fast, close, open, and low-effort.</div>
-          </button>
-          <button type="button" class="decision-choice-btn" onclick="chooseDecisionVibe('casual')">
-            <div class="decision-choice-title">🟡 Casual</div>
-            <div class="decision-choice-text">Still convenient, but a better meal.</div>
-          </button>
-          <button type="button" class="decision-choice-btn" onclick="chooseDecisionVibe('got_time')">
-            <div class="decision-choice-title">🟢 We’ve Got Time</div>
-            <div class="decision-choice-text">Best experience, worth a few extra minutes.</div>
-          </button>
-        </div>
-      </div>
-
-      <div id="decisionLoading" class="decision-loading">
-        <div class="decision-loading-pulse">🎯</div>
-        <div class="decision-loading-title">Picking your spot…</div>
-        <div class="decision-loading-text" id="decisionLoadingText">Looking for the best fit nearby.</div>
-      </div>
-
-      <div id="decisionResult" class="decision-result"></div>
-    </div>
-  </div>
-
-<div id="installPromptModal" class="install-modal-overlay" aria-hidden="true">
+  <div id="installPromptModal" class="install-modal-overlay" aria-hidden="true">
     <div class="install-modal" role="dialog" aria-modal="true" aria-labelledby="installPromptTitle">
       <button type="button" class="install-modal-close" aria-label="Close" onclick="dismissInstallPrompt()">×</button>
       <div class="install-modal-header">
@@ -3087,8 +2732,6 @@
     let lastResolvedGuideCenter = null;
     let fieldIntelPlaceholderTimer = null;
     let fieldIntelRequestToken = 0;
-    let lastDecisionRecommendation = null;
-    let decisionBuildNonce = 0;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
@@ -3428,410 +3071,7 @@
       } catch (e) {}
     }
 
-    
-    function getDecisionSourceFromUi() {
-      var query = String((document.getElementById("address") && document.getElementById("address").value) || "").trim();
-      if (query) {
-        return { sourceType: "query", query: getPreparedFacilityQuery_(query), queryLabel: query };
-      }
-
-      if (lastSourceType === "query" && lastQueryOrGps && !/^GPS:/i.test(String(lastQueryOrGps || ""))) {
-        return { sourceType: "query", query: String(lastQueryOrGps).trim(), queryLabel: String(lastQueryOrGps).trim() };
-      }
-
-      if (lastSourceType === "gps" && lastResolvedGuideCenter && Number.isFinite(lastResolvedGuideCenter.lat) && Number.isFinite(lastResolvedGuideCenter.lng)) {
-        return { sourceType: "gps", lat: lastResolvedGuideCenter.lat, lng: lastResolvedGuideCenter.lng };
-      }
-
-      return null;
-    }
-
-    function openDecisionMode() {
-      var modal = document.getElementById("decisionModal");
-      var chooser = document.getElementById("decisionChooser");
-      var loading = document.getElementById("decisionLoading");
-      var result = document.getElementById("decisionResult");
-      if (!modal || !chooser || !loading || !result) return;
-
-      chooser.style.display = "block";
-      loading.classList.remove("active");
-      result.classList.remove("active");
-      result.innerHTML = "";
-      modal.classList.add("active");
-      modal.setAttribute("aria-hidden", "false");
-
-      trackEvent("decision_mode_opened", {
-        searchCategory: "decision_mode",
-        interactionType: "open_decision_mode",
-        sourceType: lastSourceType || "",
-        queryOrGps: lastQueryOrGps || ""
-      });
-    }
-
-    function closeDecisionModal() {
-      var modal = document.getElementById("decisionModal");
-      if (!modal) return;
-      modal.classList.remove("active");
-      modal.setAttribute("aria-hidden", "true");
-    }
-
-    function setDecisionLoadingState(isLoading, message) {
-      var chooser = document.getElementById("decisionChooser");
-      var loading = document.getElementById("decisionLoading");
-      var loadingText = document.getElementById("decisionLoadingText");
-      var result = document.getElementById("decisionResult");
-      if (!chooser || !loading || !result) return;
-
-      chooser.style.display = isLoading ? "none" : "block";
-      loading.classList.toggle("active", !!isLoading);
-      result.classList.remove("active");
-      if (loadingText && message) loadingText.textContent = message;
-    }
-
-    function decisionVibeLabel(vibe) {
-      if (vibe === "quick_easy") return "quick_easy";
-      if (vibe === "casual") return "casual";
-      return "got_time";
-    }
-
-    function decisionHeadlineForVibe(vibe) {
-      if (vibe === "quick_easy") return "Best quick reset right now";
-      if (vibe === "casual") return "Best casual option right now";
-      return "Best option if you’ve got time";
-    }
-
-    function classifyDecisionRow(row) {
-      var name = String((row && row[1]) || "").toLowerCase();
-      var rating = Number((row && row[2]) || 0) || 0;
-      var typesBlob = [String(row && row[0] || ""), String(row && row[1] || ""), String(row && row[3] || "")].join(" ").toLowerCase();
-
-      var quickTerms = [
-        "chick-fil-a","mcdonald","taco bell","wendy","burger king","cook out","subway","jersey mike","jimmy john",
-        "kfc","bojangles","zaxby","sonic","domino","pizza hut","little caesars","five guys","whataburger","arby","raising cane"
-      ];
-      var sitDownTerms = [
-        "grill","bistro","kitchen","table","tavern","cantina","bar & grill","bar and grill","steak","house","bbq","smokehouse"
-      ];
-
-      var isQuick = quickTerms.some(function(term) { return name.indexOf(term) !== -1; }) || typesBlob.indexOf("meal_takeaway") !== -1;
-      var isSitDown = sitDownTerms.some(function(term) { return name.indexOf(term) !== -1; });
-      var isReliable = isQuick || rating >= 4.3;
-
-      return {
-        isQuick: isQuick,
-        isSitDown: isSitDown,
-        isReliable: isReliable,
-        rating: rating
-      };
-    }
-
-    function getDecisionCandidates(rows) {
-      var seen = {};
-      return (rows || []).filter(function(row) {
-        var cat = String((row && row[0]) || "");
-        var key = makePlaceKey(row);
-        if (cat !== "🍔 Food" || !key || seen[key]) return false;
-        seen[key] = true;
-        return true;
-      });
-    }
-
-    function scoreDecisionRow(row, vibe) {
-      var rating = Number((row && row[2]) || 0) || 0;
-      var minutes = getRowDriveTimeMinutes(row);
-      var miles = getRowDisplayDistanceMiles(row);
-      var classifier = classifyDecisionRow(row);
-      var score = 0;
-
-      if (minutes !== null) score -= minutes * (vibe === "quick_easy" ? 3.2 : vibe === "casual" ? 1.6 : 0.75);
-      if (miles !== null) score -= miles * (vibe === "quick_easy" ? 1.1 : vibe === "casual" ? 0.8 : 0.35);
-
-      if (vibe === "quick_easy") {
-        if (classifier.isQuick) score += 22;
-        if (classifier.isReliable) score += 10;
-        score += rating * 4;
-      } else if (vibe === "casual") {
-        if (classifier.isQuick) score += 6;
-        if (classifier.isSitDown) score += 8;
-        if (classifier.isReliable) score += 8;
-        score += rating * 8;
-      } else {
-        if (classifier.isSitDown) score += 18;
-        if (!classifier.isQuick) score += 8;
-        score += rating * 12;
-      }
-
-      return score;
-    }
-
-    function buildDecisionTags(row, vibe) {
-      var tags = [];
-      var minutes = getRowDriveTimeMinutes(row);
-      var rating = Number((row && row[2]) || 0) || 0;
-      var classifier = classifyDecisionRow(row);
-      var openNow = String((row && row[4]) || "").toLowerCase();
-
-      if (minutes !== null && minutes <= 8) tags.push("Close");
-      if (openNow.indexOf("open") !== -1) tags.push("Open");
-      if (classifier.isQuick || vibe === "quick_easy") tags.push("Fast");
-      if (rating >= 4.4 && tags.indexOf("Top Rated") === -1) tags.push("Top Rated");
-      if (classifier.isReliable && tags.indexOf("Reliable") === -1) tags.push("Reliable");
-
-      return tags.slice(0, 3);
-    }
-
-    function buildDecisionReason(row, vibe) {
-      var minutes = getRowDriveTimeMinutes(row);
-      var rating = Number((row && row[2]) || 0) || 0;
-      if (vibe === "quick_easy") {
-        return minutes !== null
-          ? "Best blend of short drive time and fast, reliable food."
-          : "Fast, simple, and easy to get to right now.";
-      }
-      if (vibe === "casual") {
-        return rating >= 4.3
-          ? "A better meal without going too far out of the way."
-          : "Balanced pick for when you still want convenience.";
-      }
-      return rating >= 4.4
-        ? "Best overall experience in range if you’re not in a rush."
-        : "Worth the extra few minutes when the day feels more relaxed.";
-    }
-
-    function renderDecisionResultCard(rec) {
-      var result = document.getElementById("decisionResult");
-      if (!result || !rec || !rec.row) return;
-
-      var row = rec.row;
-      var name = String(row[1] || "").trim() || "Recommended Spot";
-      var address = String(row[3] || "").trim();
-      var rating = String(row[2] || "").trim();
-      var openNow = String(row[4] || "").trim();
-      var minutes = getRowDriveTimeMinutes(row);
-      var miles = formatDistanceMiles(getRowDisplayDistanceMiles(row));
-      var metaParts = [];
-      var tags = buildDecisionTags(row, rec.vibe);
-      var googleUrl = buildGoogleMapsLink(name, address);
-      var appleUrl = buildAppleMapsLink(name, address);
-
-      if (minutes !== null) metaParts.push(minutes + " min away");
-      else if (miles) metaParts.push(miles + " away");
-      if (rating) metaParts.push("⭐ " + rating);
-      if (openNow) metaParts.push(openNow);
-
-      result.innerHTML =
-        "<div class='decision-result-card'>" +
-          "<div class='decision-result-label'>" + esc(decisionHeadlineForVibe(rec.vibe)) + "</div>" +
-          "<div class='decision-result-name'>" + esc(name) + "</div>" +
-          "<div class='decision-result-meta'>" + esc(metaParts.join(" • ")) + "</div>" +
-          (address ? "<div class='decision-result-reason'>" + esc(buildDecisionReason(row, rec.vibe)) + "</div>" : "") +
-          "<div class='decision-tag-row'>" +
-            tags.map(function(tag) { return "<span class='decision-tag'>" + esc(tag) + "</span>"; }).join("") +
-          "</div>" +
-          "<div class='decision-result-actions'>" +
-            "<a class='location-action-btn' id='decisionAppleBtn' href='" + esc(appleUrl) + "' target='_blank' rel='noopener'>Open in Apple Maps</a>" +
-            "<a class='location-action-btn google-btn' id='decisionGoogleBtn' href='" + esc(googleUrl) + "' target='_blank' rel='noopener'>Open in Google Maps</a>" +
-            "<button type='button' class='secondary-btn' id='decisionRerollBtn'>Try Another</button>" +
-            "<button type='button' class='location-action-btn share-action' id='decisionShareBtn'>Share This Spot</button>" +
-          "</div>" +
-        "</div>";
-
-      result.classList.add("active");
-
-      var appleBtn = document.getElementById("decisionAppleBtn");
-      if (appleBtn) {
-        appleBtn.onclick = function() {
-          trackEvent("decision_place_clicked", {
-            searchCategory: decisionVibeLabel(rec.vibe),
-            interactionType: "open_apple_maps",
-            placeId: String(rec.placeId || ""),
-            resultRank: Number(rec.resultRank || 1),
-            sourceType: rec.sourceType || "",
-            queryOrGps: rec.queryOrGps || ""
-          });
-        };
-      }
-
-      var googleBtn = document.getElementById("decisionGoogleBtn");
-      if (googleBtn) {
-        googleBtn.onclick = function() {
-          trackEvent("decision_place_clicked", {
-            searchCategory: decisionVibeLabel(rec.vibe),
-            interactionType: "open_google_maps",
-            placeId: String(rec.placeId || ""),
-            resultRank: Number(rec.resultRank || 1),
-            sourceType: rec.sourceType || "",
-            queryOrGps: rec.queryOrGps || ""
-          });
-        };
-      }
-
-      var rerollBtn = document.getElementById("decisionRerollBtn");
-      if (rerollBtn) {
-        rerollBtn.onclick = function() {
-          trackEvent("decision_reroll_clicked", {
-            searchCategory: decisionVibeLabel(rec.vibe),
-            interactionType: "reroll_decision",
-            placeId: String(rec.placeId || ""),
-            resultRank: Number(rec.resultRank || 1),
-            sourceType: rec.sourceType || "",
-            queryOrGps: rec.queryOrGps || ""
-          });
-          runDecisionMode(rec.vibe, { excludePlaceId: rec.placeId || "", priorRows: rec.candidates || [] });
-        };
-      }
-
-      var shareBtn = document.getElementById("decisionShareBtn");
-      if (shareBtn) {
-        shareBtn.onclick = function() {
-          trackEvent("decision_share_clicked", {
-            searchCategory: decisionVibeLabel(rec.vibe),
-            interactionType: "share_decision_place",
-            placeId: String(rec.placeId || ""),
-            resultRank: Number(rec.resultRank || 1),
-            sourceType: rec.sourceType || "",
-            queryOrGps: rec.queryOrGps || ""
-          });
-          shareSpot(name, address, shareBtn);
-        };
-      }
-    }
-
-    async function fetchDecisionRows(source) {
-      if (source && source.sourceType === "query" && source.query) {
-        return {
-          rows: await fetchBuildGuide({ query: source.query, radiusMiles: 10, mode: "core" }),
-          sourceType: "query",
-          queryOrGps: source.queryLabel || source.query
-        };
-      }
-
-      if (source && source.sourceType === "gps" && Number.isFinite(source.lat) && Number.isFinite(source.lng)) {
-        return {
-          rows: await fetchBuildGuide({ lat: source.lat, lng: source.lng, radiusMiles: 10, mode: "core" }),
-          sourceType: "gps",
-          queryOrGps: "GPS:" + source.lat + "," + source.lng
-        };
-      }
-
-      if (!navigator.geolocation) {
-        throw new Error("Location is not supported on this device.");
-      }
-
-      var coords = await new Promise(function(resolve, reject) {
-        navigator.geolocation.getCurrentPosition(
-          function(pos) {
-            resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-          },
-          function(err) {
-            reject(err || new Error("Location unavailable"));
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-        );
-      });
-
-      return {
-        rows: await fetchBuildGuide({ lat: coords.lat, lng: coords.lng, radiusMiles: 10, mode: "core" }),
-        sourceType: "gps",
-        queryOrGps: "GPS:" + coords.lat + "," + coords.lng
-      };
-    }
-
-    function chooseDecisionVibe(vibe) {
-      trackEvent("decision_vibe_selected", {
-        searchCategory: decisionVibeLabel(vibe),
-        interactionType: "select_vibe",
-        sourceType: lastSourceType || "",
-        queryOrGps: lastQueryOrGps || ""
-      });
-      runDecisionMode(vibe);
-    }
-
-    async function runDecisionMode(vibe, options) {
-      options = options || {};
-      var nonce = ++decisionBuildNonce;
-      var source = getDecisionSourceFromUi();
-      var result = document.getElementById("decisionResult");
-      var message = vibe === "quick_easy"
-        ? "Finding something fast, close, and easy."
-        : vibe === "casual"
-          ? "Finding a balanced, easy meal."
-          : "Finding the best option if you’ve got time.";
-
-      setDecisionLoadingState(true, message);
-      if (result) result.innerHTML = "";
-
-      try {
-        var fetched = options.priorRows && options.priorRows.length
-          ? { rows: options.priorRows, sourceType: lastDecisionRecommendation && lastDecisionRecommendation.sourceType || "", queryOrGps: lastDecisionRecommendation && lastDecisionRecommendation.queryOrGps || "" }
-          : await fetchDecisionRows(source);
-
-        if (nonce !== decisionBuildNonce) return;
-
-        var candidates = getDecisionCandidates(fetched.rows).map(function(row, index) {
-          return {
-            row: row,
-            placeId: getRowPlaceId(row) || makePlaceKey(row),
-            rawIndex: index
-          };
-        });
-
-        if (options.excludePlaceId) {
-          candidates = candidates.filter(function(item) { return String(item.placeId || "") !== String(options.excludePlaceId || ""); });
-        }
-
-        if (!candidates.length) {
-          throw new Error("No food options found within 10 miles.");
-        }
-
-        candidates.forEach(function(item) {
-          item.score = scoreDecisionRow(item.row, vibe);
-        });
-
-        candidates.sort(function(a, b) {
-          if (b.score !== a.score) return b.score - a.score;
-          return compareRowsForDisplay(a.row, b.row);
-        });
-
-        var pick = candidates[0];
-        var recommendation = {
-          vibe: vibe,
-          row: pick.row,
-          placeId: pick.placeId,
-          resultRank: 1,
-          sourceType: fetched.sourceType,
-          queryOrGps: fetched.queryOrGps,
-          candidates: candidates.map(function(item) { return item.row; })
-        };
-
-        lastDecisionRecommendation = recommendation;
-        trackEvent("decision_result_served", {
-          searchCategory: decisionVibeLabel(vibe),
-          interactionType: "serve_decision_result",
-          sourceType: fetched.sourceType,
-          queryOrGps: fetched.queryOrGps,
-          placeId: String(recommendation.placeId || ""),
-          resultRank: 1
-        });
-
-        setDecisionLoadingState(false);
-        renderDecisionResultCard(recommendation);
-      } catch (err) {
-        if (nonce !== decisionBuildNonce) return;
-        setDecisionLoadingState(false);
-        if (result) {
-          result.innerHTML =
-            "<div class='decision-result-card'>" +
-              "<div class='decision-result-label'>Decision Mode</div>" +
-              "<div class='decision-result-name'>Couldn’t find a strong pick</div>" +
-              "<div class='decision-result-reason'>" + esc(err && err.message ? err.message : "Try entering a field first or allow location access.") + "</div>" +
-            "</div>";
-          result.classList.add("active");
-        }
-      }
-    }
-
-function trackPlaceClick(meta) {
+    function trackPlaceClick(meta) {
       try {
         var info = meta || {};
         var categoryKey = normalizeCategoryLabel(info.categoryLabel || "");
@@ -4308,25 +3548,7 @@ function trackPlaceClick(meta) {
     }
 
 
-    
-    function setupDecisionModal() {
-      var modal = document.getElementById("decisionModal");
-      if (!modal) return;
-
-      modal.addEventListener("click", function(e) {
-        if (e.target === modal) {
-          closeDecisionModal();
-        }
-      });
-
-      document.addEventListener("keydown", function(e) {
-        if (e.key === "Escape" && modal.classList.contains("active")) {
-          closeDecisionModal();
-        }
-      });
-    }
-
-function setupVenueConfirmOverlay() {
+    function setupVenueConfirmOverlay() {
       var overlay = document.getElementById("venueConfirmOverlay");
       if (!overlay) return;
 
@@ -5179,12 +4401,22 @@ function setupVenueConfirmOverlay() {
       return cleaned || String(rawQuery || "").trim();
     }
 
+    function isZipCodeSearch_(value) {
+      return /^\d{5}$/.test(String(value || "").trim());
+    }
+
     function findMatchingFields() {
       var rawQuery = String(document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
 
       if (!query) {
         document.getElementById("status").textContent = "Enter a facility name first.";
+        hideFieldMatchResults();
+        return;
+      }
+
+      if (isZipCodeSearch_(rawQuery)) {
+        document.getElementById("status").textContent = "Try field name or address";
         hideFieldMatchResults();
         return;
       }
@@ -5929,7 +5161,11 @@ function setupVenueConfirmOverlay() {
           : "Field guide ready to share"
       );
 
-      var shareMeta = "";
+      var shareMeta = customMeta || (
+        safeLocationLabel
+          ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
+          : "Send this to your team chat so everyone can open the same GameDayGuide."
+      );
 
       var smsLink = buildGuideSmsShareLink(url);
       var emailLink = buildGuideEmailShareLink(url);
@@ -7365,7 +6601,6 @@ function setupVenueConfirmOverlay() {
       setupFieldMatchResults();
       setupAddressKeyActions();
       setupInstallPrompt();
-      setupDecisionModal();
       setupVenueConfirmOverlay();
       stopLoadingState();
       updateGuideButtonVisibility();
