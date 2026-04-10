@@ -3665,20 +3665,24 @@
       }
 
       var shareBtn = document.getElementById("decisionShareBtn");
-      if (shareBtn) {
-        shareBtn.onclick = function() {
-          trackEvent("decision_share_clicked", {
-            searchCategory: decisionVibeLabel(rec.vibe),
-            interactionType: "share_decision_place",
-            placeId: String(rec.placeId || ""),
-            resultRank: Number(rec.resultRank || 1),
-            sourceType: rec.sourceType || "",
-            queryOrGps: rec.queryOrGps || ""
-          });
-          shareSpot(name, address, shareBtn);
-        };
-      }
-    }
+if (shareBtn) {
+  shareBtn.onclick = function() {
+    trackEvent("decision_share_clicked", {
+      searchCategory: decisionVibeLabel(rec.vibe),
+      interactionType: "share_decision_place",
+      placeId: String(rec.placeId || ""),
+      resultRank: Number(rec.resultRank || 1),
+      sourceType: rec.sourceType || "",
+      queryOrGps: rec.queryOrGps || ""
+    });
+
+    closeDecisionModal();
+
+    window.setTimeout(function() {
+      shareSpot(name, address);
+    }, 220);
+  };
+}
 
     async function fetchDecisionRows(source) {
       if (source && source.sourceType === "query" && source.query) {
