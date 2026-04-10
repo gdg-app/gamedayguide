@@ -1,5 +1,6 @@
-// SAFE PHASE 3 VERSION
-// Keeps guide_build and category_click behavior intact and adds place_click support.
+// 2026-04-10
+// Full replacement: /api/log-usage.js
+// Adds Decision Mode analytics while preserving existing guide_build, category_click, and place_click behavior.
 
 import { google } from "googleapis";
 import crypto from "crypto";
@@ -10,8 +11,7 @@ export default async function handler(req, res) {
       return res.status(405).json({ ok: false });
     }
 
-    const body = typeof req.body === "string" ? JSON.parse(req.body) : req.body || {};
-
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
     const now = new Date();
 
     const eventId = crypto.randomBytes(8).toString("hex");
@@ -41,19 +41,34 @@ export default async function handler(req, res) {
 
     const isCategoryClick = eventType === "category_click";
     const isPlaceClick = eventType === "place_click";
+    const isDecisionEvent = eventType.indexOf("decision_") === 0;
 
-    const searchCategory = (isCategoryClick || isPlaceClick)
-      ? String(body.categoryLabel || body.searchCategory || body.category || "").trim()
+    const searchCategory = (function resolveSearchCategory() {
+      if (isCategoryClick || isPlaceClick || isDecisionEvent) {
+        return String(
+          body.searchCategory ||
+          body.categoryLabel ||
+          body.category ||
+          ""
+        ).trim();
+      }
+      return "";
+    })();
+
+    const interactionType = (function resolveInteractionType() {
+      if (isCategoryClick) return "open_category";
+      if (isPlaceClick) return String(body.interactionType || "open_place").trim();
+      if (isDecisionEvent) return String(body.interactionType || eventType).trim();
+      return "build_guide";
+    })();
+
+    const placeId = (isPlaceClick || isDecisionEvent)
+      ? String(body.placeId || "").trim()
       : "";
 
-    const interactionType = isCategoryClick
-      ? "open_category"
-      : (isPlaceClick
-          ? String(body.interactionType || "open_place").trim()
-          : "build_guide");
-
-    const placeId = isPlaceClick ? String(body.placeId || "").trim() : "";
-    const resultRank = isPlaceClick ? String(body.resultRank || "").trim() : "";
+    const resultRank = (isPlaceClick || isDecisionEvent)
+      ? String(body.resultRank || "").trim()
+      : "";
 
     const contextResolutionMethod =
       sourceType === "gps" ? "device_gps" :
@@ -103,7 +118,6 @@ export default async function handler(req, res) {
     });
 
     return res.status(200).json({ ok: true });
-
   } catch (err) {
     return res.status(500).json({
       ok: false,
