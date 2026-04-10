@@ -876,7 +876,7 @@
     .share-modal {
       position: fixed;
       inset: 0;
-      z-index: 10060;
+      z-index: 9999;
       display: none;
     }
 
@@ -2569,13 +2569,10 @@
   background: #fff;
   border-top-left-radius: 28px;
   border-top-right-radius: 28px;
-  padding: 14px 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
+  padding: 14px 16px 24px;
   box-shadow: 0 -14px 34px rgba(0,0,0,0.22);
   transform: translateY(100%);
   transition: transform 0.25s ease;
-  max-height: calc(100dvh - 24px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .decision-modal.active .decision-modal-sheet {
@@ -2856,6 +2853,8 @@
           <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
         </div>
 
+        <div id="status"></div>
+
         <div id="loadingState" class="loading-wrap" style="display:none;">
           <div class="loading-card">
             <div class="loading-logo-shell">
@@ -2899,9 +2898,6 @@
           <button type="button" class="action-btn build-btn" id="updateGuideBtn" onclick="runGuide()">Update Guide</button>
         </div>
       </div>
-
-      <div id="status"></div>
-
 
       <div id="shareTools" style="display:none;">
         <div class="share-tools-row">
@@ -3692,7 +3688,10 @@
             sourceType: rec.sourceType || "",
             queryOrGps: rec.queryOrGps || ""
           });
-          shareSpot(name, address, shareBtn);
+          closeDecisionModal();
+          window.setTimeout(function() {
+            shareSpot(name, address);
+          }, 220);
         };
       }
     }
@@ -5185,12 +5184,6 @@ function setupVenueConfirmOverlay() {
 
       if (!query) {
         document.getElementById("status").textContent = "Enter a facility name first.";
-        hideFieldMatchResults();
-        return;
-      }
-
-      if (/^\d{5}$/.test(rawQuery)) {
-        document.getElementById("status").textContent = "Try field name or address";
         hideFieldMatchResults();
         return;
       }
