@@ -3627,6 +3627,7 @@
             tags.map(function(tag) { return "<span class='decision-tag'>" + esc(tag) + "</span>"; }).join("") +
           "</div>" +
           "<div class='decision-result-actions'>" +
+            "<a class='location-action-btn' id='decisionAppleBtn' href='" + esc(appleUrl) + "' target='_blank' rel='noopener'>Open in Apple Maps</a>" +
             "<a class='location-action-btn google-btn' id='decisionGoogleBtn' href='" + esc(googleUrl) + "' target='_blank' rel='noopener'>Open in Google Maps</a>" +
             "<button type='button' class='secondary-btn' id='decisionRerollBtn'>Try Another</button>" +
             "<button type='button' class='location-action-btn share-action' id='decisionShareBtn'>Share This Spot</button>" +
@@ -3635,6 +3636,20 @@
         "</div>";
 
       result.classList.add("active");
+
+      var appleBtn = document.getElementById("decisionAppleBtn");
+      if (appleBtn) {
+        appleBtn.onclick = function() {
+          trackEvent("decision_place_clicked", {
+            searchCategory: decisionVibeLabel(rec.vibe),
+            interactionType: "open_apple_maps",
+            placeId: String(rec.placeId || ""),
+            resultRank: Number(rec.resultRank || 1),
+            sourceType: rec.sourceType || "",
+            queryOrGps: rec.queryOrGps || ""
+          });
+        };
+      }
 
       var googleBtn = document.getElementById("decisionGoogleBtn");
       if (googleBtn) {
