@@ -5189,6 +5189,12 @@ function setupVenueConfirmOverlay() {
         return;
       }
 
+      if (/^\d{5}$/.test(rawQuery)) {
+        document.getElementById("status").textContent = "Try field name or address";
+        hideFieldMatchResults();
+        return;
+      }
+
       document.getElementById("status").textContent = "Searching for fields…";
       hideFieldMatchResults();
 
