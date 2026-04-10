@@ -4371,6 +4371,14 @@
       box.style.display = "none";
     }
 
+    function showFieldMatchNote(message) {
+      visibleSuggestions = [];
+      var box = document.getElementById("fieldMatchResults");
+      if (!box) return;
+      box.innerHTML = "<div class='suggestion-note'>" + esc(message || "") + "</div>";
+      box.style.display = "block";
+    }
+
     function renderFieldMatchResults(items) {
       var box = document.getElementById("fieldMatchResults");
       var html = "";
@@ -4401,10 +4409,6 @@
       return cleaned || String(rawQuery || "").trim();
     }
 
-    function isZipCodeSearch_(value) {
-      return /^\d{5}$/.test(String(value || "").trim());
-    }
-
     function findMatchingFields() {
       var rawQuery = String(document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
@@ -4415,9 +4419,9 @@
         return;
       }
 
-      if (isZipCodeSearch_(rawQuery)) {
-        document.getElementById("status").textContent = "Try field name or address";
-        hideFieldMatchResults();
+      if (/^\d{5}$/.test(rawQuery)) {
+        document.getElementById("status").textContent = "";
+        showFieldMatchNote("Try field name or address");
         return;
       }
 
