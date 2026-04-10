@@ -5934,11 +5934,7 @@ function setupVenueConfirmOverlay() {
           : "Field guide ready to share"
       );
 
-      var shareMeta = customMeta || (
-        safeLocationLabel
-          ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
-          : "Send this to your team chat so everyone can open the same GameDayGuide."
-      );
+      var shareMeta = "";
 
       var smsLink = buildGuideSmsShareLink(url);
       var emailLink = buildGuideEmailShareLink(url);
