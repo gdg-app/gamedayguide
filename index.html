@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- 2026-04-10 Decision Mode fix: adds visible X close, both Apple Maps and Google Maps buttons, and scroll-safe decision sheet. -->
 <html>
 <head>
   <meta charset="UTF-8" />
@@ -2574,9 +2573,6 @@
   box-shadow: 0 -14px 34px rgba(0,0,0,0.22);
   transform: translateY(100%);
   transition: transform 0.25s ease;
-  max-height: min(90vh, calc(100dvh - 18px));
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .decision-modal.active .decision-modal-sheet {
@@ -2592,7 +2588,7 @@
 }
 
 .decision-modal-close {
-  position: sticky;
+  position: absolute;
   top: 10px;
   right: 12px;
   width: 34px;
@@ -2609,8 +2605,6 @@
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  z-index: 2;
-  float: right;
 }
 
 .decision-modal-title {
@@ -3007,7 +3001,7 @@
 
       <div id="decisionChooser">
         <div class="decision-modal-title">What’s the vibe right now?</div>
-        <div class="decision-modal-subtitle">GDG will use a 10 mile food search and give you one strong answer.</div>
+        <div class="decision-modal-subtitle"></div>
         <div class="decision-choice-grid">
           <button type="button" class="decision-choice-btn" onclick="chooseDecisionVibe('quick_easy')">
             <div class="decision-choice-title">🔴 Quick & Easy</div>
@@ -3633,29 +3627,13 @@
             tags.map(function(tag) { return "<span class='decision-tag'>" + esc(tag) + "</span>"; }).join("") +
           "</div>" +
           "<div class='decision-result-actions'>" +
-            "<a class='location-action-btn' id='decisionAppleBtn' href='" + esc(appleUrl) + "' target='_blank' rel='noopener'>Open in Apple Maps</a>" +
             "<a class='location-action-btn google-btn' id='decisionGoogleBtn' href='" + esc(googleUrl) + "' target='_blank' rel='noopener'>Open in Google Maps</a>" +
             "<button type='button' class='secondary-btn' id='decisionRerollBtn'>Try Another</button>" +
             "<button type='button' class='location-action-btn share-action' id='decisionShareBtn'>Share This Spot</button>" +
           "</div>" +
-          "<div class='decision-result-note'>Decision Mode always uses a 10 mile food search.</div>" +
         "</div>";
 
       result.classList.add("active");
-
-      var appleBtn = document.getElementById("decisionAppleBtn");
-      if (appleBtn) {
-        appleBtn.onclick = function() {
-          trackEvent("decision_place_clicked", {
-            searchCategory: decisionVibeLabel(rec.vibe),
-            interactionType: "open_apple_maps",
-            placeId: String(rec.placeId || ""),
-            resultRank: Number(rec.resultRank || 1),
-            sourceType: rec.sourceType || "",
-            queryOrGps: rec.queryOrGps || ""
-          });
-        };
-      }
 
       var googleBtn = document.getElementById("decisionGoogleBtn");
       if (googleBtn) {
@@ -5934,7 +5912,11 @@ function setupVenueConfirmOverlay() {
           : "Field guide ready to share"
       );
 
-      var shareMeta = "";
+      var shareMeta = customMeta || (
+        safeLocationLabel
+          ? "Send this to your team chat so everyone can open the same GameDayGuide for this field."
+          : "Send this to your team chat so everyone can open the same GameDayGuide."
+      );
 
       var smsLink = buildGuideSmsShareLink(url);
       var emailLink = buildGuideEmailShareLink(url);
