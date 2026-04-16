@@ -4274,34 +4274,14 @@
 
       var firstGameMinutes = schedule[0];
       var lastGameMinutes = schedule[schedule.length - 1];
-      var dayEndsAt = lastGameMinutes + PLANNER_ASSUMED_GAME_LENGTH_MINUTES;
-
-      if (nowMinutes < firstGameMinutes) {
-        return {
-          phase: "pre_day",
-          schedule: schedule,
-          firstGameMinutes: firstGameMinutes,
-          lastGameMinutes: lastGameMinutes,
-          nextGame: { index: 0, minutes: firstGameMinutes }
-        };
-      }
-
-      if (nowMinutes >= dayEndsAt) {
-        return {
-          phase: "post_day",
-          schedule: schedule,
-          firstGameMinutes: firstGameMinutes,
-          lastGameMinutes: lastGameMinutes,
-          nextGame: null
-        };
-      }
 
       return {
-        phase: "mid_day",
+        phase: "pre_day",
         schedule: schedule,
         firstGameMinutes: firstGameMinutes,
         lastGameMinutes: lastGameMinutes,
-        nextGame: getNextUpcomingPlanTime(schedule, nowMinutes)
+        nextGame: { index: 0, minutes: firstGameMinutes },
+        planningMode: "future_schedule"
       };
     }
 
@@ -4327,35 +4307,31 @@
     }
 
     function shouldShowPlannerCoffee(nextGameMinutes, nowMinutes) {
-      if (!Number.isFinite(nextGameMinutes) || !Number.isFinite(nowMinutes)) return false;
+      if (!Number.isFinite(nextGameMinutes)) return false;
       if (nextGameMinutes > PLANNER_EARLY_GAME_CUTOFF_MINUTES) return false;
-      return (nextGameMinutes - nowMinutes) >= PLANNER_COFFEE_TARGET_MINUTES;
+      return nextGameMinutes >= PLANNER_COFFEE_TARGET_MINUTES;
     }
 
-    function clampPlannerMomentToSchedule(targetMinutes, gameMinutes) {
+    function clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes) {
       var latestSafe = Math.max(gameMinutes - PLANNER_PREGAME_BUFFER_MINUTES, 0);
+      var earliestSafe = 0;
       if (targetMinutes >= latestSafe) return latestSafe;
-      if (targetMinutes < 0) return 0;
+      if (targetMinutes <= earliestSafe) return earliestSafe;
       return targetMinutes;
     }
 
-    function buildPlannerMomentLabel(targetMinutes, gameMinutes, labelText) {
+    function buildPlannerMomentLabel(targetMinutes, gameMinutes, nowMinutes, labelText) {
       var safeLabel = labelText || "Before first game";
-      var scheduledMinutes = clampPlannerMomentToSchedule(targetMinutes, gameMinutes);
-      return formatPlanTime(scheduledMinutes) + " • " + safeLabel;
+      var clamped = clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes);
+      return formatPlanTime(clamped) + " • " + safeLabel;
     }
 
-    function getPlannerPreGameLabel(gameMinutes, labelText) {
-      return buildPlannerMomentLabel(gameMinutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, gameMinutes, labelText);
+    function getPlannerPreGameLabel(gameMinutes, nowMinutes, labelText) {
+      return buildPlannerMomentLabel(gameMinutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, gameMinutes, nowMinutes, labelText);
     }
 
-    function getPlannerCoffeeLabel(gameMinutes, labelText) {
-      return buildPlannerMomentLabel(gameMinutes - PLANNER_COFFEE_TARGET_MINUTES, gameMinutes, labelText);
-    }
-
-    function isPlannerMomentStillRelevant(targetMinutes, gameMinutes, nowMinutes) {
-      var scheduledMinutes = clampPlannerMomentToSchedule(targetMinutes, gameMinutes);
-      return scheduledMinutes > nowMinutes;
+    function getPlannerCoffeeLabel(gameMinutes, nowMinutes, labelText) {
+      return buildPlannerMomentLabel(gameMinutes - PLANNER_COFFEE_TARGET_MINUTES, gameMinutes, nowMinutes, labelText);
     }
 
     function getPlannerPostGameLabel(lastGameMinutes) {
@@ -4494,15 +4470,11 @@
       }
 
       if (dayState.phase === "pre_day" && Number.isFinite(dayState.firstGameMinutes)) {
-        if (
-          shouldShowPlannerCoffee(dayState.firstGameMinutes, nowMinutes) &&
-          coffeeCandidates.length &&
-          isPlannerMomentStillRelevant(dayState.firstGameMinutes - PLANNER_COFFEE_TARGET_MINUTES, dayState.firstGameMinutes, nowMinutes)
-        ) {
+        if (shouldShowPlannerCoffee(dayState.firstGameMinutes, nowMinutes) && coffeeCandidates.length) {
           addPlannerBlock({
             key: "before_first_game_coffee",
             icon: "☕",
-            label: getPlannerCoffeeLabel(dayState.firstGameMinutes, "Before first game"),
+            label: getPlannerCoffeeLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
             title: "Coffee before the first game",
             reason: "Early game + enough time. Grab coffee first, then make the food stop without rushing.",
             category: "☕ Coffee",
@@ -4512,29 +4484,22 @@
           });
         }
 
-        if (isPlannerMomentStillRelevant(dayState.firstGameMinutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, dayState.firstGameMinutes, nowMinutes)) {
-          addPlannerBlock({
-            key: "before_first_game_food",
-            icon: "🍔",
-            label: getPlannerPreGameLabel(dayState.firstGameMinutes, "Before first game"),
-            title: "Quick food before the first game",
-            reason: (dayState.firstGameMinutes - nowMinutes) <= PLANNER_GAP_SKIP_MINUTES
-              ? "Tight window. Keep it fast, close, and grab-and-go before first pitch."
-              : "Start the day with a realistic pre-game stop before warmups and arrival pressure kick in.",
-            category: "🍔 Food",
-            focusQuickAction: "food",
-            pool: foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates,
-            poolKey: "before_first_game_food"
-          });
-        }
+        addPlannerBlock({
+          key: "before_first_game_food",
+          icon: "🍔",
+          label: getPlannerPreGameLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
+          title: "Quick food before the first game",
+          reason: (dayState.firstGameMinutes - nowMinutes) <= PLANNER_GAP_SKIP_MINUTES
+            ? "Tight window. Keep it fast, close, and grab-and-go before first pitch."
+            : "Start the day with a realistic pre-game stop before warmups and arrival pressure kick in.",
+          category: "🍔 Food",
+          focusQuickAction: "food",
+          pool: foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates,
+          poolKey: "before_first_game_food"
+        });
       }
 
-      if (
-        dayState.phase === "mid_day" &&
-        nextGame &&
-        Number.isFinite(nextGame.minutes) &&
-        isPlannerMomentStillRelevant(nextGame.minutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, nextGame.minutes, nowMinutes)
-      ) {
+      if (dayState.phase === "mid_day" && nextGame && Number.isFinite(nextGame.minutes)) {
         var minutesUntilNextGame = nextGame.minutes - nowMinutes;
         var currentGapLabel = minutesUntilNextGame < PLANNER_GAP_LONG_BREAK_MINUTES ? "Before next game" : "Between games";
         var currentGapPool = minutesUntilNextGame >= PLANNER_GAP_LONG_BREAK_MINUTES && foodMealCandidates.length
@@ -4544,7 +4509,7 @@
         addPlannerBlock({
           key: "before_next_game_food",
           icon: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES ? "⚡" : "🍔",
-          label: getPlannerPreGameLabel(nextGame.minutes, currentGapLabel),
+          label: getPlannerPreGameLabel(nextGame.minutes, nowMinutes, currentGapLabel),
           title: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES
             ? "Fastest food before the next game"
             : (currentGapLabel === "Between games" ? "Food while you have a real break" : "Quick food before the next game"),
