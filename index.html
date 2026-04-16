@@ -4046,12 +4046,21 @@
       }
     }
 
-    function enterClassicMode() {
+    function enterClassicMode(options) {
+      options = options || {};
       plannerModeActive = false;
       showElement("modeChooser", false);
       showElement("plannerPanel", false);
       showElement("searchPanel", true, "block");
       document.body.classList.add("home-mode");
+
+      if (!options.preserveSource) {
+        var addressInput = document.getElementById("address");
+        if (addressInput) addressInput.value = "";
+        document.getElementById("status").textContent = "";
+        hideFieldMatchResults();
+      }
+
       focusAddressField();
     }
 
@@ -4738,7 +4747,7 @@
     function openFullGuideFromPlanner(focusQuickAction) {
       var quickAction = String(focusQuickAction || "");
       if (quickAction) pendingQuickCategory = quickAction;
-      enterClassicMode();
+      enterClassicMode({ preserveSource: true });
 
       if (plannerSourceType === "query" && plannerSourceQuery) {
         document.getElementById("address").value = plannerSourceLabel || plannerSourceQuery;
