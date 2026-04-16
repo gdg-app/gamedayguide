@@ -3333,7 +3333,7 @@
 
       <div class="search-panel planner-panel" id="plannerPanel">
         <div class="panel-back-row">
-          <button type="button" class="secondary-btn panel-back-btn" onclick="backToModeChooser()">← Back</button>
+          <button type="button" class="secondary-btn panel-back-btn" onclick="backToModeChooser()">← Back to Home</button>
         </div>
 
         <div class="planner-entry-card" id="plannerEntryCard">
@@ -3375,7 +3375,7 @@
 
       <div class="search-panel classic-panel" id="searchPanel">
         <div class="panel-back-row">
-          <button type="button" class="secondary-btn panel-back-btn" onclick="backToModeChooser()">← Back</button>
+          <button type="button" class="secondary-btn panel-back-btn" onclick="backToModeChooser()">← Back to Home</button>
         </div>
         <div class="search-intro">
 <h2 class="search-title">Find food, coffee, and essentials near your field</h2>
@@ -3779,6 +3779,24 @@
 
     function updateResultsSharePrompt() {
       return;
+    }
+
+    function scrollToPlannerResults() {
+      var wrap = document.getElementById("planResults");
+      if (!wrap || !wrap.classList.contains("active")) return;
+
+      window.setTimeout(function() {
+        var firstCard = wrap.querySelector(".plan-card") || wrap;
+        if (!firstCard) return;
+        var rect = firstCard.getBoundingClientRect();
+        var offset = 18;
+        var top = window.pageYOffset + rect.top - offset;
+        try {
+          window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
+        } catch (e) {
+          firstCard.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 140);
     }
 
     function scrollToGuideResults() {
@@ -4224,11 +4242,11 @@
 
     var PLANNER_ASSUMED_GAME_LENGTH_MINUTES = 90;
     var PLANNER_PREGAME_FOOD_TARGET_MINUTES = 150;
+    var PLANNER_PREGAME_BUFFER_MINUTES = 10;
     var PLANNER_COFFEE_TARGET_MINUTES = 180;
     var PLANNER_EARLY_GAME_CUTOFF_MINUTES = 10 * 60 + 30;
-    var PLANNER_BETWEEN_GAMES_SKIP_MINUTES = 90;
-    var PLANNER_BETWEEN_GAMES_LONG_BREAK_MINUTES = 150;
-    var PLANNER_TIGHT_WINDOW_MINUTES = 60;
+    var PLANNER_GAP_SKIP_MINUTES = 90;
+    var PLANNER_GAP_LONG_BREAK_MINUTES = 150;
 
     function getCurrentPlanMinutes() {
       var now = new Date();
@@ -4248,13 +4266,42 @@
       return null;
     }
 
-    function getPlannerAnchorGame(schedule, nowMinutes) {
-      if (!Array.isArray(schedule) || !schedule.length) return null;
-      var nextUpcoming = getNextUpcomingPlanTime(schedule, nowMinutes);
-      if (nextUpcoming) return nextUpcoming;
+    function getPlannerDayState(times, nowMinutes) {
+      var schedule = (Array.isArray(times) ? times.slice() : []).filter(function(value) {
+        return Number.isFinite(value);
+      }).sort(function(a, b) { return a - b; });
+      if (!schedule.length) return { phase: "empty", schedule: [] };
+
+      var firstGameMinutes = schedule[0];
+      var lastGameMinutes = schedule[schedule.length - 1];
+      var dayEndsAt = lastGameMinutes + PLANNER_ASSUMED_GAME_LENGTH_MINUTES;
+
+      if (nowMinutes < firstGameMinutes) {
+        return {
+          phase: "pre_day",
+          schedule: schedule,
+          firstGameMinutes: firstGameMinutes,
+          lastGameMinutes: lastGameMinutes,
+          nextGame: { index: 0, minutes: firstGameMinutes }
+        };
+      }
+
+      if (nowMinutes >= dayEndsAt) {
+        return {
+          phase: "post_day",
+          schedule: schedule,
+          firstGameMinutes: firstGameMinutes,
+          lastGameMinutes: lastGameMinutes,
+          nextGame: null
+        };
+      }
+
       return {
-        index: 0,
-        minutes: schedule[0]
+        phase: "mid_day",
+        schedule: schedule,
+        firstGameMinutes: firstGameMinutes,
+        lastGameMinutes: lastGameMinutes,
+        nextGame: getNextUpcomingPlanTime(schedule, nowMinutes)
       };
     }
 
@@ -4262,11 +4309,11 @@
       if (!Number.isFinite(startMinutes) || !Number.isFinite(nextMinutes)) return null;
       var windowStart = startMinutes + PLANNER_ASSUMED_GAME_LENGTH_MINUTES;
       var freeMinutes = nextMinutes - windowStart;
-      if (freeMinutes < PLANNER_BETWEEN_GAMES_SKIP_MINUTES) return null;
+      if (freeMinutes < PLANNER_GAP_SKIP_MINUTES) return null;
       return {
         windowStart: windowStart,
         freeMinutes: freeMinutes,
-        type: freeMinutes < PLANNER_BETWEEN_GAMES_LONG_BREAK_MINUTES ? "quick_break" : "long_break"
+        type: freeMinutes >= PLANNER_GAP_LONG_BREAK_MINUTES ? "long_break" : "quick_break"
       };
     }
 
@@ -4275,34 +4322,30 @@
       var gapText = info.freeMinutes >= 60
         ? (Math.round(info.freeMinutes / 6) / 10).toFixed(1).replace(/\.0$/, "") + " hrs"
         : info.freeMinutes + " min";
-      return formatPlanTime(info.windowStart) + " • " + (info.type === "long_break" ? "Long break" : "Between games") + " (" + gapText + ")";
+      var label = info.type === "long_break" ? "Between games" : "Before next game";
+      return formatPlanTime(info.windowStart) + " • " + label + " (" + gapText + ")";
     }
 
-    function shouldShowPlannerCoffee(anchorGameMinutes, nowMinutes) {
-      if (!Number.isFinite(anchorGameMinutes) || !Number.isFinite(nowMinutes)) return false;
-      if (anchorGameMinutes > PLANNER_EARLY_GAME_CUTOFF_MINUTES) return false;
-      return (anchorGameMinutes - nowMinutes) >= 120;
+    function shouldShowPlannerCoffee(nextGameMinutes, nowMinutes) {
+      if (!Number.isFinite(nextGameMinutes) || !Number.isFinite(nowMinutes)) return false;
+      if (nextGameMinutes > PLANNER_EARLY_GAME_CUTOFF_MINUTES) return false;
+      return (nextGameMinutes - nowMinutes) >= PLANNER_COFFEE_TARGET_MINUTES;
     }
 
-    function getPlannerBeforeGameFoodMode(anchorGameMinutes, nowMinutes) {
-      if (!Number.isFinite(anchorGameMinutes) || !Number.isFinite(nowMinutes)) return "quick_food";
-      var minutesUntilGame = anchorGameMinutes - nowMinutes;
-      if (minutesUntilGame <= PLANNER_TIGHT_WINDOW_MINUTES) return "tight_food";
-      if (minutesUntilGame <= PLANNER_PREGAME_FOOD_TARGET_MINUTES) return "quick_food";
-      return "quick_food";
+    function clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes) {
+      var latestSafe = Math.max(gameMinutes - PLANNER_PREGAME_BUFFER_MINUTES, 0);
+      var earliestUseful = Math.max(nowMinutes + 5, 0);
+      return Math.min(Math.max(targetMinutes, earliestUseful), latestSafe);
     }
 
-    function getPlannerPreGameLabel(anchorGameMinutes, nowMinutes, foodMode) {
-      var leadMinutes = foodMode === "tight_food"
-        ? 25
-        : PLANNER_PREGAME_FOOD_TARGET_MINUTES;
-      var targetMinutes = Math.max(anchorGameMinutes - leadMinutes, nowMinutes + 10);
-      return formatPlanTime(targetMinutes) + " • Before first game";
+    function getPlannerPreGameLabel(gameMinutes, nowMinutes, labelText) {
+      var targetMinutes = clampPlannerMoment(gameMinutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, gameMinutes, nowMinutes);
+      return formatPlanTime(targetMinutes) + " • " + (labelText || "Before first game");
     }
 
-    function getPlannerCoffeeLabel(anchorGameMinutes, nowMinutes) {
-      var targetMinutes = Math.max(anchorGameMinutes - PLANNER_COFFEE_TARGET_MINUTES, nowMinutes + 10);
-      return formatPlanTime(targetMinutes) + " • Coffee before you go";
+    function getPlannerCoffeeLabel(gameMinutes, nowMinutes, labelText) {
+      var targetMinutes = clampPlannerMoment(gameMinutes - PLANNER_COFFEE_TARGET_MINUTES, gameMinutes, nowMinutes);
+      return formatPlanTime(targetMinutes) + " • " + (labelText || "Before first game");
     }
 
     function getPlannerPostGameLabel(lastGameMinutes) {
@@ -4364,11 +4407,11 @@
       if (excludePlaceIds && excludePlaceIds[placeId]) score -= 120;
       if (openNow.indexOf("open") !== -1) score += 8;
 
-      if (minutes !== null) score -= minutes * (mode === "meal" ? 1.2 : mode === "tight_food" ? 4.0 : 2.6);
-      if (miles !== null) score -= miles * (mode === "meal" ? 0.8 : mode === "tight_food" ? 1.8 : 1.3);
+      if (minutes !== null) score -= minutes * (mode === "meal" ? 1.2 : 2.8);
+      if (miles !== null) score -= miles * (mode === "meal" ? 0.8 : 1.3);
 
-      if (mode === "quick_food" || mode === "tight_food") {
-        if (isQuickFoodName(name)) score += mode === "tight_food" ? 28 : 22;
+      if (mode === "quick_food") {
+        if (isQuickFoodName(name)) score += 22;
         if (!isSitDownFoodName(name)) score += 8;
         score += rating * 4;
       } else if (mode === "meal") {
@@ -4380,9 +4423,6 @@
         if (isBadCoffeeMatch_(name, row && row[3])) score -= 80;
         if (isFallbackCoffeeOnly_(name, row && row[3])) score -= 40;
         score += rating * 4;
-      } else if (mode === "treat") {
-        score += rating * 5;
-        if (String((row && row[0]) || "") === "🍦 Ice Cream") score += 16;
       } else if (mode === "gas") {
         score += rating * 2;
       }
@@ -4410,147 +4450,144 @@
       return filtered.slice(0, 5);
     }
 
-    function getPlannerCombinedCandidates(candidateGroups, usedPlaceIds, mode) {
-      var combined = [];
-      var seen = {};
-      (candidateGroups || []).forEach(function(group) {
-        (group || []).forEach(function(row) {
-          var placeKey = getRowPlaceId(row) || makePlaceKey(row);
-          if (!placeKey || seen[placeKey]) return;
-          seen[placeKey] = true;
-          combined.push(row);
-        });
-      });
-      combined.sort(function(a, b) {
-        var sa = scorePlanRow(a, mode, usedPlaceIds);
-        var sb = scorePlanRow(b, mode, usedPlaceIds);
-        if (sb !== sa) return sb - sa;
-        return compareRowsForDisplay(a, b);
-      });
-      return combined.slice(0, 6);
-    }
-
     function buildPlannerBlocks(rows, times) {
       var blocks = [];
       var usedPlaceIds = {};
       var fallbackIndexMap = {};
-      var schedule = (Array.isArray(times) ? times.slice() : []).filter(function(value) {
-        return Number.isFinite(value);
-      }).sort(function(a, b) { return a - b; });
       var nowMinutes = getCurrentPlanMinutes();
-      var anchorGame = getPlannerAnchorGame(schedule, nowMinutes);
-      var nextGame = getNextUpcomingPlanTime(schedule, nowMinutes);
-      var lastGameMinutes = schedule.length ? schedule[schedule.length - 1] : null;
+      var dayState = getPlannerDayState(times, nowMinutes);
+      var schedule = dayState.schedule || [];
+      var nextGame = dayState.nextGame;
+      var lastGameMinutes = dayState.lastGameMinutes;
 
       var coffeeCandidates = getPlannerCandidates(rows, "☕ Coffee", "coffee", usedPlaceIds);
-      var iceCreamCandidates = getPlannerCandidates(rows, "🍦 Ice Cream", "treat", usedPlaceIds);
       var foodQuickCandidates = getPlannerCandidates(rows, "🍔 Food", "quick_food", usedPlaceIds);
-      var foodTightCandidates = getPlannerCandidates(rows, "🍔 Food", "tight_food", usedPlaceIds);
       var foodMealCandidates = getPlannerCandidates(rows, "🍔 Food", "meal", usedPlaceIds);
+      var iceCreamCandidates = getPlannerCandidates(rows, "🍦 Ice Cream", "quick_food", usedPlaceIds);
       var gasCandidates = getPlannerCandidates(rows, "⛽ Gas", "gas", usedPlaceIds);
 
-      if (anchorGame && shouldShowPlannerCoffee(anchorGame.minutes, nowMinutes)) {
-        var coffeePick = pullNextPlannerCandidate(coffeeCandidates, usedPlaceIds, fallbackIndexMap, "before_game_coffee");
-        if (coffeePick && coffeePick.row) {
-          blocks.push({
-            key: "before_game_coffee",
-            icon: "☕",
-            label: getPlannerCoffeeLabel(anchorGame.minutes, nowMinutes),
-            title: "Coffee before the day gets moving",
-            reason: "Early start and enough time — grab coffee first, then a quick bite before you head in.",
-            category: "☕ Coffee",
-            focusQuickAction: "coffee",
-            candidates: coffeeCandidates,
-            activeIndex: coffeePick.index || 0
-          });
-        }
+      function addPlannerBlock(config) {
+        var pool = Array.isArray(config.pool) ? config.pool : [];
+        var pick = pullNextPlannerCandidate(pool, usedPlaceIds, fallbackIndexMap, config.poolKey || config.key);
+        if (!pick || !pick.row) return;
+        blocks.push({
+          key: config.key,
+          icon: config.icon,
+          label: config.label,
+          title: config.title,
+          reason: config.reason,
+          category: config.category,
+          focusQuickAction: config.focusQuickAction,
+          candidates: pool,
+          activeIndex: pick.index || 0
+        });
       }
 
-      if (anchorGame) {
-        var preGameMode = getPlannerBeforeGameFoodMode(anchorGame.minutes, nowMinutes);
-        var preGamePool = preGameMode === "tight_food"
-          ? (foodTightCandidates.length ? foodTightCandidates : foodQuickCandidates)
-          : (foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates);
-        var preGamePick = pullNextPlannerCandidate(preGamePool, usedPlaceIds, fallbackIndexMap, "before_game_food");
-        if (preGamePick && preGamePick.row) {
-          blocks.push({
-            key: "before_game_food",
-            icon: preGameMode === "tight_food" ? "⚡" : "🍔",
-            label: getPlannerPreGameLabel(anchorGame.minutes, nowMinutes, preGameMode),
-            title: preGameMode === "tight_food" ? "Fastest food before first pitch" : "Quick food before the first game",
-            reason: preGameMode === "tight_food"
-              ? "Tight window — this is the closest, easiest grab-and-go move before the day starts."
-              : "A realistic pre-game stop so you eat before things get rushed at the field.",
-            category: "🍔 Food",
-            focusQuickAction: "food",
-            candidates: preGamePool,
-            activeIndex: preGamePick.index || 0
+      if (dayState.phase === "pre_day" && Number.isFinite(dayState.firstGameMinutes)) {
+        if (shouldShowPlannerCoffee(dayState.firstGameMinutes, nowMinutes) && coffeeCandidates.length) {
+          addPlannerBlock({
+            key: "before_first_game_coffee",
+            icon: "☕",
+            label: getPlannerCoffeeLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
+            title: "Coffee before the first game",
+            reason: "Early game + enough time. Grab coffee first, then make the food stop without rushing.",
+            category: "☕ Coffee",
+            focusQuickAction: "coffee",
+            pool: coffeeCandidates,
+            poolKey: "before_first_game_coffee"
           });
         }
+
+        addPlannerBlock({
+          key: "before_first_game_food",
+          icon: "🍔",
+          label: getPlannerPreGameLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
+          title: "Quick food before the first game",
+          reason: (dayState.firstGameMinutes - nowMinutes) <= PLANNER_GAP_SKIP_MINUTES
+            ? "Tight window. Keep it fast, close, and grab-and-go before first pitch."
+            : "Start the day with a realistic pre-game stop before warmups and arrival pressure kick in.",
+          category: "🍔 Food",
+          focusQuickAction: "food",
+          pool: foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates,
+          poolKey: "before_first_game_food"
+        });
+      }
+
+      if (dayState.phase === "mid_day" && nextGame && Number.isFinite(nextGame.minutes)) {
+        var minutesUntilNextGame = nextGame.minutes - nowMinutes;
+        var currentGapLabel = minutesUntilNextGame < PLANNER_GAP_LONG_BREAK_MINUTES ? "Before next game" : "Between games";
+        var currentGapPool = minutesUntilNextGame >= PLANNER_GAP_LONG_BREAK_MINUTES && foodMealCandidates.length
+          ? foodMealCandidates
+          : (foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates);
+
+        addPlannerBlock({
+          key: "before_next_game_food",
+          icon: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES ? "⚡" : "🍔",
+          label: getPlannerPreGameLabel(nextGame.minutes, nowMinutes, currentGapLabel),
+          title: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES
+            ? "Fastest food before the next game"
+            : (currentGapLabel === "Between games" ? "Food while you have a real break" : "Quick food before the next game"),
+          reason: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES
+            ? "You’re already in the day. Keep this one quick, close, and easy before the next game starts."
+            : (currentGapLabel === "Between games"
+              ? "You have a real break here, so this is a better chance for food before the next game."
+              : "This keeps the stop realistic without pushing too close to first pitch on the next one."),
+          category: "🍔 Food",
+          focusQuickAction: "food",
+          pool: currentGapPool,
+          poolKey: "before_next_game_food"
+        });
       }
 
       if (schedule.length >= 2) {
         for (var i = 0; i < schedule.length - 1; i++) {
           var gapInfo = getPlanGapInfo(schedule[i], schedule[i + 1]);
           if (!gapInfo) continue;
-          if (nextGame && i < nextGame.index) continue;
+          if (dayState.phase === "mid_day" && nextGame && schedule[i + 1] <= nextGame.minutes) continue;
 
           if (gapInfo.type === "quick_break") {
-            var quickBreakPool = getPlannerCombinedCandidates([
-              iceCreamCandidates,
-              coffeeCandidates,
-              foodQuickCandidates
-            ], usedPlaceIds, "quick_food");
-            var quickBreakPick = pullNextPlannerCandidate(quickBreakPool, usedPlaceIds, fallbackIndexMap, "between_quick_" + i);
-            if (quickBreakPick && quickBreakPick.row) {
-              var quickCategory = String((quickBreakPick.row && quickBreakPick.row[0]) || "");
-              var quickIcon = quickCategory === "🍦 Ice Cream" ? "🍦" : (quickCategory === "☕ Coffee" ? "☕" : "🍔");
-              blocks.push({
-                key: "between_quick_" + (i + 1),
-                icon: quickIcon,
-                label: formatPlanGapLabel(gapInfo),
-                title: "Quick reset between games",
-                reason: "This gap is useful, but not huge — think coffee, a light bite, or a quick treat.",
-                category: quickCategory || "🍔 Food",
-                focusQuickAction: quickCategory === "☕ Coffee" ? "coffee" : (quickCategory === "🍦 Ice Cream" ? "food" : "food"),
-                candidates: quickBreakPool,
-                activeIndex: quickBreakPick.index || 0
-              });
-            }
+            var quickPool = iceCreamCandidates.length
+              ? iceCreamCandidates
+              : (coffeeCandidates.length ? coffeeCandidates : (foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates));
+            var quickCategory = iceCreamCandidates.length ? "🍦 Ice Cream" : (coffeeCandidates.length ? "☕ Coffee" : "🍔 Food");
+            var quickAction = quickCategory === "☕ Coffee" ? "coffee" : "food";
+            addPlannerBlock({
+              key: "between_games_quick_" + (i + 1),
+              icon: quickCategory === "☕ Coffee" ? "☕" : (quickCategory === "🍦 Ice Cream" ? "🍦" : "🍔"),
+              label: formatPlanGapLabel(gapInfo),
+              title: "Quick reset between games",
+              reason: "This break is real, but not huge. Think coffee, a treat, or something light and easy.",
+              category: quickCategory,
+              focusQuickAction: quickAction,
+              pool: quickPool,
+              poolKey: "between_games_quick_" + (i + 1)
+            });
           } else {
-            var longMealPool = foodMealCandidates.length ? foodMealCandidates : foodQuickCandidates;
-            var longMealPick = pullNextPlannerCandidate(longMealPool, usedPlaceIds, fallbackIndexMap, "between_long_food_" + i);
-            if (longMealPick && longMealPick.row) {
-              blocks.push({
-                key: "between_long_food_" + (i + 1),
-                icon: "🍔",
-                label: formatPlanGapLabel(gapInfo),
-                title: "A real meal while you have time",
-                reason: "This is a real break, so lead with food while you actually have room to enjoy it.",
-                category: "🍔 Food",
-                focusQuickAction: "food",
-                candidates: longMealPool,
-                activeIndex: longMealPick.index || 0
-              });
-            }
+            addPlannerBlock({
+              key: "between_games_food_" + (i + 1),
+              icon: "🍔",
+              label: formatPlanGapLabel(gapInfo),
+              title: "Food while you have time",
+              reason: "This is a true break in the day, so food becomes the primary move instead of a rushed stop.",
+              category: "🍔 Food",
+              focusQuickAction: "food",
+              pool: foodMealCandidates.length ? foodMealCandidates : foodQuickCandidates,
+              poolKey: "between_games_food_" + (i + 1)
+            });
 
-            var longRelaxPool = getPlannerCombinedCandidates([
-              coffeeCandidates,
-              iceCreamCandidates
-            ], usedPlaceIds, "treat");
-            var longRelaxPick = pullNextPlannerCandidate(longRelaxPool, usedPlaceIds, fallbackIndexMap, "between_long_relax_" + i);
-            if (longRelaxPick && longRelaxPick.row) {
-              var relaxCategory = String((longRelaxPick.row && longRelaxPick.row[0]) || "");
-              blocks.push({
-                key: "between_long_relax_" + (i + 1),
-                icon: relaxCategory === "🍦 Ice Cream" ? "🍦" : "☕",
+            var secondaryPool = coffeeCandidates.length ? coffeeCandidates : iceCreamCandidates;
+            var secondaryCategory = coffeeCandidates.length ? "☕ Coffee" : (iceCreamCandidates.length ? "🍦 Ice Cream" : "");
+            if (secondaryPool.length && secondaryCategory) {
+              addPlannerBlock({
+                key: "between_games_secondary_" + (i + 1),
+                icon: secondaryCategory === "☕ Coffee" ? "☕" : "🍦",
                 label: formatPlanGapLabel(gapInfo),
-                title: "Optional second stop if you want to relax",
-                reason: "When the break is long enough, you can add a coffee or treat without forcing it.",
-                category: relaxCategory || "☕ Coffee",
-                focusQuickAction: relaxCategory === "🍦 Ice Cream" ? "food" : "coffee",
-                candidates: longRelaxPool,
-                activeIndex: longRelaxPick.index || 0
+                title: secondaryCategory === "☕ Coffee" ? "Optional coffee stop" : "Optional treat stop",
+                reason: "You’ve got enough room here for a second idea if the family wants coffee, a treat, or a quick reset.",
+                category: secondaryCategory,
+                focusQuickAction: secondaryCategory === "☕ Coffee" ? "coffee" : "food",
+                pool: secondaryPool,
+                poolKey: "between_games_secondary_" + (i + 1)
               });
             }
           }
@@ -4558,24 +4595,20 @@
       }
 
       var postGamePool = foodMealCandidates.length ? foodMealCandidates : foodQuickCandidates;
-      var postGameFoodPick = pullNextPlannerCandidate(postGamePool, usedPlaceIds, fallbackIndexMap, "after_games_food");
-      if (postGameFoodPick && postGameFoodPick.row) {
-        blocks.push({
-          key: "after_games_food",
-          icon: "🍔",
-          label: getPlannerPostGameLabel(lastGameMinutes),
-          title: "Food after the last game",
-          reason: "When the day is over, food comes first. Gas is optional and secondary.",
-          category: "🍔 Food",
-          focusQuickAction: "food",
-          candidates: postGamePool,
-          activeIndex: postGameFoodPick.index || 0
-        });
-      }
+      addPlannerBlock({
+        key: "after_games_food",
+        icon: "🍔",
+        label: getPlannerPostGameLabel(lastGameMinutes),
+        title: "Food after the last game",
+        reason: "When the day is done, food comes first. This is the one stop that should always be there.",
+        category: "🍔 Food",
+        focusQuickAction: "food",
+        pool: postGamePool,
+        poolKey: "after_games_food"
+      });
 
-      var gasPick = pullNextPlannerCandidate(gasCandidates, usedPlaceIds, fallbackIndexMap, "after_games_gas");
-      if (gasPick && gasPick.row) {
-        blocks.push({
+      if (gasCandidates.length) {
+        addPlannerBlock({
           key: "after_games_gas",
           icon: "⛽",
           label: getPlannerPostGameLabel(lastGameMinutes),
@@ -4583,8 +4616,8 @@
           reason: "Optional secondary stop if you want to top off before heading home.",
           category: "⛽ Gas",
           focusQuickAction: "gas",
-          candidates: gasCandidates,
-          activeIndex: gasPick.index || 0
+          pool: gasCandidates,
+          poolKey: "after_games_gas"
         });
       }
 
@@ -4608,22 +4641,6 @@
       return getPlatformType() === "ios"
         ? buildAppleMapsLink(name, address)
         : buildGoogleMapsLink(name, address);
-    }
-
-    function scrollToPlannerResults() {
-      var wrap = document.getElementById("planResults");
-      if (!wrap) return;
-      window.setTimeout(function() {
-        var target = wrap.querySelector(".plan-card") || wrap;
-        if (!target) return;
-        var rect = target.getBoundingClientRect();
-        var top = window.pageYOffset + rect.top - 20;
-        try {
-          window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
-        } catch (e) {
-          target.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 120);
     }
 
     function renderPlannerResults() {
