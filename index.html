@@ -4334,18 +4334,27 @@
 
     function clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes) {
       var latestSafe = Math.max(gameMinutes - PLANNER_PREGAME_BUFFER_MINUTES, 0);
-      var earliestUseful = Math.max(nowMinutes + 5, 0);
-      return Math.min(Math.max(targetMinutes, earliestUseful), latestSafe);
+      if (targetMinutes >= latestSafe) return latestSafe;
+      if (targetMinutes <= nowMinutes) return nowMinutes;
+      return targetMinutes;
+    }
+
+    function buildPlannerMomentLabel(targetMinutes, gameMinutes, nowMinutes, labelText) {
+      var safeLabel = labelText || "Before first game";
+      var latestSafe = Math.max(gameMinutes - PLANNER_PREGAME_BUFFER_MINUTES, 0);
+      var clamped = clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes);
+      if (clamped >= latestSafe || clamped <= nowMinutes) {
+        return "Now • " + safeLabel;
+      }
+      return formatPlanTime(clamped) + " • " + safeLabel;
     }
 
     function getPlannerPreGameLabel(gameMinutes, nowMinutes, labelText) {
-      var targetMinutes = clampPlannerMoment(gameMinutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, gameMinutes, nowMinutes);
-      return formatPlanTime(targetMinutes) + " • " + (labelText || "Before first game");
+      return buildPlannerMomentLabel(gameMinutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, gameMinutes, nowMinutes, labelText);
     }
 
     function getPlannerCoffeeLabel(gameMinutes, nowMinutes, labelText) {
-      var targetMinutes = clampPlannerMoment(gameMinutes - PLANNER_COFFEE_TARGET_MINUTES, gameMinutes, nowMinutes);
-      return formatPlanTime(targetMinutes) + " • " + (labelText || "Before first game");
+      return buildPlannerMomentLabel(gameMinutes - PLANNER_COFFEE_TARGET_MINUTES, gameMinutes, nowMinutes, labelText);
     }
 
     function getPlannerPostGameLabel(lastGameMinutes) {
