@@ -2786,7 +2786,8 @@
 }
 
 @media (max-width: 640px) {
-  .decision-entry-top {
+  .decision-entry-top,
+  .planner-entry-top {
     flex-direction: column;
   }
 
@@ -2795,6 +2796,275 @@
     justify-content: center;
   }
 }
+
+@media (min-width: 768px) {
+  .planner-source-row,
+  .planner-button-row,
+  .plan-card-actions,
+  .plan-secondary-actions,
+  .plan-footer-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .plan-card-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-secondary-actions {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+
+/* 2026-04-16 Plan My Day MVP */
+.planner-entry-card {
+  margin: 0 0 16px;
+  padding: 16px 16px 14px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, rgba(21,38,58,0.08), rgba(47,111,222,0.03));
+  border: 1px solid rgba(47,111,222,0.16);
+  box-shadow: 0 10px 22px rgba(16,43,77,0.08);
+}
+
+.planner-entry-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.planner-entry-copy {
+  min-width: 0;
+}
+
+.planner-entry-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #56708a;
+  margin-bottom: 6px;
+}
+
+.planner-entry-title {
+  font-size: 20px;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  color: #15263a;
+  margin-bottom: 6px;
+}
+
+.planner-entry-text {
+  font-size: 14px;
+  line-height: 1.45;
+  color: #5b6a78;
+}
+
+.planner-source-row,
+.planner-button-row,
+.plan-card-actions,
+.plan-secondary-actions,
+.plan-footer-actions {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+}
+
+.planner-field-wrap {
+  display: none;
+  margin-top: 10px;
+}
+
+.planner-field-wrap.active {
+  display: block;
+}
+
+.planner-times-wrap {
+  margin-top: 10px;
+}
+
+.planner-input-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: #485a6c;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.planner-helper-text {
+  font-size: 13px;
+  color: #687066;
+  line-height: 1.45;
+  margin-top: 6px;
+}
+
+.planner-source-pill {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: #eef4fb;
+  color: #284b73;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.planner-source-pill.pending {
+  background: #f5f4ef;
+  color: #64717d;
+}
+
+.planner-status {
+  min-height: 18px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4f5d69;
+}
+
+.plan-results-wrap {
+  display: none;
+  margin: 6px 0 18px;
+}
+
+.plan-results-wrap.active {
+  display: block;
+}
+
+.plan-results-header {
+  margin-bottom: 12px;
+  padding: 0 2px;
+}
+
+.plan-results-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.74);
+  margin-bottom: 6px;
+}
+
+.plan-results-title {
+  font-size: 24px;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.18);
+}
+
+.plan-results-subtitle {
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(255,255,255,0.84);
+}
+
+.plan-block-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.plan-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.96));
+  border: 1px solid #e0e7ef;
+  border-radius: 22px;
+  padding: 18px 16px 16px;
+  box-shadow: 0 12px 26px rgba(10,22,14,0.08);
+}
+
+.plan-card-kicker {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5d7388;
+  margin-bottom: 8px;
+}
+
+.plan-card-title {
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  color: #1c2a35;
+  margin-bottom: 8px;
+}
+
+.plan-card-meta {
+  font-size: 14px;
+  color: #465463;
+  line-height: 1.45;
+  margin-bottom: 10px;
+}
+
+.plan-card-reason {
+  font-size: 14px;
+  color: #5f6d79;
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
+.plan-tag-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.plan-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: #edf3fb;
+  color: #2e5b94;
+  font-size: 12px;
+  font-weight: 800;
+  box-shadow: 0 3px 8px rgba(16,43,77,0.06);
+}
+
+.plan-empty-card {
+  background: rgba(255,255,255,0.96);
+  border-radius: 22px;
+  padding: 16px;
+  color: #465463;
+  box-shadow: var(--shadow-card);
+}
+
+.plan-footer-card {
+  margin-top: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.92));
+  border-radius: 22px;
+  padding: 16px;
+  border: var(--border-soft);
+  box-shadow: var(--shadow-soft);
+}
+
+.plan-footer-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #1c2a35;
+  margin-bottom: 4px;
+}
+
+.plan-footer-text {
+  font-size: 13px;
+  color: #5f6d79;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
 #status {
   color: #111827;
   font-weight: 600;
@@ -2838,6 +3108,41 @@
         <div class="search-intro">
 <h2 class="search-title">Find food, coffee, and essentials near your field</h2>
         </div>
+
+        <div class="planner-entry-card" id="plannerEntryCard">
+          <div class="planner-entry-top">
+            <div class="planner-entry-copy">
+              <div class="planner-entry-eyebrow">Plan My Day ⚡</div>
+              <div class="planner-entry-title">Turn game times into a simple game day plan</div>
+              <div class="planner-entry-text">Pick your location, add game times, and GDG will line up coffee, food, and gas for the day.</div>
+            </div>
+          </div>
+
+          <div class="planner-source-row">
+            <button type="button" class="action-btn location-btn" id="planUseLocationBtn" onclick="selectPlanLocationMode('gps')">📍 Use My Location</button>
+            <button type="button" class="action-btn build-btn" id="planUseFieldBtn" onclick="togglePlanFieldEntry()">🔍 Find My Field</button>
+          </div>
+
+          <div id="planFieldWrap" class="planner-field-wrap">
+            <label class="planner-input-label" for="planFieldInput">Venue or complex</label>
+            <input id="planFieldInput" placeholder="USA Baseball Complex, Jordan High, Ting Park" value="" />
+          </div>
+
+          <div class="planner-times-wrap">
+            <label class="planner-input-label" for="planTimesInput">Enter Game Times</label>
+            <input id="planTimesInput" placeholder="9, 12, 3" value="" />
+            <div class="planner-helper-text">Takes 2 seconds — makes your plan smarter.</div>
+          </div>
+
+          <div id="plannerSourcePill" class="planner-source-pill pending">No location selected yet</div>
+          <div id="plannerStatus" class="planner-status"></div>
+
+          <div class="planner-button-row" style="margin-top:12px;">
+            <button type="button" class="action-btn share-btn" id="buildPlanBtn" onclick="runPlanMyDay()">Build My Plan</button>
+          </div>
+        </div>
+
+        <div id="planResults" class="plan-results-wrap"></div>
 
         <div class="decision-entry-card">
           <div class="decision-entry-top">
@@ -3088,6 +3393,12 @@
     let fieldIntelRequestToken = 0;
     let lastDecisionRecommendation = null;
     let decisionBuildNonce = 0;
+    let plannerSourceType = "";
+    let plannerSourceQuery = "";
+    let plannerSourceLabel = "";
+    let plannerSourceCoords = null;
+    let plannerResults = [];
+    let plannerBlocks = [];
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
@@ -3428,6 +3739,572 @@
     }
 
     
+
+    function updatePlannerSourcePill() {
+      var pill = document.getElementById("plannerSourcePill");
+      if (!pill) return;
+
+      var text = "No location selected yet";
+      pill.classList.add("pending");
+
+      if (plannerSourceType === "gps") {
+        text = plannerSourceLabel || "Using your current location";
+        pill.classList.remove("pending");
+      } else if (plannerSourceType === "query" && plannerSourceLabel) {
+        text = "Field: " + plannerSourceLabel;
+        pill.classList.remove("pending");
+      }
+
+      pill.textContent = text;
+    }
+
+    function setPlannerStatus(message, isError) {
+      var el = document.getElementById("plannerStatus");
+      if (!el) return;
+      el.textContent = String(message || "");
+      el.style.color = isError ? "#b42318" : "#4f5d69";
+    }
+
+    function clearPlannerResults() {
+      plannerResults = [];
+      plannerBlocks = [];
+      var el = document.getElementById("planResults");
+      if (!el) return;
+      el.classList.remove("active");
+      el.innerHTML = "";
+    }
+
+    function resetPlannerState() {
+      plannerSourceType = "";
+      plannerSourceQuery = "";
+      plannerSourceLabel = "";
+      plannerSourceCoords = null;
+      var planFieldWrap = document.getElementById("planFieldWrap");
+      var planFieldInput = document.getElementById("planFieldInput");
+      var planTimesInput = document.getElementById("planTimesInput");
+      if (planFieldWrap) planFieldWrap.classList.remove("active");
+      if (planFieldInput) planFieldInput.value = "";
+      if (planTimesInput) planTimesInput.value = "";
+      updatePlannerSourcePill();
+      setPlannerStatus("");
+      clearPlannerResults();
+    }
+
+    function togglePlanFieldEntry() {
+      var wrap = document.getElementById("planFieldWrap");
+      var input = document.getElementById("planFieldInput");
+      if (!wrap || !input) return;
+
+      plannerSourceType = "query";
+      plannerSourceCoords = null;
+      plannerSourceQuery = String(input.value || "").trim();
+      plannerSourceLabel = plannerSourceQuery;
+      wrap.classList.add("active");
+      updatePlannerSourcePill();
+      setPlannerStatus("Enter your field or complex for a smarter plan.");
+
+      window.setTimeout(function() {
+        try {
+          input.focus({ preventScroll: true });
+        } catch (e) {
+          input.focus();
+        }
+      }, 60);
+    }
+
+    function syncPlannerFieldFromMainInput() {
+      var planFieldInput = document.getElementById("planFieldInput");
+      var addressInput = document.getElementById("address");
+      if (!planFieldInput || !addressInput) return;
+      if (!String(planFieldInput.value || "").trim() && String(addressInput.value || "").trim()) {
+        planFieldInput.value = String(addressInput.value || "").trim();
+      }
+    }
+
+    function parsePlanTimeToken(token, priorMinutes) {
+      var raw = String(token || "").trim().toLowerCase();
+      if (!raw) return null;
+
+      var match = raw.match(/^(\d{1,2})(?::(\d{2}))?\s*(a|am|p|pm)?$/i);
+      if (!match) return null;
+
+      var hour = Number(match[1]);
+      var minute = Number(match[2] || 0);
+      var suffix = String(match[3] || "").toLowerCase();
+      if (!Number.isFinite(hour) || hour < 1 || hour > 12 || minute < 0 || minute > 59) return null;
+
+      if (suffix === "a" || suffix === "am") {
+        if (hour === 12) hour = 0;
+      } else if (suffix === "p" || suffix === "pm") {
+        if (hour !== 12) hour += 12;
+      } else {
+        if (priorMinutes === null) {
+          if (hour >= 1 && hour <= 6) hour += 12;
+          if (hour === 12) hour = 12;
+        } else {
+          while ((hour * 60 + minute) <= priorMinutes && hour < 24) {
+            hour += 12;
+          }
+          if (hour >= 24) hour -= 12;
+        }
+      }
+
+      return hour * 60 + minute;
+    }
+
+    function parsePlanTimes(text) {
+      var cleaned = String(text || "")
+        .replace(/\band\b/gi, ",")
+        .replace(/\s+/g, " ")
+        .trim();
+
+      if (!cleaned) return [];
+
+      var parts = cleaned.split(/[\n,]/).map(function(part) {
+        return String(part || "").trim();
+      }).filter(Boolean);
+
+      var times = [];
+      var prior = null;
+      parts.forEach(function(part) {
+        var minutes = parsePlanTimeToken(part, prior);
+        if (minutes === null) return;
+        times.push(minutes);
+        prior = minutes;
+      });
+
+      return times;
+    }
+
+    function formatPlanTime(minutes) {
+      if (!Number.isFinite(minutes)) return "";
+      var hour24 = Math.floor(minutes / 60) % 24;
+      var mins = minutes % 60;
+      var suffix = hour24 >= 12 ? "PM" : "AM";
+      var hour12 = hour24 % 12;
+      if (!hour12) hour12 = 12;
+      return hour12 + ":" + String(mins).padStart(2, "0") + " " + suffix;
+    }
+
+    function isQuickFoodName(name) {
+      var n = String(name || "").toLowerCase();
+      var quickTerms = [
+        "chick-fil-a","mcdonald","taco bell","wendy","burger king","cook out","subway","jersey mike","jimmy john",
+        "kfc","bojangles","zaxby","sonic","domino","pizza hut","little caesars","five guys","whataburger","arby","raising cane",
+        "chipotle","qdoba","panera","cava","shake shack"
+      ];
+      return quickTerms.some(function(term) { return n.indexOf(term) !== -1; });
+    }
+
+    function isSitDownFoodName(name) {
+      var n = String(name || "").toLowerCase();
+      var sitDownTerms = [
+        "grill","bistro","kitchen","table","tavern","cantina","bar & grill","bar and grill","steak","house","bbq",
+        "smokehouse","chophouse","diner","brewpub","restaurant"
+      ];
+      return sitDownTerms.some(function(term) { return n.indexOf(term) !== -1; });
+    }
+
+    function scorePlanRow(row, mode, excludePlaceIds) {
+      var rating = Number((row && row[2]) || 0) || 0;
+      var minutes = getRowDriveTimeMinutes(row);
+      var miles = getRowDisplayDistanceMiles(row);
+      var name = String((row && row[1]) || "");
+      var openNow = String((row && row[4]) || "").toLowerCase();
+      var placeId = getRowPlaceId(row) || makePlaceKey(row);
+      var score = 0;
+
+      if (excludePlaceIds && excludePlaceIds[placeId]) score -= 120;
+      if (openNow.indexOf("open") !== -1) score += 8;
+
+      if (minutes !== null) score -= minutes * (mode === "meal" ? 1.2 : 2.8);
+      if (miles !== null) score -= miles * (mode === "meal" ? 0.8 : 1.3);
+
+      if (mode === "quick_food") {
+        if (isQuickFoodName(name)) score += 22;
+        if (!isSitDownFoodName(name)) score += 8;
+        score += rating * 4;
+      } else if (mode === "meal") {
+        if (isSitDownFoodName(name)) score += 20;
+        if (!isQuickFoodName(name)) score += 8;
+        score += rating * 10;
+      } else if (mode === "coffee") {
+        if (isPreferredCoffeeName_(name)) score += 18;
+        if (isBadCoffeeMatch_(name, row && row[3])) score -= 80;
+        if (isFallbackCoffeeOnly_(name, row && row[3])) score -= 40;
+        score += rating * 4;
+      } else if (mode === "gas") {
+        score += rating * 2;
+      }
+
+      return score;
+    }
+
+    function getPlannerCandidates(rows, categoryLabel, mode, excludePlaceIds) {
+      var seen = {};
+      var filtered = (rows || []).filter(function(row) {
+        var cat = String((row && row[0]) || "");
+        var placeKey = getRowPlaceId(row) || makePlaceKey(row);
+        if (cat !== categoryLabel || !placeKey || seen[placeKey]) return false;
+        seen[placeKey] = true;
+        return true;
+      });
+
+      filtered.sort(function(a, b) {
+        var sa = scorePlanRow(a, mode, excludePlaceIds);
+        var sb = scorePlanRow(b, mode, excludePlaceIds);
+        if (sb !== sa) return sb - sa;
+        return compareRowsForDisplay(a, b);
+      });
+
+      return filtered.slice(0, 5);
+    }
+
+    function buildPlannerBlocks(rows, times) {
+      var blocks = [];
+      var usedPlaceIds = {};
+      var coffeeCandidates = getPlannerCandidates(rows, "☕ Coffee", "coffee", usedPlaceIds);
+      var foodQuickCandidates = getPlannerCandidates(rows, "🍔 Food", "quick_food", usedPlaceIds);
+      var foodMealCandidates = getPlannerCandidates(rows, "🍔 Food", "meal", usedPlaceIds);
+      var gasCandidates = getPlannerCandidates(rows, "⛽ Gas", "gas", usedPlaceIds);
+
+      if (coffeeCandidates.length) {
+        blocks.push({
+          key: "before_game",
+          icon: "☕",
+          label: times.length ? (formatPlanTime(Math.max(times[0] - 60, 0)) + " • Before first game") : "Before first game",
+          title: "Coffee before game one",
+          reason: "Best blend of close, reliable, and easy to grab before the day starts.",
+          category: "☕ Coffee",
+          focusQuickAction: "coffee",
+          candidates: coffeeCandidates,
+          activeIndex: 0
+        });
+        usedPlaceIds[getRowPlaceId(coffeeCandidates[0]) || makePlaceKey(coffeeCandidates[0])] = true;
+      }
+
+      if (foodQuickCandidates.length) {
+        blocks.push({
+          key: "quick_break",
+          icon: "🍔",
+          label: times.length >= 2 ? (formatPlanTime(times[0] + 90) + " • Quick break") : "Between games",
+          title: "Quick food between games",
+          reason: "Close, fast, and low-friction when you need something easy.",
+          category: "🍔 Food",
+          focusQuickAction: "food",
+          candidates: foodQuickCandidates,
+          activeIndex: 0
+        });
+        usedPlaceIds[getRowPlaceId(foodQuickCandidates[0]) || makePlaceKey(foodQuickCandidates[0])] = true;
+      }
+
+      if (foodMealCandidates.length && (times.length >= 3 || times.length === 0 || times.length === 2)) {
+        blocks.push({
+          key: "longer_break",
+          icon: "🍕",
+          label: times.length >= 3 ? (formatPlanTime(times[1] + 90) + " • Longer break") : "Longer break",
+          title: "Sit-down meal when you have time",
+          reason: "A better meal when the day opens up and you can slow down a bit.",
+          category: "🍔 Food",
+          focusQuickAction: "food",
+          candidates: foodMealCandidates,
+          activeIndex: 0
+        });
+      }
+
+      if (gasCandidates.length) {
+        blocks.push({
+          key: "after_games",
+          icon: "⛽",
+          label: times.length ? (formatPlanTime(times[times.length - 1] + 120) + " • After the last game") : "After the last game",
+          title: "Gas before heading home",
+          reason: "Closest solid gas stop so you can finish the day without another errand.",
+          category: "⛽ Gas",
+          focusQuickAction: "gas",
+          candidates: gasCandidates,
+          activeIndex: 0
+        });
+      }
+
+      return blocks;
+    }
+
+    function buildPlannerTagRow(row) {
+      var tags = [];
+      var minutes = getRowDriveTimeMinutes(row);
+      var rating = Number((row && row[2]) || 0) || 0;
+      var openNow = String((row && row[4]) || "").toLowerCase();
+      if (minutes !== null && minutes <= 8) tags.push("Close");
+      if (openNow.indexOf("open") !== -1) tags.push("Open");
+      if (rating >= 4.4) tags.push("Top Rated");
+      return tags.slice(0, 3);
+    }
+
+    function getPlannerDirectionsLink(row) {
+      var name = String((row && row[1]) || "").trim();
+      var address = String((row && row[3]) || "").trim();
+      return getPlatformType() === "ios"
+        ? buildAppleMapsLink(name, address)
+        : buildGoogleMapsLink(name, address);
+    }
+
+    function renderPlannerResults() {
+      var wrap = document.getElementById("planResults");
+      if (!wrap) return;
+
+      if (!plannerBlocks.length) {
+        wrap.classList.add("active");
+        wrap.innerHTML = "<div class='plan-empty-card'>Couldn’t build a strong plan yet. Try a field name, use location, or widen the radius.</div>";
+        return;
+      }
+
+      var subtitle = plannerSourceType === "query" && plannerSourceLabel
+        ? ("Built around " + plannerSourceLabel)
+        : "Built around your current location";
+
+      var html =
+        "<div class='plan-results-header'>" +
+          "<div class='plan-results-eyebrow'>Plan My Day</div>" +
+          "<div class='plan-results-title'>Your Game Day Plan</div>" +
+          "<div class='plan-results-subtitle'>" + esc(subtitle) + "</div>" +
+        "</div>" +
+        "<div class='plan-block-grid'>";
+
+      plannerBlocks.forEach(function(block) {
+        var row = block.candidates[block.activeIndex] || null;
+        if (!row) return;
+        var name = String((row && row[1]) || "Recommended stop").trim();
+        var rating = String((row && row[2]) || "").trim();
+        var openNow = String((row && row[4]) || "").trim();
+        var minutes = getRowDriveTimeMinutes(row);
+        var miles = formatDistanceMiles(getRowDisplayDistanceMiles(row));
+        var metaParts = [];
+        if (minutes !== null) metaParts.push(minutes + " min away");
+        else if (miles) metaParts.push(miles + " away");
+        if (rating) metaParts.push("⭐ " + rating);
+        if (openNow) metaParts.push(openNow);
+
+        html +=
+          "<div class='plan-card'>" +
+            "<div class='plan-card-kicker'>" + esc(block.icon + " " + block.label) + "</div>" +
+            "<div class='plan-card-title'>" + esc(name) + "</div>" +
+            "<div class='plan-card-meta'>" + esc(metaParts.join(" • ")) + "</div>" +
+            "<div class='plan-card-reason'>" + esc(block.reason) + "</div>" +
+            "<div class='plan-tag-row'>" + buildPlannerTagRow(row).map(function(tag) {
+              return "<span class='plan-tag'>" + esc(tag) + "</span>";
+            }).join("") + "</div>" +
+            "<div class='plan-card-actions'>" +
+              "<a class='directions-btn' href='" + esc(getPlannerDirectionsLink(row)) + "' target='_blank' rel='noopener' onclick=\"trackPlannerAction('directions','" + esc(block.key) + "')\">Directions</a>" +
+            "</div>" +
+            "<div class='plan-secondary-actions' style='margin-top:10px;'>" +
+              "<button type='button' class='secondary-btn' onclick=\"sharePlannerBlock('" + esc(block.key) + "')\">Share</button>" +
+              "<button type='button' class='secondary-btn' onclick=\"swapPlannerBlock('" + esc(block.key) + "')\">Pick a Different Option</button>" +
+              "<button type='button' class='secondary-btn' onclick=\"seeMorePlannerOptions('" + esc(block.key) + "')\">See More Options</button>" +
+            "</div>" +
+          "</div>";
+      });
+
+      html += "</div>" +
+        "<div class='plan-footer-card'>" +
+          "<div class='plan-footer-title'>Want the full guide too?</div>" +
+          "<div class='plan-footer-text'>Open the full GDG results for more nearby categories, top stops, and detailed options.</div>" +
+          "<div class='plan-footer-actions'>" +
+            "<button type='button' class='action-btn build-btn' onclick='openFullGuideFromPlanner()'>Open Full Guide</button>" +
+          "</div>" +
+        "</div>";
+
+      wrap.innerHTML = html;
+      wrap.classList.add("active");
+    }
+
+    function trackPlannerAction(actionType, blockKey) {
+      var block = plannerBlocks.find(function(item) { return item.key === blockKey; });
+      var row = block && block.candidates[block.activeIndex];
+      if (!row) return;
+      trackEvent("planner_action", {
+        searchCategory: normalizeCategoryLabel(block.category || ""),
+        interactionType: actionType,
+        sourceType: plannerSourceType || "",
+        queryOrGps: plannerSourceType === "query" ? plannerSourceQuery : (plannerSourceCoords ? ("GPS:" + plannerSourceCoords.lat + "," + plannerSourceCoords.lng) : ""),
+        placeId: String(getRowPlaceId(row) || makePlaceKey(row) || "")
+      });
+    }
+
+    function swapPlannerBlock(blockKey) {
+      var block = plannerBlocks.find(function(item) { return item.key === blockKey; });
+      if (!block || !block.candidates || block.candidates.length < 2) {
+        setPlannerStatus("No alternate options available for that stop.", true);
+        return;
+      }
+      block.activeIndex = (block.activeIndex + 1) % block.candidates.length;
+      setPlannerStatus("Swapped to another option.");
+      trackPlannerAction("swap_option", blockKey);
+      renderPlannerResults();
+    }
+
+    function sharePlannerBlock(blockKey) {
+      var block = plannerBlocks.find(function(item) { return item.key === blockKey; });
+      var row = block && block.candidates[block.activeIndex];
+      if (!row) return;
+      trackPlannerAction("share_option", blockKey);
+      shareSpot(String(row[1] || "").trim(), String(row[3] || "").trim());
+    }
+
+    function getPlannerQuickAction(block) {
+      if (!block) return "";
+      return String(block.focusQuickAction || "");
+    }
+
+    function openFullGuideFromPlanner(focusQuickAction) {
+      var quickAction = String(focusQuickAction || "");
+      if (quickAction) pendingQuickCategory = quickAction;
+
+      if (plannerSourceType === "query" && plannerSourceQuery) {
+        document.getElementById("address").value = plannerSourceLabel || plannerSourceQuery;
+        runGuideWithQuery(plannerSourceQuery, "query");
+        return;
+      }
+
+      if (plannerSourceType === "gps" && plannerSourceCoords && Number.isFinite(plannerSourceCoords.lat) && Number.isFinite(plannerSourceCoords.lng)) {
+        resetSelectedPlaces();
+        resetLoadMoreState();
+        document.getElementById("results").innerHTML = "";
+        document.getElementById("topStops").innerHTML = "";
+        document.getElementById("categoryJumpBar").innerHTML = "";
+        clearResultsContext();
+        clearFieldIntel();
+        clearWeather();
+        clearRadiusResultsHint();
+        document.getElementById("shareLinkBox").style.display = "none";
+        document.getElementById("shareLinkBox").innerHTML = "";
+        document.getElementById("shareTools").style.display = "none";
+        latestShareUrl = "";
+        lastResolvedGuideCenter = null;
+        startLoadingState();
+        document.getElementById("status").textContent = "";
+        beginGpsGuideBuild({ lat: plannerSourceCoords.lat, lng: plannerSourceCoords.lng });
+      }
+    }
+
+    function seeMorePlannerOptions(blockKey) {
+      var block = plannerBlocks.find(function(item) { return item.key === blockKey; });
+      if (!block) return;
+      trackPlannerAction("see_more_options", blockKey);
+      openFullGuideFromPlanner(getPlannerQuickAction(block));
+    }
+
+    async function selectPlanLocationMode(mode) {
+      if (mode !== "gps") {
+        togglePlanFieldEntry();
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        setPlannerStatus("This device/browser doesn’t support location.", true);
+        return;
+      }
+
+      plannerSourceType = "gps";
+      plannerSourceQuery = "";
+      plannerSourceLabel = "Finding your location…";
+      plannerSourceCoords = null;
+      updatePlannerSourcePill();
+      setPlannerStatus("Checking your location…");
+
+      try {
+        var coords = await new Promise(function(resolve, reject) {
+          navigator.geolocation.getCurrentPosition(
+            function(pos) {
+              resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+            },
+            function(err) {
+              reject(err || new Error("Location unavailable"));
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+          );
+        });
+
+        plannerSourceCoords = coords;
+        plannerSourceLabel = "Using your current location";
+        updatePlannerSourcePill();
+        setPlannerStatus("Location ready. Add times and build your plan.");
+      } catch (err) {
+        plannerSourceType = "";
+        plannerSourceCoords = null;
+        plannerSourceLabel = "";
+        updatePlannerSourcePill();
+        setPlannerStatus("Couldn’t access location. Try again or use a field.", true);
+      }
+    }
+
+    async function runPlanMyDay() {
+      var buildBtn = document.getElementById("buildPlanBtn");
+      var planFieldInput = document.getElementById("planFieldInput");
+      var planTimesInput = document.getElementById("planTimesInput");
+      var query = "";
+      var times = parsePlanTimes(planTimesInput ? planTimesInput.value : "");
+      var params = { radiusMiles: getRadiusMiles(), mode: "core" };
+
+      if (plannerSourceType === "query") {
+        query = getPreparedFacilityQuery_(String((planFieldInput && planFieldInput.value) || plannerSourceQuery || document.getElementById("address").value || "").trim());
+        if (!query) {
+          setPlannerStatus("Enter your field or complex first.", true);
+          return;
+        }
+        plannerSourceQuery = query;
+        plannerSourceLabel = String((planFieldInput && planFieldInput.value) || document.getElementById("address").value || query).trim();
+        params.query = query;
+        document.getElementById("address").value = plannerSourceLabel || query;
+      } else if (plannerSourceType === "gps" && plannerSourceCoords && Number.isFinite(plannerSourceCoords.lat) && Number.isFinite(plannerSourceCoords.lng)) {
+        params.lat = plannerSourceCoords.lat;
+        params.lng = plannerSourceCoords.lng;
+      } else {
+        var fallbackAddress = String((document.getElementById("address") && document.getElementById("address").value) || "").trim();
+        if (fallbackAddress) {
+          plannerSourceType = "query";
+          plannerSourceQuery = getPreparedFacilityQuery_(fallbackAddress);
+          plannerSourceLabel = fallbackAddress;
+          params.query = plannerSourceQuery;
+          if (planFieldInput && !String(planFieldInput.value || "").trim()) planFieldInput.value = fallbackAddress;
+          var wrap = document.getElementById("planFieldWrap");
+          if (wrap) wrap.classList.add("active");
+        } else {
+          setPlannerStatus("Choose a location first — Use My Location or Find My Field.", true);
+          return;
+        }
+      }
+
+      updatePlannerSourcePill();
+      setPlannerStatus("Building your plan…");
+      clearPlannerResults();
+      if (buildBtn) {
+        buildBtn.disabled = true;
+        buildBtn.textContent = "Building Plan...";
+      }
+
+      try {
+        plannerResults = await fetchBuildGuide(params);
+        plannerBlocks = buildPlannerBlocks(plannerResults, times);
+        renderPlannerResults();
+        setPlannerStatus("Plan ready.");
+        trackEvent("planner_build", {
+          sourceType: plannerSourceType || "",
+          queryOrGps: plannerSourceType === "query" ? plannerSourceQuery : (plannerSourceCoords ? ("GPS:" + plannerSourceCoords.lat + "," + plannerSourceCoords.lng) : ""),
+          radius: getRadiusMiles(),
+          resultCount: Number((plannerResults || []).length || 0),
+          interactionType: "build_plan"
+        });
+      } catch (err) {
+        setPlannerStatus("Couldn’t build the plan right now. Try again.", true);
+        clearPlannerResults();
+      } finally {
+        if (buildBtn) {
+          buildBtn.disabled = false;
+          buildBtn.textContent = "Build My Plan";
+        }
+      }
+    }
+
     function getDecisionSourceFromUi() {
       var query = String((document.getElementById("address") && document.getElementById("address").value) || "").trim();
       if (query) {
@@ -5236,6 +6113,14 @@ function setupVenueConfirmOverlay() {
 
       setRadius(5);
       document.getElementById("address").value = chosenQuery;
+      var planFieldInput = document.getElementById("planFieldInput");
+      var planFieldWrap = document.getElementById("planFieldWrap");
+      if (planFieldInput) planFieldInput.value = chosenQuery;
+      if (planFieldWrap) planFieldWrap.classList.add("active");
+      plannerSourceType = "query";
+      plannerSourceQuery = chosenQuery;
+      plannerSourceLabel = chosenQuery;
+      updatePlannerSourcePill();
       hideFieldMatchResults();
       document.getElementById("status").textContent = "Building your guide — results will appear below…";
       runGuideWithQuery(chosenQuery, "query");
@@ -5518,6 +6403,7 @@ function setupVenueConfirmOverlay() {
       var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
       hideFieldMatchResults();
       renderRecentSearches();
+      resetPlannerState();
       document.body.classList.add("home-mode");
       window.scrollTo({ top: 0, behavior: "smooth" });
       setActiveQuickAction("");
@@ -7367,11 +8253,58 @@ function setupVenueConfirmOverlay() {
     }
 
 
+
+    function setupPlannerInputs() {
+      var planFieldInput = document.getElementById("planFieldInput");
+      var planTimesInput = document.getElementById("planTimesInput");
+      var addressInput = document.getElementById("address");
+
+      updatePlannerSourcePill();
+
+      if (planFieldInput) {
+        planFieldInput.addEventListener("input", function() {
+          plannerSourceType = "query";
+          plannerSourceQuery = String(planFieldInput.value || "").trim();
+          plannerSourceLabel = plannerSourceQuery;
+          updatePlannerSourcePill();
+        });
+
+        planFieldInput.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            runPlanMyDay();
+          }
+        });
+      }
+
+      if (planTimesInput) {
+        planTimesInput.addEventListener("keydown", function(e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            runPlanMyDay();
+          }
+        });
+      }
+
+      if (addressInput) {
+        addressInput.addEventListener("input", function() {
+          var fieldWrap = document.getElementById("planFieldWrap");
+          if (plannerSourceType === "query" && fieldWrap && fieldWrap.classList.contains("active") && planFieldInput && !String(planFieldInput.value || "").trim()) {
+            planFieldInput.value = String(addressInput.value || "").trim();
+            plannerSourceQuery = String(planFieldInput.value || "").trim();
+            plannerSourceLabel = plannerSourceQuery;
+            updatePlannerSourcePill();
+          }
+        });
+      }
+    }
+
     async function initializeApp() {
       renderRecentSearches();
       updateInstallTipForMode();
       setupFieldMatchResults();
       setupAddressKeyActions();
+      setupPlannerInputs();
       setupInstallPrompt();
       setupDecisionModal();
       setupVenueConfirmOverlay();
