@@ -4476,7 +4476,7 @@
             icon: "☕",
             label: getPlannerCoffeeLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
             title: "Coffee before the first game",
-            reason: "Early game + enough time. Grab coffee first, then make the food stop without rushing.",
+            reason: "Coffee stop before warmups.",
             category: "☕ Coffee",
             focusQuickAction: "coffee",
             pool: coffeeCandidates,
@@ -4490,8 +4490,8 @@
           label: getPlannerPreGameLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
           title: "Quick food before the first game",
           reason: (dayState.firstGameMinutes - nowMinutes) <= PLANNER_GAP_SKIP_MINUTES
-            ? "Tight window. Keep it fast, close, and grab-and-go before first pitch."
-            : "Start the day with a realistic pre-game stop before warmups and arrival pressure kick in.",
+            ? "Quick stop before the day starts."
+            : "Best window for a pregame bite.",
           category: "🍔 Food",
           focusQuickAction: "food",
           pool: foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates,
@@ -4514,10 +4514,10 @@
             ? "Fastest food before the next game"
             : (currentGapLabel === "Between games" ? "Food while you have a real break" : "Quick food before the next game"),
           reason: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES
-            ? "You’re already in the day. Keep this one quick, close, and easy before the next game starts."
+            ? "Quick stop before the next game."
             : (currentGapLabel === "Between games"
-              ? "You have a real break here, so this is a better chance for food before the next game."
-              : "This keeps the stop realistic without pushing too close to first pitch on the next one."),
+              ? "Best window for a real meal."
+              : "Quick stop before the next game."),
           category: "🍔 Food",
           focusQuickAction: "food",
           pool: currentGapPool,
@@ -4542,7 +4542,7 @@
               icon: quickCategory === "☕ Coffee" ? "☕" : (quickCategory === "🍦 Ice Cream" ? "🍦" : "🍔"),
               label: formatPlanGapLabel(gapInfo),
               title: "Quick reset between games",
-              reason: "This break is real, but not huge. Think coffee, a treat, or something light and easy.",
+              reason: "Quick reset between games.",
               category: quickCategory,
               focusQuickAction: quickAction,
               pool: quickPool,
@@ -4554,7 +4554,7 @@
               icon: "🍔",
               label: formatPlanGapLabel(gapInfo),
               title: "Food while you have time",
-              reason: "This is a true break in the day, so food becomes the primary move instead of a rushed stop.",
+              reason: "Best window for a real meal.",
               category: "🍔 Food",
               focusQuickAction: "food",
               pool: foodMealCandidates.length ? foodMealCandidates : foodQuickCandidates,
@@ -4569,7 +4569,7 @@
                 icon: secondaryCategory === "☕ Coffee" ? "☕" : "🍦",
                 label: formatPlanGapLabel(gapInfo),
                 title: secondaryCategory === "☕ Coffee" ? "Optional coffee stop" : "Optional treat stop",
-                reason: "You’ve got enough room here for a second idea if the family wants coffee, a treat, or a quick reset.",
+                reason: "Optional second stop for coffee or a treat.",
                 category: secondaryCategory,
                 focusQuickAction: secondaryCategory === "☕ Coffee" ? "coffee" : "food",
                 pool: secondaryPool,
@@ -4586,7 +4586,7 @@
         icon: "🍔",
         label: getPlannerPostGameLabel(lastGameMinutes),
         title: "Food after the last game",
-        reason: "When the day is done, food comes first. This is the one stop that should always be there.",
+        reason: "Food first after the last game.",
         category: "🍔 Food",
         focusQuickAction: "food",
         pool: postGamePool,
@@ -4599,7 +4599,7 @@
           icon: "⛽",
           label: getPlannerPostGameLabel(lastGameMinutes),
           title: "Gas on the way out",
-          reason: "Optional secondary stop if you want to top off before heading home.",
+          reason: "Optional gas stop on the way out.",
           category: "⛽ Gas",
           focusQuickAction: "gas",
           pool: gasCandidates,
