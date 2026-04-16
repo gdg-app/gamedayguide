@@ -2491,6 +2491,208 @@
 }
 
 
+
+/* 2026-04-16 Two Mode Home */
+.mode-chooser-wrap {
+  display: block;
+  margin-bottom: 22px;
+}
+
+.mode-chooser-card {
+  width: 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(255,255,255,0.93));
+  padding: 24px 20px 20px;
+  border-radius: var(--radius-xxl);
+  box-shadow: var(--shadow);
+  border: var(--border-soft);
+  backdrop-filter: blur(16px);
+}
+
+.mode-chooser-title {
+  font-size: 30px;
+  line-height: 1.06;
+  letter-spacing: -0.045em;
+  font-weight: 800;
+  color: #15263a;
+  margin: 0 0 10px;
+}
+
+.mode-chooser-subtitle {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #526274;
+  margin: 0 0 16px;
+  max-width: 38ch;
+}
+
+.mode-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.mode-choice-card {
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(47,111,222,0.14);
+  border-radius: 22px;
+  padding: 18px 16px;
+  background: linear-gradient(180deg, rgba(21,38,58,0.06), rgba(47,111,222,0.02));
+  box-shadow: 0 10px 22px rgba(16,43,77,0.08);
+  cursor: pointer;
+}
+
+.mode-choice-card:active {
+  transform: scale(0.99);
+}
+
+.mode-choice-eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #56708a;
+  margin-bottom: 6px;
+}
+
+.mode-choice-title {
+  font-size: 22px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  color: #15263a;
+  margin-bottom: 6px;
+}
+
+.mode-choice-text {
+  font-size: 14px;
+  line-height: 1.45;
+  color: #5b6a78;
+}
+
+.panel-back-row {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 12px;
+}
+
+.planner-panel,
+.classic-panel {
+  display: none;
+}
+
+.panel-back-btn {
+  width: auto;
+  min-height: 44px;
+}
+
+.plan-field-match-results {
+  display: none;
+  margin-top: 8px;
+  margin-bottom: 2px;
+  background: #fdfcf9;
+  border: 1px solid #d8dde4;
+  border-radius: 18px;
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.plan-field-match-results .match-result-item {
+  padding: 13px 14px;
+}
+
+.map-choice-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10060;
+  display: none;
+}
+
+.map-choice-modal.active {
+  display: block;
+}
+
+.map-choice-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.42);
+}
+
+.map-choice-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-top-left-radius: 28px;
+  border-top-right-radius: 28px;
+  padding: 14px 16px 24px;
+  box-shadow: 0 -14px 34px rgba(0,0,0,0.22);
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
+}
+
+.map-choice-modal.active .map-choice-sheet {
+  transform: translateY(0);
+}
+
+.map-choice-handle {
+  width: 42px;
+  height: 5px;
+  border-radius: 999px;
+  background: #d8d8d8;
+  margin: 0 auto 14px;
+}
+
+.map-choice-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.06);
+  color: #4f5d69;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.map-choice-title {
+  font-size: 22px;
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  font-weight: 800;
+  color: #1c2a35;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.map-choice-subtitle {
+  font-size: 14px;
+  line-height: 1.45;
+  color: #5f6d79;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.map-choice-actions {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .mode-card-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
 /* 2026-04-10 Decision Mode */
 .decision-entry-card {
   margin: 0 0 16px;
@@ -3104,9 +3306,28 @@
         </div>
       </div>
 
-      <div class="search-panel" id="searchPanel">
-        <div class="search-intro">
-<h2 class="search-title">Find food, coffee, and essentials near your field</h2>
+      <div id="modeChooser" class="mode-chooser-wrap">
+        <div class="mode-chooser-card">
+          <div class="mode-chooser-title">Choose your game day mode</div>
+          <div class="mode-chooser-subtitle">Plan the day for you, or build the full guide the classic GDG way.</div>
+          <div class="mode-card-grid">
+            <button type="button" class="mode-choice-card" onclick="enterPlannerMode()">
+              <div class="mode-choice-eyebrow">Mode 1</div>
+              <div class="mode-choice-title">Plan My Day ⚡</div>
+              <div class="mode-choice-text">Turn game times into a simple coffee, food, and gas plan.</div>
+            </button>
+            <button type="button" class="mode-choice-card" onclick="enterClassicMode()">
+              <div class="mode-choice-eyebrow">Mode 2</div>
+              <div class="mode-choice-title">Build My Guide</div>
+              <div class="mode-choice-text">Use the full GDG search, quick actions, and category browse flow.</div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="search-panel planner-panel" id="plannerPanel">
+        <div class="panel-back-row">
+          <button type="button" class="secondary-btn panel-back-btn" onclick="backToModeChooser()">← Back</button>
         </div>
 
         <div class="planner-entry-card" id="plannerEntryCard">
@@ -3125,13 +3346,14 @@
 
           <div id="planFieldWrap" class="planner-field-wrap">
             <label class="planner-input-label" for="planFieldInput">Venue or complex</label>
-            <input id="planFieldInput" placeholder="USA Baseball Complex, Jordan High, Ting Park" value="" />
+            <input id="planFieldInput" placeholder="USA Baseball Complex, Jordan High, Ting Park" value="" autocomplete="off" />
+            <div id="planFieldMatchResults" class="plan-field-match-results"></div>
           </div>
 
           <div class="planner-times-wrap">
             <label class="planner-input-label" for="planTimesInput">Enter Game Times</label>
-            <input id="planTimesInput" placeholder="9, 12, 3" value="" />
-            <div class="planner-helper-text">Takes 2 seconds — makes your plan smarter.</div>
+            <input id="planTimesInput" placeholder="9 12 3" value="" inputmode="text" />
+            <div class="planner-helper-text">Type naturally — GDG will clean up the times and add commas.</div>
           </div>
 
           <div id="plannerSourcePill" class="planner-source-pill pending">No location selected yet</div>
@@ -3143,6 +3365,15 @@
         </div>
 
         <div id="planResults" class="plan-results-wrap"></div>
+      </div>
+
+      <div class="search-panel classic-panel" id="searchPanel">
+        <div class="panel-back-row">
+          <button type="button" class="secondary-btn panel-back-btn" onclick="backToModeChooser()">← Back</button>
+        </div>
+        <div class="search-intro">
+<h2 class="search-title">Find food, coffee, and essentials near your field</h2>
+        </div>
 
         <div class="decision-entry-card">
           <div class="decision-entry-top">
@@ -3360,6 +3591,20 @@
     </div>
   </div>
 
+  <div id="mapChoiceModal" class="map-choice-modal" aria-hidden="true">
+    <div class="map-choice-backdrop" onclick="closeMapChoiceModal()"></div>
+    <div class="map-choice-sheet">
+      <button type="button" class="map-choice-close" aria-label="Close" onclick="closeMapChoiceModal()">✕</button>
+      <div class="map-choice-handle"></div>
+      <div class="map-choice-title">Open directions</div>
+      <div class="map-choice-subtitle" id="mapChoiceSubtitle">Choose your map app</div>
+      <div class="map-choice-actions">
+        <a id="mapChoiceAppleBtn" class="location-action-btn" href="#" target="_blank" rel="noopener">Open in Apple Maps</a>
+        <a id="mapChoiceGoogleBtn" class="location-action-btn google-btn" href="#" target="_blank" rel="noopener">Open in Google Maps</a>
+      </div>
+    </div>
+  </div>
+
   <script>
     const SHARED_GUIDE = null;
 
@@ -3399,6 +3644,10 @@
     let plannerSourceCoords = null;
     let plannerResults = [];
     let plannerBlocks = [];
+    let plannerFieldSuggestions = [];
+    let plannerFieldSuggestTimer = null;
+    let plannerModeActive = false;
+    let mapChoiceRow = null;
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
@@ -3740,6 +3989,53 @@
 
     
 
+    function showElement(id, visible, displayValue) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.style.display = visible ? (displayValue || "block") : "none";
+    }
+
+    function enterHomeChooserMode() {
+      plannerModeActive = false;
+      showElement("modeChooser", true, "block");
+      showElement("plannerPanel", false);
+      showElement("searchPanel", false);
+      document.body.classList.add("home-mode");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function enterPlannerMode() {
+      plannerModeActive = true;
+      showElement("modeChooser", false);
+      showElement("plannerPanel", true, "block");
+      showElement("searchPanel", false);
+      document.body.classList.add("home-mode");
+      syncPlannerFieldFromMainInput();
+      updatePlannerSourcePill();
+      setPlannerStatus("");
+      var input = document.getElementById("planFieldInput");
+      if (input) {
+        window.setTimeout(function() {
+          try { input.focus({ preventScroll: true }); } catch (e) { try { input.focus(); } catch (err) {} }
+        }, 80);
+      }
+    }
+
+    function enterClassicMode() {
+      plannerModeActive = false;
+      showElement("modeChooser", false);
+      showElement("plannerPanel", false);
+      showElement("searchPanel", true, "block");
+      document.body.classList.add("home-mode");
+      focusAddressField();
+    }
+
+    function backToModeChooser() {
+      hidePlannerFieldMatchResults();
+      closeMapChoiceModal();
+      enterHomeChooserMode();
+    }
+
     function updatePlannerSourcePill() {
       var pill = document.getElementById("plannerSourcePill");
       if (!pill) return;
@@ -3801,7 +4097,7 @@
       plannerSourceLabel = plannerSourceQuery;
       wrap.classList.add("active");
       updatePlannerSourcePill();
-      setPlannerStatus("Enter your field or complex for a smarter plan.");
+      setPlannerStatus("Start typing your field or complex.");
 
       window.setTimeout(function() {
         try {
@@ -3884,6 +4180,33 @@
       var hour12 = hour24 % 12;
       if (!hour12) hour12 = 12;
       return hour12 + ":" + String(mins).padStart(2, "0") + " " + suffix;
+    }
+
+    function tokenizePlannerTimeInput(text) {
+      return String(text || "")
+        .replace(/[\n;]/g, " ")
+        .replace(/\band\b/gi, " ")
+        .replace(/(\d)(am|pm|a|p)(?=\d)/gi, "$1$2 ")
+        .replace(/,/g, " ")
+        .split(/\s+/)
+        .map(function(part) { return String(part || "").trim(); })
+        .filter(Boolean);
+    }
+
+    function normalizePlannerTimesText(text, forceFormat) {
+      var tokens = tokenizePlannerTimeInput(text);
+      var prior = null;
+      var out = [];
+      for (var i = 0; i < tokens.length; i++) {
+        var minutes = parsePlanTimeToken(tokens[i], prior);
+        if (minutes === null) {
+          if (!forceFormat) out.push(tokens[i]);
+          continue;
+        }
+        out.push(forceFormat ? formatPlanTime(minutes) : tokens[i]);
+        prior = minutes;
+      }
+      return out.join(", ");
     }
 
     function isQuickFoodName(name) {
@@ -4106,8 +4429,8 @@
 
       html += "</div>" +
         "<div class='plan-footer-card'>" +
-          "<div class='plan-footer-title'>Want the full guide too?</div>" +
-          "<div class='plan-footer-text'>Open the full GDG results for more nearby categories, top stops, and detailed options.</div>" +
+          "<div class='plan-footer-title'>Need more nearby?</div>" +
+          "<div class='plan-footer-text'>Open the full GDG guide for more categories, top stops, and detailed options.</div>" +
           "<div class='plan-footer-actions'>" +
             "<button type='button' class='action-btn build-btn' onclick='openFullGuideFromPlanner()'>Open Full Guide</button>" +
           "</div>" +
@@ -4158,6 +4481,7 @@
     function openFullGuideFromPlanner(focusQuickAction) {
       var quickAction = String(focusQuickAction || "");
       if (quickAction) pendingQuickCategory = quickAction;
+      enterClassicMode();
 
       if (plannerSourceType === "query" && plannerSourceQuery) {
         document.getElementById("address").value = plannerSourceLabel || plannerSourceQuery;
@@ -4191,6 +4515,33 @@
       if (!block) return;
       trackPlannerAction("see_more_options", blockKey);
       openFullGuideFromPlanner(getPlannerQuickAction(block));
+    }
+
+    function openPlannerDirectionsChoice(blockKey) {
+      var block = plannerBlocks.find(function(item) { return item.key === blockKey; });
+      var row = block && block.candidates[block.activeIndex];
+      if (!row) return;
+      mapChoiceRow = row;
+      var appleBtn = document.getElementById("mapChoiceAppleBtn");
+      var googleBtn = document.getElementById("mapChoiceGoogleBtn");
+      var subtitle = document.getElementById("mapChoiceSubtitle");
+      if (appleBtn) appleBtn.href = buildAppleMapsLink(String(row[1] || ""), String(row[3] || ""));
+      if (googleBtn) googleBtn.href = buildGoogleMapsLink(String(row[1] || ""), String(row[3] || ""));
+      if (subtitle) subtitle.textContent = String(row[1] || "Recommended stop");
+      trackPlannerAction("directions", blockKey);
+      var modal = document.getElementById("mapChoiceModal");
+      if (modal) {
+        modal.classList.add("active");
+        modal.setAttribute("aria-hidden", "false");
+      }
+    }
+
+    function closeMapChoiceModal() {
+      var modal = document.getElementById("mapChoiceModal");
+      if (!modal) return;
+      modal.classList.remove("active");
+      modal.setAttribute("aria-hidden", "true");
+      mapChoiceRow = null;
     }
 
     async function selectPlanLocationMode(mode) {
@@ -5934,6 +6285,75 @@ function setupVenueConfirmOverlay() {
       return actions;
     }
 
+    function hidePlannerFieldMatchResults() {
+      plannerFieldSuggestions = [];
+      var box = document.getElementById("planFieldMatchResults");
+      if (!box) return;
+      box.innerHTML = "";
+      box.style.display = "none";
+    }
+
+    function renderPlannerFieldMatchResults(items) {
+      var box = document.getElementById("planFieldMatchResults");
+      if (!box) return;
+      if (!items || !items.length) {
+        box.innerHTML = "<div class='suggestion-note'>No matching facilities found.</div>";
+        box.style.display = "block";
+        return;
+      }
+      var html = "<div class='match-results-header'>Matching Fields</div>";
+      items.forEach(function(item, index) {
+        html +=
+          "<button type='button' class='match-result-item' data-plan-match-index='" + index + "'>" +
+            "<div class='match-result-top'>" +
+              "<div class='match-result-title'>" + esc(item.label) + "</div>" +
+              badgeHtmlForSuggestion(item) +
+            "</div>" +
+            "<div class='match-result-meta'>" + esc(item.secondaryText || item.query || "") + "</div>" +
+          "</button>";
+      });
+      box.innerHTML = html;
+      box.style.display = "block";
+    }
+
+    function applyPlannerFieldSelection(item) {
+      var chosenQuery = String((item && (item.query || item.label)) || "").trim();
+      var chosenLabel = String((item && (item.label || item.query)) || chosenQuery).trim();
+      var input = document.getElementById("planFieldInput");
+      if (!chosenQuery || !input) return;
+      input.value = chosenLabel;
+      plannerSourceType = "query";
+      plannerSourceCoords = null;
+      plannerSourceQuery = chosenQuery;
+      plannerSourceLabel = chosenLabel;
+      updatePlannerSourcePill();
+      setPlannerStatus("Field selected. Add times and build your plan.");
+      hidePlannerFieldMatchResults();
+    }
+
+    function fetchPlannerFieldSuggestions(searchText) {
+      var query = getPreparedFacilityQuery_(String(searchText || "").trim());
+      if (query.length < 2) {
+        hidePlannerFieldMatchResults();
+        return;
+      }
+      window.clearTimeout(plannerFieldSuggestTimer);
+      plannerFieldSuggestTimer = window.setTimeout(function() {
+        fetch("/api/field-suggestions?query=" + encodeURIComponent(query))
+          .then(function(response) { return response.json(); })
+          .then(function(result) {
+            if (!result.ok) throw new Error(result.error || "Field suggestions failed.");
+            var serverSuggestions = Array.isArray(result.data) ? result.data : [];
+            var curated = getCuratedSuggestions(query);
+            plannerFieldSuggestions = mergeSuggestions(curated, serverSuggestions, query).slice(0, 6);
+            renderPlannerFieldMatchResults(plannerFieldSuggestions);
+          })
+          .catch(function() {
+            hidePlannerFieldMatchResults();
+          });
+      }, 260);
+    }
+
     function getCuratedSuggestions(searchText) {
       return [];
     }
@@ -6384,10 +6804,11 @@ function setupVenueConfirmOverlay() {
       lastResolvedGuideCenter = null;
       resetSelectedPlaces();
       resetLoadMoreState();
+      resetPlannerState();
+      closeMapChoiceModal();
 
       stopLoadingState();
       document.getElementById("sharedBanner").style.display = "none";
-      document.getElementById("searchPanel").style.display = "block";
       document.getElementById("address").value = "";
       document.getElementById("status").textContent = "";
       document.getElementById("results").innerHTML = "";
@@ -6402,13 +6823,13 @@ function setupVenueConfirmOverlay() {
       document.getElementById("shareTools").style.display = "none";
       var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
       hideFieldMatchResults();
+      hidePlannerFieldMatchResults();
       renderRecentSearches();
-      resetPlannerState();
       document.body.classList.add("home-mode");
       window.scrollTo({ top: 0, behavior: "smooth" });
       setActiveQuickAction("");
       updateGuideButtonVisibility();
-      focusAddressField();
+      enterHomeChooserMode();
     }
 
     function trackSuccessfulGuideBuild(sourceType, queryOrGps, resultCount) {
@@ -7593,6 +8014,8 @@ function setupVenueConfirmOverlay() {
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Find what you need near your game.";
       document.getElementById("searchPanel").style.display = "none";
+      showElement("plannerPanel", false);
+      showElement("modeChooser", false);
       var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
       var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
       updateGuideButtonVisibility();
@@ -7642,6 +8065,8 @@ function setupVenueConfirmOverlay() {
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "A few game day stops, shared with you.";
       document.getElementById("searchPanel").style.display = "none";
+      showElement("plannerPanel", false);
+      showElement("modeChooser", false);
       var resultsSharePrompt = document.getElementById("resultsSharePrompt"); if (resultsSharePrompt) resultsSharePrompt.style.display = "none";
       updateGuideButtonVisibility();
       clearFieldIntel();
@@ -7742,6 +8167,8 @@ function setupVenueConfirmOverlay() {
       document.getElementById("pageTitle").textContent = "GameDayGuide";
       document.getElementById("pageSubtitle").textContent = "Find what you need near your game.";
       document.getElementById("searchPanel").style.display = "none";
+      showElement("plannerPanel", false);
+      showElement("modeChooser", false);
       updateGuideButtonVisibility();
       clearFieldIntel();
       clearWeather();
@@ -8258,29 +8685,70 @@ function setupVenueConfirmOverlay() {
       var planFieldInput = document.getElementById("planFieldInput");
       var planTimesInput = document.getElementById("planTimesInput");
       var addressInput = document.getElementById("address");
+      var plannerResultsBox = document.getElementById("planFieldMatchResults");
 
       updatePlannerSourcePill();
 
       if (planFieldInput) {
         planFieldInput.addEventListener("input", function() {
           plannerSourceType = "query";
+          plannerSourceCoords = null;
           plannerSourceQuery = String(planFieldInput.value || "").trim();
           plannerSourceLabel = plannerSourceQuery;
           updatePlannerSourcePill();
+          if (plannerSourceQuery.length >= 2) {
+            fetchPlannerFieldSuggestions(plannerSourceQuery);
+          } else {
+            hidePlannerFieldMatchResults();
+          }
         });
 
         planFieldInput.addEventListener("keydown", function(e) {
           if (e.key === "Enter") {
             e.preventDefault();
-            runPlanMyDay();
+            if (plannerFieldSuggestions.length) {
+              applyPlannerFieldSelection(plannerFieldSuggestions[0]);
+            } else {
+              runPlanMyDay();
+            }
           }
+        });
+
+        planFieldInput.addEventListener("blur", function() {
+          window.setTimeout(function() {
+            hidePlannerFieldMatchResults();
+          }, 180);
+        });
+      }
+
+      if (plannerResultsBox) {
+        plannerResultsBox.addEventListener("click", function(e) {
+          var btn = e.target.closest(".match-result-item");
+          if (!btn) return;
+          var index = Number(btn.getAttribute("data-plan-match-index"));
+          if (!Number.isFinite(index)) return;
+          applyPlannerFieldSelection(plannerFieldSuggestions[index]);
         });
       }
 
       if (planTimesInput) {
+        planTimesInput.addEventListener("input", function() {
+          var normalized = normalizePlannerTimesText(planTimesInput.value, false);
+          if (normalized && normalized !== planTimesInput.value) {
+            var end = normalized.length;
+            planTimesInput.value = normalized;
+            try { planTimesInput.setSelectionRange(end, end); } catch (e) {}
+          }
+        });
+        planTimesInput.addEventListener("blur", function() {
+          var formatted = normalizePlannerTimesText(planTimesInput.value, true);
+          if (formatted) planTimesInput.value = formatted;
+        });
         planTimesInput.addEventListener("keydown", function(e) {
           if (e.key === "Enter") {
             e.preventDefault();
+            var formatted = normalizePlannerTimesText(planTimesInput.value, true);
+            if (formatted) planTimesInput.value = formatted;
             runPlanMyDay();
           }
         });
@@ -8310,6 +8778,10 @@ function setupVenueConfirmOverlay() {
       setupVenueConfirmOverlay();
       stopLoadingState();
       updateGuideButtonVisibility();
+      enterHomeChooserMode();
+      document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") closeMapChoiceModal();
+      });
 
       var shareId = getShareIdFromUrl();
       var spotId = getSpotIdFromUrl();
@@ -8354,12 +8826,11 @@ function setupVenueConfirmOverlay() {
       }
 
       document.getElementById("sharedBanner").style.display = "none";
-      document.getElementById("searchPanel").style.display = "block";
       hasBuiltGuide = false;
       updateGuideButtonVisibility();
       document.body.classList.add("home-mode");
       setRadius(5);
-      focusAddressField();
+      enterHomeChooserMode();
       maybeOfferInstallPrompt(1200);
     }
 
