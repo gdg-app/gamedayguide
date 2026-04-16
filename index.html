@@ -4332,29 +4332,30 @@
       return (nextGameMinutes - nowMinutes) >= PLANNER_COFFEE_TARGET_MINUTES;
     }
 
-    function clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes) {
+    function clampPlannerMomentToSchedule(targetMinutes, gameMinutes) {
       var latestSafe = Math.max(gameMinutes - PLANNER_PREGAME_BUFFER_MINUTES, 0);
       if (targetMinutes >= latestSafe) return latestSafe;
-      if (targetMinutes <= nowMinutes) return nowMinutes;
+      if (targetMinutes < 0) return 0;
       return targetMinutes;
     }
 
-    function buildPlannerMomentLabel(targetMinutes, gameMinutes, nowMinutes, labelText) {
+    function buildPlannerMomentLabel(targetMinutes, gameMinutes, labelText) {
       var safeLabel = labelText || "Before first game";
-      var latestSafe = Math.max(gameMinutes - PLANNER_PREGAME_BUFFER_MINUTES, 0);
-      var clamped = clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes);
-      if (clamped >= latestSafe || clamped <= nowMinutes) {
-        return "Now • " + safeLabel;
-      }
-      return formatPlanTime(clamped) + " • " + safeLabel;
+      var scheduledMinutes = clampPlannerMomentToSchedule(targetMinutes, gameMinutes);
+      return formatPlanTime(scheduledMinutes) + " • " + safeLabel;
     }
 
-    function getPlannerPreGameLabel(gameMinutes, nowMinutes, labelText) {
-      return buildPlannerMomentLabel(gameMinutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, gameMinutes, nowMinutes, labelText);
+    function getPlannerPreGameLabel(gameMinutes, labelText) {
+      return buildPlannerMomentLabel(gameMinutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, gameMinutes, labelText);
     }
 
-    function getPlannerCoffeeLabel(gameMinutes, nowMinutes, labelText) {
-      return buildPlannerMomentLabel(gameMinutes - PLANNER_COFFEE_TARGET_MINUTES, gameMinutes, nowMinutes, labelText);
+    function getPlannerCoffeeLabel(gameMinutes, labelText) {
+      return buildPlannerMomentLabel(gameMinutes - PLANNER_COFFEE_TARGET_MINUTES, gameMinutes, labelText);
+    }
+
+    function isPlannerMomentStillRelevant(targetMinutes, gameMinutes, nowMinutes) {
+      var scheduledMinutes = clampPlannerMomentToSchedule(targetMinutes, gameMinutes);
+      return scheduledMinutes > nowMinutes;
     }
 
     function getPlannerPostGameLabel(lastGameMinutes) {
@@ -4493,11 +4494,15 @@
       }
 
       if (dayState.phase === "pre_day" && Number.isFinite(dayState.firstGameMinutes)) {
-        if (shouldShowPlannerCoffee(dayState.firstGameMinutes, nowMinutes) && coffeeCandidates.length) {
+        if (
+          shouldShowPlannerCoffee(dayState.firstGameMinutes, nowMinutes) &&
+          coffeeCandidates.length &&
+          isPlannerMomentStillRelevant(dayState.firstGameMinutes - PLANNER_COFFEE_TARGET_MINUTES, dayState.firstGameMinutes, nowMinutes)
+        ) {
           addPlannerBlock({
             key: "before_first_game_coffee",
             icon: "☕",
-            label: getPlannerCoffeeLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
+            label: getPlannerCoffeeLabel(dayState.firstGameMinutes, "Before first game"),
             title: "Coffee before the first game",
             reason: "Early game + enough time. Grab coffee first, then make the food stop without rushing.",
             category: "☕ Coffee",
@@ -4507,22 +4512,29 @@
           });
         }
 
-        addPlannerBlock({
-          key: "before_first_game_food",
-          icon: "🍔",
-          label: getPlannerPreGameLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
-          title: "Quick food before the first game",
-          reason: (dayState.firstGameMinutes - nowMinutes) <= PLANNER_GAP_SKIP_MINUTES
-            ? "Tight window. Keep it fast, close, and grab-and-go before first pitch."
-            : "Start the day with a realistic pre-game stop before warmups and arrival pressure kick in.",
-          category: "🍔 Food",
-          focusQuickAction: "food",
-          pool: foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates,
-          poolKey: "before_first_game_food"
-        });
+        if (isPlannerMomentStillRelevant(dayState.firstGameMinutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, dayState.firstGameMinutes, nowMinutes)) {
+          addPlannerBlock({
+            key: "before_first_game_food",
+            icon: "🍔",
+            label: getPlannerPreGameLabel(dayState.firstGameMinutes, "Before first game"),
+            title: "Quick food before the first game",
+            reason: (dayState.firstGameMinutes - nowMinutes) <= PLANNER_GAP_SKIP_MINUTES
+              ? "Tight window. Keep it fast, close, and grab-and-go before first pitch."
+              : "Start the day with a realistic pre-game stop before warmups and arrival pressure kick in.",
+            category: "🍔 Food",
+            focusQuickAction: "food",
+            pool: foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates,
+            poolKey: "before_first_game_food"
+          });
+        }
       }
 
-      if (dayState.phase === "mid_day" && nextGame && Number.isFinite(nextGame.minutes)) {
+      if (
+        dayState.phase === "mid_day" &&
+        nextGame &&
+        Number.isFinite(nextGame.minutes) &&
+        isPlannerMomentStillRelevant(nextGame.minutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, nextGame.minutes, nowMinutes)
+      ) {
         var minutesUntilNextGame = nextGame.minutes - nowMinutes;
         var currentGapLabel = minutesUntilNextGame < PLANNER_GAP_LONG_BREAK_MINUTES ? "Before next game" : "Between games";
         var currentGapPool = minutesUntilNextGame >= PLANNER_GAP_LONG_BREAK_MINUTES && foodMealCandidates.length
@@ -4532,7 +4544,7 @@
         addPlannerBlock({
           key: "before_next_game_food",
           icon: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES ? "⚡" : "🍔",
-          label: getPlannerPreGameLabel(nextGame.minutes, nowMinutes, currentGapLabel),
+          label: getPlannerPreGameLabel(nextGame.minutes, currentGapLabel),
           title: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES
             ? "Fastest food before the next game"
             : (currentGapLabel === "Between games" ? "Food while you have a real break" : "Quick food before the next game"),
