@@ -4046,19 +4046,23 @@
       }
     }
 
-    function enterClassicMode(options) {
-      options = options || {};
+    function enterClassicMode(preserveAddress) {
       plannerModeActive = false;
       showElement("modeChooser", false);
       showElement("plannerPanel", false);
       showElement("searchPanel", true, "block");
       document.body.classList.add("home-mode");
 
-      if (!options.preserveSource) {
+      if (!preserveAddress) {
         var addressInput = document.getElementById("address");
+        var statusEl = document.getElementById("status");
+        var matchResults = document.getElementById("fieldMatchResults");
         if (addressInput) addressInput.value = "";
-        document.getElementById("status").textContent = "";
-        hideFieldMatchResults();
+        if (statusEl) statusEl.textContent = "";
+        if (matchResults) {
+          matchResults.style.display = "none";
+          matchResults.innerHTML = "";
+        }
       }
 
       focusAddressField();
@@ -4283,14 +4287,34 @@
 
       var firstGameMinutes = schedule[0];
       var lastGameMinutes = schedule[schedule.length - 1];
+      var dayEndsAt = lastGameMinutes + PLANNER_ASSUMED_GAME_LENGTH_MINUTES;
+
+      if (nowMinutes < firstGameMinutes) {
+        return {
+          phase: "pre_day",
+          schedule: schedule,
+          firstGameMinutes: firstGameMinutes,
+          lastGameMinutes: lastGameMinutes,
+          nextGame: { index: 0, minutes: firstGameMinutes }
+        };
+      }
+
+      if (nowMinutes >= dayEndsAt) {
+        return {
+          phase: "post_day",
+          schedule: schedule,
+          firstGameMinutes: firstGameMinutes,
+          lastGameMinutes: lastGameMinutes,
+          nextGame: null
+        };
+      }
 
       return {
-        phase: "pre_day",
+        phase: "mid_day",
         schedule: schedule,
         firstGameMinutes: firstGameMinutes,
         lastGameMinutes: lastGameMinutes,
-        nextGame: { index: 0, minutes: firstGameMinutes },
-        planningMode: "future_schedule"
+        nextGame: getNextUpcomingPlanTime(schedule, nowMinutes)
       };
     }
 
@@ -4316,22 +4340,25 @@
     }
 
     function shouldShowPlannerCoffee(nextGameMinutes, nowMinutes) {
-      if (!Number.isFinite(nextGameMinutes)) return false;
+      if (!Number.isFinite(nextGameMinutes) || !Number.isFinite(nowMinutes)) return false;
       if (nextGameMinutes > PLANNER_EARLY_GAME_CUTOFF_MINUTES) return false;
-      return nextGameMinutes >= PLANNER_COFFEE_TARGET_MINUTES;
+      return (nextGameMinutes - nowMinutes) >= PLANNER_COFFEE_TARGET_MINUTES;
     }
 
     function clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes) {
       var latestSafe = Math.max(gameMinutes - PLANNER_PREGAME_BUFFER_MINUTES, 0);
-      var earliestSafe = 0;
       if (targetMinutes >= latestSafe) return latestSafe;
-      if (targetMinutes <= earliestSafe) return earliestSafe;
+      if (targetMinutes <= nowMinutes) return nowMinutes;
       return targetMinutes;
     }
 
     function buildPlannerMomentLabel(targetMinutes, gameMinutes, nowMinutes, labelText) {
       var safeLabel = labelText || "Before first game";
+      var latestSafe = Math.max(gameMinutes - PLANNER_PREGAME_BUFFER_MINUTES, 0);
       var clamped = clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes);
+      if (clamped >= latestSafe || clamped <= nowMinutes) {
+        return "Now • " + safeLabel;
+      }
       return formatPlanTime(clamped) + " • " + safeLabel;
     }
 
@@ -4485,7 +4512,7 @@
             icon: "☕",
             label: getPlannerCoffeeLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
             title: "Coffee before the first game",
-            reason: "Coffee stop before warmups.",
+            reason: "Early game + enough time. Grab coffee first, then make the food stop without rushing.",
             category: "☕ Coffee",
             focusQuickAction: "coffee",
             pool: coffeeCandidates,
@@ -4499,8 +4526,8 @@
           label: getPlannerPreGameLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
           title: "Quick food before the first game",
           reason: (dayState.firstGameMinutes - nowMinutes) <= PLANNER_GAP_SKIP_MINUTES
-            ? "Quick stop before the day starts."
-            : "Best window for a pregame bite.",
+            ? "Tight window. Keep it fast, close, and grab-and-go before first pitch."
+            : "Start the day with a realistic pre-game stop before warmups and arrival pressure kick in.",
           category: "🍔 Food",
           focusQuickAction: "food",
           pool: foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates,
@@ -4523,10 +4550,10 @@
             ? "Fastest food before the next game"
             : (currentGapLabel === "Between games" ? "Food while you have a real break" : "Quick food before the next game"),
           reason: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES
-            ? "Quick stop before the next game."
+            ? "You’re already in the day. Keep this one quick, close, and easy before the next game starts."
             : (currentGapLabel === "Between games"
-              ? "Best window for a real meal."
-              : "Quick stop before the next game."),
+              ? "You have a real break here, so this is a better chance for food before the next game."
+              : "This keeps the stop realistic without pushing too close to first pitch on the next one."),
           category: "🍔 Food",
           focusQuickAction: "food",
           pool: currentGapPool,
@@ -4551,7 +4578,7 @@
               icon: quickCategory === "☕ Coffee" ? "☕" : (quickCategory === "🍦 Ice Cream" ? "🍦" : "🍔"),
               label: formatPlanGapLabel(gapInfo),
               title: "Quick reset between games",
-              reason: "Quick reset between games.",
+              reason: "This break is real, but not huge. Think coffee, a treat, or something light and easy.",
               category: quickCategory,
               focusQuickAction: quickAction,
               pool: quickPool,
@@ -4563,7 +4590,7 @@
               icon: "🍔",
               label: formatPlanGapLabel(gapInfo),
               title: "Food while you have time",
-              reason: "Best window for a real meal.",
+              reason: "This is a true break in the day, so food becomes the primary move instead of a rushed stop.",
               category: "🍔 Food",
               focusQuickAction: "food",
               pool: foodMealCandidates.length ? foodMealCandidates : foodQuickCandidates,
@@ -4578,7 +4605,7 @@
                 icon: secondaryCategory === "☕ Coffee" ? "☕" : "🍦",
                 label: formatPlanGapLabel(gapInfo),
                 title: secondaryCategory === "☕ Coffee" ? "Optional coffee stop" : "Optional treat stop",
-                reason: "Optional second stop for coffee or a treat.",
+                reason: "You’ve got enough room here for a second idea if the family wants coffee, a treat, or a quick reset.",
                 category: secondaryCategory,
                 focusQuickAction: secondaryCategory === "☕ Coffee" ? "coffee" : "food",
                 pool: secondaryPool,
@@ -4595,7 +4622,7 @@
         icon: "🍔",
         label: getPlannerPostGameLabel(lastGameMinutes),
         title: "Food after the last game",
-        reason: "Food first after the last game.",
+        reason: "When the day is done, food comes first. This is the one stop that should always be there.",
         category: "🍔 Food",
         focusQuickAction: "food",
         pool: postGamePool,
@@ -4608,7 +4635,7 @@
           icon: "⛽",
           label: getPlannerPostGameLabel(lastGameMinutes),
           title: "Gas on the way out",
-          reason: "Optional gas stop on the way out.",
+          reason: "Optional secondary stop if you want to top off before heading home.",
           category: "⛽ Gas",
           focusQuickAction: "gas",
           pool: gasCandidates,
@@ -4747,7 +4774,7 @@
     function openFullGuideFromPlanner(focusQuickAction) {
       var quickAction = String(focusQuickAction || "");
       if (quickAction) pendingQuickCategory = quickAction;
-      enterClassicMode({ preserveSource: true });
+      enterClassicMode(true);
 
       if (plannerSourceType === "query" && plannerSourceQuery) {
         document.getElementById("address").value = plannerSourceLabel || plannerSourceQuery;
