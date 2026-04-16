@@ -3009,11 +3009,11 @@
   }
 
   .plan-card-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .plan-secondary-actions {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 }
 
@@ -3073,6 +3073,11 @@
   gap: 10px;
   grid-template-columns: 1fr;
 }
+
+.plan-card-actions {
+  grid-template-columns: 1fr 1fr;
+}
+
 
 .planner-field-wrap {
   display: none;
@@ -3309,17 +3314,15 @@
       <div id="modeChooser" class="mode-chooser-wrap">
         <div class="mode-chooser-card">
           <div class="mode-chooser-title">Choose your game day mode</div>
-          <div class="mode-chooser-subtitle">Plan the day for you, or build the full guide the classic GDG way.</div>
+          <div class="mode-chooser-subtitle">Pick the fast plan, or build the full guide.</div>
           <div class="mode-card-grid">
             <button type="button" class="mode-choice-card" onclick="enterPlannerMode()">
-              <div class="mode-choice-eyebrow">Mode 1</div>
               <div class="mode-choice-title">Plan My Day ⚡</div>
-              <div class="mode-choice-text">Turn game times into a simple coffee, food, and gas plan.</div>
+              <div class="mode-choice-text">Turn your schedule into a simple game day plan</div>
             </button>
             <button type="button" class="mode-choice-card" onclick="enterClassicMode()">
-              <div class="mode-choice-eyebrow">Mode 2</div>
               <div class="mode-choice-title">Build My Guide</div>
-              <div class="mode-choice-text">Use the full GDG search, quick actions, and category browse flow.</div>
+              <div class="mode-choice-text">Find food, coffee, gas &amp; more near your field</div>
             </button>
           </div>
         </div>
@@ -3334,8 +3337,8 @@
           <div class="planner-entry-top">
             <div class="planner-entry-copy">
               <div class="planner-entry-eyebrow">Plan My Day ⚡</div>
-              <div class="planner-entry-title">Turn game times into a simple game day plan</div>
-              <div class="planner-entry-text">Pick your location, add game times, and GDG will line up coffee, food, and gas for the day.</div>
+              <div class="planner-entry-title">Turn your schedule into a simple game day plan</div>
+              <div class="planner-entry-text">Pick your location, enter game times, and GDG will line up a cleaner plan for the day.</div>
             </div>
           </div>
 
@@ -3353,7 +3356,7 @@
           <div class="planner-times-wrap">
             <label class="planner-input-label" for="planTimesInput">Enter Game Times</label>
             <input id="planTimesInput" placeholder="9 12 3" value="" inputmode="text" />
-            <div class="planner-helper-text">Type naturally — GDG will clean up the times and add commas.</div>
+            <div class="planner-helper-text">Type naturally — GDG will add commas, clean the times up, and use them in your plan.</div>
           </div>
 
           <div id="plannerSourcePill" class="planner-source-pill pending">No location selected yet</div>
@@ -4209,6 +4212,46 @@
       return out.join(", ");
     }
 
+    function getPlanGapInfo(startMinutes, nextMinutes) {
+      if (!Number.isFinite(startMinutes) || !Number.isFinite(nextMinutes)) return null;
+      var assumedGameLength = 90;
+      var windowStart = startMinutes + assumedGameLength;
+      var freeMinutes = nextMinutes - windowStart;
+      if (freeMinutes <= 20) return null;
+      return {
+        windowStart: windowStart,
+        freeMinutes: freeMinutes,
+        type: freeMinutes < 90 ? "quick_food" : "meal"
+      };
+    }
+
+    function formatPlanGapLabel(info) {
+      if (!info) return "Between games";
+      var gapText = info.freeMinutes >= 60
+        ? (Math.round(info.freeMinutes / 6) / 10).toFixed(1).replace(/\.0$/, "") + " hrs"
+        : info.freeMinutes + " min";
+      return formatPlanTime(info.windowStart) + " • " + (info.type === "quick_food" ? "Quick break" : "Long break") + " (" + gapText + ")";
+    }
+
+    function pullNextPlannerCandidate(candidates, usedPlaceIds, fallbackIndexMap, poolKey) {
+      var list = Array.isArray(candidates) ? candidates : [];
+      var startIndex = fallbackIndexMap[poolKey] || 0;
+      for (var i = startIndex; i < list.length; i++) {
+        var row = list[i];
+        var placeId = getRowPlaceId(row) || makePlaceKey(row);
+        if (placeId && !usedPlaceIds[placeId]) {
+          fallbackIndexMap[poolKey] = i + 1;
+          usedPlaceIds[placeId] = true;
+          return { row: row, index: i };
+        }
+      }
+      if (list[startIndex]) {
+        fallbackIndexMap[poolKey] = startIndex + 1;
+        return { row: list[startIndex], index: startIndex };
+      }
+      return null;
+    }
+
     function isQuickFoodName(name) {
       var n = String(name || "").toLowerCase();
       var quickTerms = [
@@ -4286,66 +4329,78 @@
     function buildPlannerBlocks(rows, times) {
       var blocks = [];
       var usedPlaceIds = {};
+      var fallbackIndexMap = {};
       var coffeeCandidates = getPlannerCandidates(rows, "☕ Coffee", "coffee", usedPlaceIds);
       var foodQuickCandidates = getPlannerCandidates(rows, "🍔 Food", "quick_food", usedPlaceIds);
       var foodMealCandidates = getPlannerCandidates(rows, "🍔 Food", "meal", usedPlaceIds);
       var gasCandidates = getPlannerCandidates(rows, "⛽ Gas", "gas", usedPlaceIds);
+      var coffeePick = pullNextPlannerCandidate(coffeeCandidates, usedPlaceIds, fallbackIndexMap, "coffee");
+      var gasPick = pullNextPlannerCandidate(gasCandidates, usedPlaceIds, fallbackIndexMap, "gas");
 
-      if (coffeeCandidates.length) {
+      if (coffeePick && coffeePick.row) {
         blocks.push({
           key: "before_game",
           icon: "☕",
           label: times.length ? (formatPlanTime(Math.max(times[0] - 60, 0)) + " • Before first game") : "Before first game",
           title: "Coffee before game one",
-          reason: "Best blend of close, reliable, and easy to grab before the day starts.",
+          reason: "A quick, reliable stop before the first pitch.",
           category: "☕ Coffee",
           focusQuickAction: "coffee",
           candidates: coffeeCandidates,
-          activeIndex: 0
-        });
-        usedPlaceIds[getRowPlaceId(coffeeCandidates[0]) || makePlaceKey(coffeeCandidates[0])] = true;
-      }
-
-      if (foodQuickCandidates.length) {
-        blocks.push({
-          key: "quick_break",
-          icon: "🍔",
-          label: times.length >= 2 ? (formatPlanTime(times[0] + 90) + " • Quick break") : "Between games",
-          title: "Quick food between games",
-          reason: "Close, fast, and low-friction when you need something easy.",
-          category: "🍔 Food",
-          focusQuickAction: "food",
-          candidates: foodQuickCandidates,
-          activeIndex: 0
-        });
-        usedPlaceIds[getRowPlaceId(foodQuickCandidates[0]) || makePlaceKey(foodQuickCandidates[0])] = true;
-      }
-
-      if (foodMealCandidates.length && (times.length >= 3 || times.length === 0 || times.length === 2)) {
-        blocks.push({
-          key: "longer_break",
-          icon: "🍕",
-          label: times.length >= 3 ? (formatPlanTime(times[1] + 90) + " • Longer break") : "Longer break",
-          title: "Sit-down meal when you have time",
-          reason: "A better meal when the day opens up and you can slow down a bit.",
-          category: "🍔 Food",
-          focusQuickAction: "food",
-          candidates: foodMealCandidates,
-          activeIndex: 0
+          activeIndex: coffeePick.index || 0
         });
       }
 
-      if (gasCandidates.length) {
+      if (times.length >= 2) {
+        for (var i = 0; i < times.length - 1; i++) {
+          var gapInfo = getPlanGapInfo(times[i], times[i + 1]);
+          if (!gapInfo) continue;
+          var mode = gapInfo.type;
+          var foodPool = mode === "meal" ? foodMealCandidates : foodQuickCandidates;
+          var foodPick = pullNextPlannerCandidate(foodPool, usedPlaceIds, fallbackIndexMap, mode);
+          if (!foodPick || !foodPick.row) continue;
+          blocks.push({
+            key: mode + "_" + (i + 1),
+            icon: mode === "meal" ? "🍕" : "🍔",
+            label: formatPlanGapLabel(gapInfo),
+            title: mode === "meal" ? "A better meal while you have time" : "Quick food between games",
+            reason: mode === "meal"
+              ? "You have enough room for a sit-down meal without rushing back."
+              : "This keeps the stop close and quick when the break is tighter.",
+            category: "🍔 Food",
+            focusQuickAction: "food",
+            candidates: foodPool,
+            activeIndex: foodPick.index || 0
+          });
+        }
+      } else {
+        var quickFallback = pullNextPlannerCandidate(foodQuickCandidates, usedPlaceIds, fallbackIndexMap, "quick_food");
+        if (quickFallback && quickFallback.row) {
+          blocks.push({
+            key: "quick_break_1",
+            icon: "🍔",
+            label: "Between games",
+            title: "Quick food between games",
+            reason: "A close, easy stop when you need something fast.",
+            category: "🍔 Food",
+            focusQuickAction: "food",
+            candidates: foodQuickCandidates,
+            activeIndex: quickFallback.index || 0
+          });
+        }
+      }
+
+      if (gasPick && gasPick.row) {
         blocks.push({
           key: "after_games",
           icon: "⛽",
           label: times.length ? (formatPlanTime(times[times.length - 1] + 120) + " • After the last game") : "After the last game",
           title: "Gas before heading home",
-          reason: "Closest solid gas stop so you can finish the day without another errand.",
+          reason: "Finish the day with one clean stop on the way out.",
           category: "⛽ Gas",
           focusQuickAction: "gas",
           candidates: gasCandidates,
-          activeIndex: 0
+          activeIndex: gasPick.index || 0
         });
       }
 
@@ -4417,22 +4472,21 @@
               return "<span class='plan-tag'>" + esc(tag) + "</span>";
             }).join("") + "</div>" +
             "<div class='plan-card-actions'>" +
-              "<a class='directions-btn' href='" + esc(getPlannerDirectionsLink(row)) + "' target='_blank' rel='noopener' onclick=\"trackPlannerAction('directions','" + esc(block.key) + "')\">Directions</a>" +
+              "<a class='location-action-btn' href='" + esc(buildAppleMapsLink(String(row[1] || ""), String(row[3] || ""))) + "' target='_blank' rel='noopener' onclick=\"trackPlannerAction('open_apple_maps','" + esc(block.key) + "')\">Apple Maps</a>" +
+              "<a class='location-action-btn google-btn' href='" + esc(buildGoogleMapsLink(String(row[1] || ""), String(row[3] || ""))) + "' target='_blank' rel='noopener' onclick=\"trackPlannerAction('open_google_maps','" + esc(block.key) + "')\">Google Maps</a>" +
             "</div>" +
             "<div class='plan-secondary-actions' style='margin-top:10px;'>" +
-              "<button type='button' class='secondary-btn' onclick=\"sharePlannerBlock('" + esc(block.key) + "')\">Share</button>" +
               "<button type='button' class='secondary-btn' onclick=\"swapPlannerBlock('" + esc(block.key) + "')\">Pick a Different Option</button>" +
-              "<button type='button' class='secondary-btn' onclick=\"seeMorePlannerOptions('" + esc(block.key) + "')\">See More Options</button>" +
             "</div>" +
           "</div>";
       });
 
       html += "</div>" +
         "<div class='plan-footer-card'>" +
-          "<div class='plan-footer-title'>Need more nearby?</div>" +
-          "<div class='plan-footer-text'>Open the full GDG guide for more categories, top stops, and detailed options.</div>" +
+          "<div class='plan-footer-title'>Want the full guide too?</div>" +
+          "<div class='plan-footer-text'>Open the full GDG guide for more categories, top stops, and additional nearby options.</div>" +
           "<div class='plan-footer-actions'>" +
-            "<button type='button' class='action-btn build-btn' onclick='openFullGuideFromPlanner()'>Open Full Guide</button>" +
+            "<button type='button' class='action-btn build-btn' onclick='openFullGuideFromPlanner()'>View Full Guide</button>" +
           "</div>" +
         "</div>";
 
@@ -8734,7 +8788,7 @@ function setupVenueConfirmOverlay() {
       if (planTimesInput) {
         planTimesInput.addEventListener("input", function() {
           var normalized = normalizePlannerTimesText(planTimesInput.value, false);
-          if (normalized && normalized !== planTimesInput.value) {
+          if (normalized !== planTimesInput.value) {
             var end = normalized.length;
             planTimesInput.value = normalized;
             try { planTimesInput.setSelectionRange(end, end); } catch (e) {}
@@ -8742,13 +8796,13 @@ function setupVenueConfirmOverlay() {
         });
         planTimesInput.addEventListener("blur", function() {
           var formatted = normalizePlannerTimesText(planTimesInput.value, true);
-          if (formatted) planTimesInput.value = formatted;
+          planTimesInput.value = formatted || "";
         });
         planTimesInput.addEventListener("keydown", function(e) {
           if (e.key === "Enter") {
             e.preventDefault();
             var formatted = normalizePlannerTimesText(planTimesInput.value, true);
-            if (formatted) planTimesInput.value = formatted;
+            planTimesInput.value = formatted || planTimesInput.value;
             runPlanMyDay();
           }
         });
