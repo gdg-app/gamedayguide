@@ -4046,25 +4046,12 @@
       }
     }
 
-    function enterClassicMode(preserveAddress) {
+    function enterClassicMode() {
       plannerModeActive = false;
       showElement("modeChooser", false);
       showElement("plannerPanel", false);
       showElement("searchPanel", true, "block");
       document.body.classList.add("home-mode");
-
-      if (!preserveAddress) {
-        var addressInput = document.getElementById("address");
-        var statusEl = document.getElementById("status");
-        var matchResults = document.getElementById("fieldMatchResults");
-        if (addressInput) addressInput.value = "";
-        if (statusEl) statusEl.textContent = "";
-        if (matchResults) {
-          matchResults.style.display = "none";
-          matchResults.innerHTML = "";
-        }
-      }
-
       focusAddressField();
     }
 
@@ -4287,34 +4274,14 @@
 
       var firstGameMinutes = schedule[0];
       var lastGameMinutes = schedule[schedule.length - 1];
-      var dayEndsAt = lastGameMinutes + PLANNER_ASSUMED_GAME_LENGTH_MINUTES;
-
-      if (nowMinutes < firstGameMinutes) {
-        return {
-          phase: "pre_day",
-          schedule: schedule,
-          firstGameMinutes: firstGameMinutes,
-          lastGameMinutes: lastGameMinutes,
-          nextGame: { index: 0, minutes: firstGameMinutes }
-        };
-      }
-
-      if (nowMinutes >= dayEndsAt) {
-        return {
-          phase: "post_day",
-          schedule: schedule,
-          firstGameMinutes: firstGameMinutes,
-          lastGameMinutes: lastGameMinutes,
-          nextGame: null
-        };
-      }
 
       return {
-        phase: "mid_day",
+        phase: "pre_day",
         schedule: schedule,
         firstGameMinutes: firstGameMinutes,
         lastGameMinutes: lastGameMinutes,
-        nextGame: getNextUpcomingPlanTime(schedule, nowMinutes)
+        nextGame: { index: 0, minutes: firstGameMinutes },
+        planningMode: "future_schedule"
       };
     }
 
@@ -4340,25 +4307,22 @@
     }
 
     function shouldShowPlannerCoffee(nextGameMinutes, nowMinutes) {
-      if (!Number.isFinite(nextGameMinutes) || !Number.isFinite(nowMinutes)) return false;
+      if (!Number.isFinite(nextGameMinutes)) return false;
       if (nextGameMinutes > PLANNER_EARLY_GAME_CUTOFF_MINUTES) return false;
-      return (nextGameMinutes - nowMinutes) >= PLANNER_COFFEE_TARGET_MINUTES;
+      return nextGameMinutes >= PLANNER_COFFEE_TARGET_MINUTES;
     }
 
     function clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes) {
       var latestSafe = Math.max(gameMinutes - PLANNER_PREGAME_BUFFER_MINUTES, 0);
+      var earliestSafe = 0;
       if (targetMinutes >= latestSafe) return latestSafe;
-      if (targetMinutes <= nowMinutes) return nowMinutes;
+      if (targetMinutes <= earliestSafe) return earliestSafe;
       return targetMinutes;
     }
 
     function buildPlannerMomentLabel(targetMinutes, gameMinutes, nowMinutes, labelText) {
       var safeLabel = labelText || "Before first game";
-      var latestSafe = Math.max(gameMinutes - PLANNER_PREGAME_BUFFER_MINUTES, 0);
       var clamped = clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes);
-      if (clamped >= latestSafe || clamped <= nowMinutes) {
-        return "Now • " + safeLabel;
-      }
       return formatPlanTime(clamped) + " • " + safeLabel;
     }
 
@@ -4774,7 +4738,7 @@
     function openFullGuideFromPlanner(focusQuickAction) {
       var quickAction = String(focusQuickAction || "");
       if (quickAction) pendingQuickCategory = quickAction;
-      enterClassicMode(true);
+      enterClassicMode();
 
       if (plannerSourceType === "query" && plannerSourceQuery) {
         document.getElementById("address").value = plannerSourceLabel || plannerSourceQuery;
@@ -7384,18 +7348,18 @@ function setupVenueConfirmOverlay() {
       detectedGpsVenue = null;
       pendingGpsBuild = null;
 
-      if (!venue.query) {
-        if (Number.isFinite(pending.lat) && Number.isFinite(pending.lng)) {
-          startLoadingState();
-          document.getElementById("status").textContent = "";
-          beginGpsGuideBuild({ lat: pending.lat, lng: pending.lng });
-        }
+      if (!Number.isFinite(pending.lat) || !Number.isFinite(pending.lng)) {
+        document.getElementById("status").textContent = "Couldn’t confirm your location. Please try again.";
         return;
       }
 
-      document.getElementById("address").value = venue.query;
-      document.getElementById("status").textContent = "Building your guide — results will appear below…";
-      beginGpsGuideBuild({ query: venue.query, weatherLat: pending.lat, weatherLng: pending.lng });
+      if (venue.query) {
+        document.getElementById("address").value = venue.query;
+      }
+
+      startLoadingState();
+      document.getElementById("status").textContent = "";
+      beginGpsGuideBuild({ lat: pending.lat, lng: pending.lng, confirmedVenueName: venue.query || "", confirmedVenueAddress: venue.venueAddress || "" });
     }
 
     function declineDetectedVenue() {
