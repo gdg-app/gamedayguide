@@ -144,8 +144,8 @@ const DRIVE_TIME_CATEGORY_LABELS = [
   "⛽ Gas",
   "🏥 Urgent Care / ER"
 ];
-const DRIVE_TIME_CANDIDATE_LIMIT = 4;
-const DRIVE_TIME_TOP_COUNT = 3;
+const DRIVE_TIME_CANDIDATE_LIMIT = 8;
+const DRIVE_TIME_TOP_COUNT = 5;
 
 function toFiniteNumber(value) {
   const n = Number(value);
@@ -679,6 +679,21 @@ function buildNearbyUrl(loc, radiusMeters, type, keyword, apiKey) {
   );
 }
 
+function buildNearbyDistanceUrl(loc, type, keyword, apiKey) {
+  return (
+    "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=" +
+    loc.lat + "," + loc.lng +
+    "&rankby=distance" +
+    "&type=" + encodeURIComponent(type) +
+    (keyword ? "&keyword=" + encodeURIComponent(keyword) : "") +
+    "&key=" + encodeURIComponent(apiKey)
+  );
+}
+
+function shouldUseDistanceRankForCategory(category) {
+  return category === "⛽ Gas" || category === "☕ Coffee";
+}
+
 function buildStandardCategoryRequests(loc, radiusMeters, apiKey, activeCategories) {
   const cats = categories();
   const requests = [];
@@ -698,13 +713,18 @@ function buildStandardCategoryRequests(loc, radiusMeters, apiKey, activeCategori
       continue;
     }
 
+    const useDistanceRank = shouldUseDistanceRankForCategory(c[0]);
+
     requests.push({
       category: c[0],
       type: c[1],
       keyword: c[2],
       requiredTypes: c[3],
       excludedTypes: c[4],
-      url: buildNearbyUrl(loc, radiusMeters, c[1], c[2], apiKey)
+      useDistanceRank,
+      url: useDistanceRank
+        ? buildNearbyDistanceUrl(loc, c[1], c[2], apiKey)
+        : buildNearbyUrl(loc, radiusMeters, c[1], c[2], apiKey)
     });
   }
 
@@ -841,6 +861,51 @@ function buildFoodRows(places, loc, radiusMiles, limit) {
   });
 }
 
+function getStandardCategoryRankingScore(category, row) {
+  const distance = typeof row[6] === "number" ? row[6] : 9999;
+  const rating = Number(row[2] || 0);
+  const openNow = String(row[4] || "").toLowerCase();
+
+  if (category === "⛽ Gas") {
+    return (distance * -1000) + rating;
+  }
+
+  if (category === "☕ Coffee") {
+    let score = distance * -100;
+    if (openNow.indexOf("open") !== -1) score += 15;
+    score += rating * 8;
+    return score;
+  }
+
+  let score = distance * -100;
+  if (openNow.indexOf("open") !== -1) score += 10;
+  score += rating * 5;
+  return score;
+}
+
+function sortStandardCategoryRows(category, rows) {
+  rows.sort(function(a, b) {
+    const scoreA = getStandardCategoryRankingScore(category, a);
+    const scoreB = getStandardCategoryRankingScore(category, b);
+    if (scoreB !== scoreA) return scoreB - scoreA;
+
+    const da = typeof a[6] === "number" ? a[6] : 9999;
+    const db = typeof b[6] === "number" ? b[6] : 9999;
+    if (da < db) return -1;
+    if (da > db) return 1;
+
+    const ra = Number(a[2] || 0);
+    const rb = Number(b[2] || 0);
+    if (rb !== ra) return rb - ra;
+
+    const na = String(a[1] || "").toLowerCase();
+    const nb = String(b[1] || "").toLowerCase();
+    return na < nb ? -1 : na > nb ? 1 : 0;
+  });
+
+  return rows;
+}
+
 function buildRowFromPlace(category, p, loc, radiusMiles) {
   let placeLat = null;
   let placeLng = null;
@@ -900,7 +965,7 @@ function parseStandardCategoryResponse(request, res, loc, radiusMiles, limit) {
   const rows = [];
   const results = res.results || [];
 
-  for (let i = 0; i < results.length && rows.length < limit; i++) {
+  for (let i = 0; i < results.length; i++) {
     const p = results[i];
     const pTypes = p.types || [];
 
@@ -912,7 +977,8 @@ function parseStandardCategoryResponse(request, res, loc, radiusMiles, limit) {
     if (row) rows.push(row);
   }
 
-  return rows;
+  sortStandardCategoryRows(request.category, rows);
+  return rows.slice(0, limit);
 }
 
 function collectPlacesFromTextResponse(res, labelForErrors) {
@@ -1090,6 +1156,11 @@ async function applyDriveTimeEnhancements(rows, origin, apiKey) {
       categoryOrder.push(category);
     }
     grouped[category].push(row);
+  }
+
+  for (let i = 0; i < categoryOrder.length; i++) {
+    const category = categoryOrder[i];
+    grouped[category] = sortStandardCategoryRows(category, grouped[category] || []);
   }
 
   const candidates = [];
