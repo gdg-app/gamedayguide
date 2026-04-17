@@ -2771,10 +2771,14 @@
   background: #fff;
   border-top-left-radius: 28px;
   border-top-right-radius: 28px;
-  padding: 14px 16px 24px;
+  padding: 56px 16px calc(env(safe-area-inset-bottom, 0px) + 24px);
   box-shadow: 0 -14px 34px rgba(0,0,0,0.22);
   transform: translateY(100%);
   transition: transform 0.25s ease;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 12px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .decision-modal.active .decision-modal-sheet {
@@ -2807,6 +2811,7 @@
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  z-index: 2;
 }
 
 .decision-modal-title {
@@ -4925,6 +4930,7 @@ function buildPlannerBlocks(rows, times) {
 
     function openDecisionMode() {
       var modal = document.getElementById("decisionModal");
+      var sheet = modal ? modal.querySelector(".decision-modal-sheet") : null;
       var chooser = document.getElementById("decisionChooser");
       var loading = document.getElementById("decisionLoading");
       var result = document.getElementById("decisionResult");
@@ -4934,6 +4940,7 @@ function buildPlannerBlocks(rows, times) {
       loading.classList.remove("active");
       result.classList.remove("active");
       result.innerHTML = "";
+      if (sheet) sheet.scrollTop = 0;
       modal.classList.add("active");
       modal.setAttribute("aria-hidden", "false");
 
@@ -4947,9 +4954,11 @@ function buildPlannerBlocks(rows, times) {
 
     function closeDecisionModal() {
       var modal = document.getElementById("decisionModal");
+      var sheet = modal ? modal.querySelector(".decision-modal-sheet") : null;
       if (!modal) return;
       modal.classList.remove("active");
       modal.setAttribute("aria-hidden", "true");
+      if (sheet) sheet.scrollTop = 0;
     }
 
     function setDecisionLoadingState(isLoading, message) {
