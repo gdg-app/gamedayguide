@@ -1,3 +1,4 @@
+
 export default async function handler(req, res) {
   try {
     const apiKey = process.env.MAPS_API_KEY;
@@ -785,6 +786,59 @@ function buildFoodSearchRequests(loc, radiusMeters, apiKey) {
   ];
 }
 
+function getCurrentLocalHour() {
+  try {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      hour12: false,
+      timeZone: "America/New_York"
+    });
+    const hourText = formatter.format(new Date());
+    const hour = Number(hourText);
+    return Number.isFinite(hour) ? hour : new Date().getHours();
+  } catch (_err) {
+    return new Date().getHours();
+  }
+}
+
+function getMorningFoodAdjustment(place) {
+  const hour = getCurrentLocalHour();
+  if (hour >= 10) return 0;
+
+  const hay = [place && place.name || "", place && place.formatted_address || "", place && place.vicinity || ""]
+    .join(" ")
+    .toLowerCase();
+
+  const goodMorningTerms = [
+    "breakfast", "brunch", "bagel", "bakery", "donut", "doughnut", "biscuit",
+    "coffee", "cafe", "café", "espresso", "dunkin", "starbucks", "panera",
+    "first watch", "waffle", "pancake", "omelet", "omelette"
+  ];
+
+  const badMorningTerms = [
+    "jersey mike", "subway", "firehouse", "jimmy john", "burger", "bbq", "barbecue",
+    "steak", "wings", "grill", "smokehouse", "chophouse"
+  ];
+
+  let adjustment = 0;
+
+  for (let i = 0; i < goodMorningTerms.length; i++) {
+    if (hay.indexOf(goodMorningTerms[i]) !== -1) {
+      adjustment += 25;
+      break;
+    }
+  }
+
+  for (let j = 0; j < badMorningTerms.length; j++) {
+    if (hay.indexOf(badMorningTerms[j]) !== -1) {
+      adjustment -= 40;
+      break;
+    }
+  }
+
+  return adjustment;
+}
+
 function getFoodRankingScore(p, loc) {
   let placeLat = null;
   let placeLng = null;
@@ -804,10 +858,12 @@ function getFoodRankingScore(p, loc) {
   const distance = haversineMiles(loc.lat, loc.lng, placeLat, placeLng);
   let score = 0;
 
-  if (distance < 1) score += 40;
-  else if (distance <= 3) score += 30;
-  else if (distance <= 6) score += 15;
-  else if (distance <= 10) score += 5;
+  if (distance < 1) score += 50;
+  else if (distance <= 2) score += 35;
+  else if (distance <= 4) score += 15;
+  else if (distance <= 6) score += 0;
+  else if (distance <= 8) score -= 15;
+  else score -= 40;
 
   if (p.opening_hours && typeof p.opening_hours.open_now === "boolean") {
     if (p.opening_hours.open_now) score += 25;
@@ -821,6 +877,8 @@ function getFoodRankingScore(p, loc) {
 
   const textBlob = [p.name || "", p.formatted_address || "", p.vicinity || ""].join(" ");
   if (textLooksLikeQuickFood(textBlob)) score += 10;
+
+  score += getMorningFoodAdjustment(p);
 
   return score;
 }
