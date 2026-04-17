@@ -2775,9 +2775,6 @@
   box-shadow: 0 -14px 34px rgba(0,0,0,0.22);
   transform: translateY(100%);
   transition: transform 0.25s ease;
-  max-height: min(88dvh, 720px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 .decision-modal.active .decision-modal-sheet {
@@ -3333,7 +3330,7 @@
 
       <div class="search-panel planner-panel" id="plannerPanel">
         <div class="panel-back-row">
-          <button type="button" class="secondary-btn panel-back-btn" onclick="backToModeChooser()">← Back to Home</button>
+          <button type="button" class="secondary-btn panel-back-btn" onclick="backToModeChooser()">← Back</button>
         </div>
 
         <div class="planner-entry-card" id="plannerEntryCard">
@@ -3375,7 +3372,7 @@
 
       <div class="search-panel classic-panel" id="searchPanel">
         <div class="panel-back-row">
-          <button type="button" class="secondary-btn panel-back-btn" onclick="backToModeChooser()">← Back to Home</button>
+          <button type="button" class="secondary-btn panel-back-btn" onclick="backToModeChooser()">← Back</button>
         </div>
         <div class="search-intro">
 <h2 class="search-title">Find food, coffee, and essentials near your field</h2>
@@ -3779,24 +3776,6 @@
 
     function updateResultsSharePrompt() {
       return;
-    }
-
-    function scrollToPlannerResults() {
-      var wrap = document.getElementById("planResults");
-      if (!wrap || !wrap.classList.contains("active")) return;
-
-      window.setTimeout(function() {
-        var firstCard = wrap.querySelector(".plan-card") || wrap;
-        if (!firstCard) return;
-        var rect = firstCard.getBoundingClientRect();
-        var offset = 18;
-        var top = window.pageYOffset + rect.top - offset;
-        try {
-          window.scrollTo({ top: Math.max(top, 0), behavior: "smooth" });
-        } catch (e) {
-          firstCard.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-      }, 140);
     }
 
     function scrollToGuideResults() {
@@ -4240,60 +4219,16 @@
       return out.join(", ");
     }
 
-    var PLANNER_ASSUMED_GAME_LENGTH_MINUTES = 90;
-    var PLANNER_PREGAME_FOOD_TARGET_MINUTES = 150;
-    var PLANNER_PREGAME_BUFFER_MINUTES = 10;
-    var PLANNER_COFFEE_TARGET_MINUTES = 180;
-    var PLANNER_EARLY_GAME_CUTOFF_MINUTES = 10 * 60 + 30;
-    var PLANNER_GAP_SKIP_MINUTES = 90;
-    var PLANNER_GAP_LONG_BREAK_MINUTES = 150;
-
-    function getCurrentPlanMinutes() {
-      var now = new Date();
-      return now.getHours() * 60 + now.getMinutes();
-    }
-
-    function getNextUpcomingPlanTime(times, nowMinutes) {
-      var list = Array.isArray(times) ? times.slice() : [];
-      for (var i = 0; i < list.length; i++) {
-        if (Number.isFinite(list[i]) && list[i] > nowMinutes) {
-          return {
-            index: i,
-            minutes: list[i]
-          };
-        }
-      }
-      return null;
-    }
-
-    function getPlannerDayState(times, nowMinutes) {
-      var schedule = (Array.isArray(times) ? times.slice() : []).filter(function(value) {
-        return Number.isFinite(value);
-      }).sort(function(a, b) { return a - b; });
-      if (!schedule.length) return { phase: "empty", schedule: [] };
-
-      var firstGameMinutes = schedule[0];
-      var lastGameMinutes = schedule[schedule.length - 1];
-
-      return {
-        phase: "pre_day",
-        schedule: schedule,
-        firstGameMinutes: firstGameMinutes,
-        lastGameMinutes: lastGameMinutes,
-        nextGame: { index: 0, minutes: firstGameMinutes },
-        planningMode: "future_schedule"
-      };
-    }
-
     function getPlanGapInfo(startMinutes, nextMinutes) {
       if (!Number.isFinite(startMinutes) || !Number.isFinite(nextMinutes)) return null;
-      var windowStart = startMinutes + PLANNER_ASSUMED_GAME_LENGTH_MINUTES;
+      var assumedGameLength = 90;
+      var windowStart = startMinutes + assumedGameLength;
       var freeMinutes = nextMinutes - windowStart;
-      if (freeMinutes < PLANNER_GAP_SKIP_MINUTES) return null;
+      if (freeMinutes <= 20) return null;
       return {
         windowStart: windowStart,
         freeMinutes: freeMinutes,
-        type: freeMinutes >= PLANNER_GAP_LONG_BREAK_MINUTES ? "long_break" : "quick_break"
+        type: freeMinutes < 90 ? "quick_food" : "meal"
       };
     }
 
@@ -4302,45 +4237,7 @@
       var gapText = info.freeMinutes >= 60
         ? (Math.round(info.freeMinutes / 6) / 10).toFixed(1).replace(/\.0$/, "") + " hrs"
         : info.freeMinutes + " min";
-      var label = info.type === "long_break" ? "Between games" : "Before next game";
-      return formatPlanTime(info.windowStart) + " • " + label + " (" + gapText + ")";
-    }
-
-    function shouldShowPlannerCoffee(nextGameMinutes, nowMinutes) {
-      if (!Number.isFinite(nextGameMinutes)) return false;
-      if (nextGameMinutes > PLANNER_EARLY_GAME_CUTOFF_MINUTES) return false;
-      return nextGameMinutes >= PLANNER_COFFEE_TARGET_MINUTES;
-    }
-
-    function clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes) {
-      var latestSafe = Math.max(gameMinutes - PLANNER_PREGAME_BUFFER_MINUTES, 0);
-      var earliestSafe = 0;
-      if (targetMinutes >= latestSafe) return latestSafe;
-      if (targetMinutes <= earliestSafe) return earliestSafe;
-      return targetMinutes;
-    }
-
-    function buildPlannerMomentLabel(targetMinutes, gameMinutes, nowMinutes, labelText) {
-      var safeLabel = labelText || "Before first game";
-      var clamped = clampPlannerMoment(targetMinutes, gameMinutes, nowMinutes);
-      return formatPlanTime(clamped) + " • " + safeLabel;
-    }
-
-    function getPlannerPreGameLabel(gameMinutes, nowMinutes, labelText) {
-      return buildPlannerMomentLabel(gameMinutes - PLANNER_PREGAME_FOOD_TARGET_MINUTES, gameMinutes, nowMinutes, labelText);
-    }
-
-    function getPlannerCoffeeLabel(gameMinutes, nowMinutes, labelText) {
-      return buildPlannerMomentLabel(gameMinutes - PLANNER_COFFEE_TARGET_MINUTES, gameMinutes, nowMinutes, labelText);
-    }
-
-    function getPlannerPostGameLabel(lastGameMinutes) {
-      var targetMinutes = Number.isFinite(lastGameMinutes)
-        ? (lastGameMinutes + PLANNER_ASSUMED_GAME_LENGTH_MINUTES)
-        : null;
-      return targetMinutes !== null
-        ? (formatPlanTime(targetMinutes) + " • After the last game")
-        : "After the last game";
+      return formatPlanTime(info.windowStart) + " • " + (info.type === "quick_food" ? "Quick break" : "Long break") + " (" + gapText + ")";
     }
 
     function pullNextPlannerCandidate(candidates, usedPlaceIds, fallbackIndexMap, poolKey) {
@@ -4440,170 +4337,77 @@
       var blocks = [];
       var usedPlaceIds = {};
       var fallbackIndexMap = {};
-      var nowMinutes = getCurrentPlanMinutes();
-      var dayState = getPlannerDayState(times, nowMinutes);
-      var schedule = dayState.schedule || [];
-      var nextGame = dayState.nextGame;
-      var lastGameMinutes = dayState.lastGameMinutes;
-
       var coffeeCandidates = getPlannerCandidates(rows, "☕ Coffee", "coffee", usedPlaceIds);
       var foodQuickCandidates = getPlannerCandidates(rows, "🍔 Food", "quick_food", usedPlaceIds);
       var foodMealCandidates = getPlannerCandidates(rows, "🍔 Food", "meal", usedPlaceIds);
-      var iceCreamCandidates = getPlannerCandidates(rows, "🍦 Ice Cream", "quick_food", usedPlaceIds);
       var gasCandidates = getPlannerCandidates(rows, "⛽ Gas", "gas", usedPlaceIds);
+      var coffeePick = pullNextPlannerCandidate(coffeeCandidates, usedPlaceIds, fallbackIndexMap, "coffee");
+      var gasPick = pullNextPlannerCandidate(gasCandidates, usedPlaceIds, fallbackIndexMap, "gas");
 
-      function addPlannerBlock(config) {
-        var pool = Array.isArray(config.pool) ? config.pool : [];
-        var pick = pullNextPlannerCandidate(pool, usedPlaceIds, fallbackIndexMap, config.poolKey || config.key);
-        if (!pick || !pick.row) return;
+      if (coffeePick && coffeePick.row) {
         blocks.push({
-          key: config.key,
-          icon: config.icon,
-          label: config.label,
-          title: config.title,
-          reason: config.reason,
-          category: config.category,
-          focusQuickAction: config.focusQuickAction,
-          candidates: pool,
-          activeIndex: pick.index || 0
+          key: "before_game",
+          icon: "☕",
+          label: times.length ? (formatPlanTime(Math.max(times[0] - 60, 0)) + " • Before first game") : "Before first game",
+          title: "Coffee before game one",
+          reason: "A quick, reliable stop before the first pitch.",
+          category: "☕ Coffee",
+          focusQuickAction: "coffee",
+          candidates: coffeeCandidates,
+          activeIndex: coffeePick.index || 0
         });
       }
 
-      if (dayState.phase === "pre_day" && Number.isFinite(dayState.firstGameMinutes)) {
-        if (shouldShowPlannerCoffee(dayState.firstGameMinutes, nowMinutes) && coffeeCandidates.length) {
-          addPlannerBlock({
-            key: "before_first_game_coffee",
-            icon: "☕",
-            label: getPlannerCoffeeLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
-            title: "Coffee before the first game",
-            reason: "Early game + enough time. Grab coffee first, then make the food stop without rushing.",
-            category: "☕ Coffee",
-            focusQuickAction: "coffee",
-            pool: coffeeCandidates,
-            poolKey: "before_first_game_coffee"
+      if (times.length >= 2) {
+        for (var i = 0; i < times.length - 1; i++) {
+          var gapInfo = getPlanGapInfo(times[i], times[i + 1]);
+          if (!gapInfo) continue;
+          var mode = gapInfo.type;
+          var foodPool = mode === "meal" ? foodMealCandidates : foodQuickCandidates;
+          var foodPick = pullNextPlannerCandidate(foodPool, usedPlaceIds, fallbackIndexMap, mode);
+          if (!foodPick || !foodPick.row) continue;
+          blocks.push({
+            key: mode + "_" + (i + 1),
+            icon: mode === "meal" ? "🍕" : "🍔",
+            label: formatPlanGapLabel(gapInfo),
+            title: mode === "meal" ? "A better meal while you have time" : "Quick food between games",
+            reason: mode === "meal"
+              ? "You have enough room for a sit-down meal without rushing back."
+              : "This keeps the stop close and quick when the break is tighter.",
+            category: "🍔 Food",
+            focusQuickAction: "food",
+            candidates: foodPool,
+            activeIndex: foodPick.index || 0
           });
         }
-
-        addPlannerBlock({
-          key: "before_first_game_food",
-          icon: "🍔",
-          label: getPlannerPreGameLabel(dayState.firstGameMinutes, nowMinutes, "Before first game"),
-          title: "Quick food before the first game",
-          reason: (dayState.firstGameMinutes - nowMinutes) <= PLANNER_GAP_SKIP_MINUTES
-            ? "Tight window. Keep it fast, close, and grab-and-go before first pitch."
-            : "Start the day with a realistic pre-game stop before warmups and arrival pressure kick in.",
-          category: "🍔 Food",
-          focusQuickAction: "food",
-          pool: foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates,
-          poolKey: "before_first_game_food"
-        });
-      }
-
-      if (dayState.phase === "mid_day" && nextGame && Number.isFinite(nextGame.minutes)) {
-        var minutesUntilNextGame = nextGame.minutes - nowMinutes;
-        var currentGapLabel = minutesUntilNextGame < PLANNER_GAP_LONG_BREAK_MINUTES ? "Before next game" : "Between games";
-        var currentGapPool = minutesUntilNextGame >= PLANNER_GAP_LONG_BREAK_MINUTES && foodMealCandidates.length
-          ? foodMealCandidates
-          : (foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates);
-
-        addPlannerBlock({
-          key: "before_next_game_food",
-          icon: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES ? "⚡" : "🍔",
-          label: getPlannerPreGameLabel(nextGame.minutes, nowMinutes, currentGapLabel),
-          title: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES
-            ? "Fastest food before the next game"
-            : (currentGapLabel === "Between games" ? "Food while you have a real break" : "Quick food before the next game"),
-          reason: minutesUntilNextGame < PLANNER_GAP_SKIP_MINUTES
-            ? "You’re already in the day. Keep this one quick, close, and easy before the next game starts."
-            : (currentGapLabel === "Between games"
-              ? "You have a real break here, so this is a better chance for food before the next game."
-              : "This keeps the stop realistic without pushing too close to first pitch on the next one."),
-          category: "🍔 Food",
-          focusQuickAction: "food",
-          pool: currentGapPool,
-          poolKey: "before_next_game_food"
-        });
-      }
-
-      if (schedule.length >= 2) {
-        for (var i = 0; i < schedule.length - 1; i++) {
-          var gapInfo = getPlanGapInfo(schedule[i], schedule[i + 1]);
-          if (!gapInfo) continue;
-          if (dayState.phase === "mid_day" && nextGame && schedule[i + 1] <= nextGame.minutes) continue;
-
-          if (gapInfo.type === "quick_break") {
-            var quickPool = iceCreamCandidates.length
-              ? iceCreamCandidates
-              : (coffeeCandidates.length ? coffeeCandidates : (foodQuickCandidates.length ? foodQuickCandidates : foodMealCandidates));
-            var quickCategory = iceCreamCandidates.length ? "🍦 Ice Cream" : (coffeeCandidates.length ? "☕ Coffee" : "🍔 Food");
-            var quickAction = quickCategory === "☕ Coffee" ? "coffee" : "food";
-            addPlannerBlock({
-              key: "between_games_quick_" + (i + 1),
-              icon: quickCategory === "☕ Coffee" ? "☕" : (quickCategory === "🍦 Ice Cream" ? "🍦" : "🍔"),
-              label: formatPlanGapLabel(gapInfo),
-              title: "Quick reset between games",
-              reason: "This break is real, but not huge. Think coffee, a treat, or something light and easy.",
-              category: quickCategory,
-              focusQuickAction: quickAction,
-              pool: quickPool,
-              poolKey: "between_games_quick_" + (i + 1)
-            });
-          } else {
-            addPlannerBlock({
-              key: "between_games_food_" + (i + 1),
-              icon: "🍔",
-              label: formatPlanGapLabel(gapInfo),
-              title: "Food while you have time",
-              reason: "This is a true break in the day, so food becomes the primary move instead of a rushed stop.",
-              category: "🍔 Food",
-              focusQuickAction: "food",
-              pool: foodMealCandidates.length ? foodMealCandidates : foodQuickCandidates,
-              poolKey: "between_games_food_" + (i + 1)
-            });
-
-            var secondaryPool = coffeeCandidates.length ? coffeeCandidates : iceCreamCandidates;
-            var secondaryCategory = coffeeCandidates.length ? "☕ Coffee" : (iceCreamCandidates.length ? "🍦 Ice Cream" : "");
-            if (secondaryPool.length && secondaryCategory) {
-              addPlannerBlock({
-                key: "between_games_secondary_" + (i + 1),
-                icon: secondaryCategory === "☕ Coffee" ? "☕" : "🍦",
-                label: formatPlanGapLabel(gapInfo),
-                title: secondaryCategory === "☕ Coffee" ? "Optional coffee stop" : "Optional treat stop",
-                reason: "You’ve got enough room here for a second idea if the family wants coffee, a treat, or a quick reset.",
-                category: secondaryCategory,
-                focusQuickAction: secondaryCategory === "☕ Coffee" ? "coffee" : "food",
-                pool: secondaryPool,
-                poolKey: "between_games_secondary_" + (i + 1)
-              });
-            }
-          }
+      } else {
+        var quickFallback = pullNextPlannerCandidate(foodQuickCandidates, usedPlaceIds, fallbackIndexMap, "quick_food");
+        if (quickFallback && quickFallback.row) {
+          blocks.push({
+            key: "quick_break_1",
+            icon: "🍔",
+            label: "Between games",
+            title: "Quick food between games",
+            reason: "A close, easy stop when you need something fast.",
+            category: "🍔 Food",
+            focusQuickAction: "food",
+            candidates: foodQuickCandidates,
+            activeIndex: quickFallback.index || 0
+          });
         }
       }
 
-      var postGamePool = foodMealCandidates.length ? foodMealCandidates : foodQuickCandidates;
-      addPlannerBlock({
-        key: "after_games_food",
-        icon: "🍔",
-        label: getPlannerPostGameLabel(lastGameMinutes),
-        title: "Food after the last game",
-        reason: "When the day is done, food comes first. This is the one stop that should always be there.",
-        category: "🍔 Food",
-        focusQuickAction: "food",
-        pool: postGamePool,
-        poolKey: "after_games_food"
-      });
-
-      if (gasCandidates.length) {
-        addPlannerBlock({
-          key: "after_games_gas",
+      if (gasPick && gasPick.row) {
+        blocks.push({
+          key: "after_games",
           icon: "⛽",
-          label: getPlannerPostGameLabel(lastGameMinutes),
-          title: "Gas on the way out",
-          reason: "Optional secondary stop if you want to top off before heading home.",
+          label: times.length ? (formatPlanTime(times[times.length - 1] + 120) + " • After the last game") : "After the last game",
+          title: "Gas before heading home",
+          reason: "Finish the day with one clean stop on the way out.",
           category: "⛽ Gas",
           focusQuickAction: "gas",
-          pool: gasCandidates,
-          poolKey: "after_games_gas"
+          candidates: gasCandidates,
+          activeIndex: gasPick.index || 0
         });
       }
 
@@ -4853,11 +4657,6 @@
       var times = parsePlanTimes(planTimesInput ? planTimesInput.value : "");
       var params = { radiusMiles: getRadiusMiles(), mode: "core" };
 
-      if (!times.length) {
-        setPlannerStatus("Enter at least one valid game time first.", true);
-        return;
-      }
-
       if (plannerSourceType === "query") {
         query = getPreparedFacilityQuery_(String((planFieldInput && planFieldInput.value) || plannerSourceQuery || document.getElementById("address").value || "").trim());
         if (!query) {
@@ -4899,7 +4698,6 @@
         plannerResults = await fetchBuildGuide(params);
         plannerBlocks = buildPlannerBlocks(plannerResults, times);
         renderPlannerResults();
-        scrollToPlannerResults();
         setPlannerStatus("Plan ready.");
         trackEvent("planner_build", {
           sourceType: plannerSourceType || "",
@@ -6790,7 +6588,7 @@ function setupVenueConfirmOverlay() {
         });
     }
 
-    function autoBuildFromMatchedField(item) {
+    async function autoBuildFromMatchedField(item) {
       var chosenQuery = String((item && (item.query || item.label)) || "").trim();
       if (!chosenQuery) return;
 
@@ -6802,11 +6600,11 @@ function setupVenueConfirmOverlay() {
       if (planFieldWrap) planFieldWrap.classList.add("active");
       plannerSourceType = "query";
       plannerSourceQuery = chosenQuery;
-      plannerSourceLabel = chosenQuery;
+      plannerSourceLabel = String((item && item.label) || chosenQuery).trim() || chosenQuery;
       updatePlannerSourcePill();
       hideFieldMatchResults();
       document.getElementById("status").textContent = "Building your guide — results will appear below…";
-      runGuideWithQuery(chosenQuery, "query");
+      runGuideWithQuery(chosenQuery, "query", { suggestionItem: item || null });
     }
 
     function selectMatchedFieldByIndex(index) {
@@ -7057,6 +6855,94 @@ function setupVenueConfirmOverlay() {
       runGuideWithQuery(query, "query");
     }
 
+    function uniqueNonEmptyStrings(items) {
+      var seen = {};
+      var out = [];
+
+      (items || []).forEach(function(item) {
+        var value = String(item || "").trim();
+        var key = value.toLowerCase();
+        if (!value || seen[key]) return;
+        seen[key] = true;
+        out.push(value);
+      });
+
+      return out;
+    }
+
+    async function fetchFieldSuggestionsList(query) {
+      var response = await fetch("/api/field-suggestions?query=" + encodeURIComponent(query));
+      var result = await response.json();
+      if (!result.ok) throw new Error(result.error || "Field suggestions failed.");
+
+      var serverSuggestions = Array.isArray(result.data) ? result.data : [];
+      var curated = getCuratedSuggestions(query);
+      return mergeSuggestions(curated, serverSuggestions, query);
+    }
+
+    async function resolveQueryToBuildAnchor(query, suggestionItem) {
+      var cleanedQuery = String(query || "").trim();
+      var bestSuggestion = suggestionItem || null;
+      var fieldIntelData = null;
+      var geocodeCandidates = [];
+
+      if (!cleanedQuery) {
+        return null;
+      }
+
+      if (!bestSuggestion) {
+        try {
+          var suggestions = await fetchFieldSuggestionsList(cleanedQuery);
+          if (suggestions && suggestions.length) bestSuggestion = suggestions[0];
+        } catch (e) {}
+      }
+
+      try {
+        fieldIntelData = await getJson("/api/field-intel?query=" + encodeURIComponent(cleanedQuery));
+      } catch (e) {}
+
+      var suggestionLabel = String((bestSuggestion && bestSuggestion.label) || "").trim();
+      var suggestionSecondary = String((bestSuggestion && bestSuggestion.secondaryText) || "").trim();
+      var intelVenueName = String((fieldIntelData && fieldIntelData.venueName) || "").trim();
+      var intelVenueAddress = String((fieldIntelData && fieldIntelData.venueAddress) || "").trim();
+      var resolvedLabel = intelVenueName || suggestionLabel || cleanedQuery;
+
+      geocodeCandidates = uniqueNonEmptyStrings([
+        [intelVenueName, intelVenueAddress].filter(Boolean).join(" "),
+        intelVenueAddress,
+        [suggestionLabel, suggestionSecondary].filter(Boolean).join(" "),
+        suggestionSecondary,
+        suggestionLabel,
+        cleanedQuery
+      ]);
+
+      for (var i = 0; i < geocodeCandidates.length; i++) {
+        try {
+          var coords = await geocodeWeatherQuery(geocodeCandidates[i]);
+          if (coords && Number.isFinite(coords.lat) && Number.isFinite(coords.lng)) {
+            return {
+              lat: coords.lat,
+              lng: coords.lng,
+              resolvedLabel: resolvedLabel,
+              resolvedAddress: intelVenueAddress || suggestionSecondary || "",
+              sourceQuery: cleanedQuery,
+              geocodeSource: geocodeCandidates[i],
+              fieldIntelData: fieldIntelData,
+              suggestionItem: bestSuggestion || null
+            };
+          }
+        } catch (e) {}
+      }
+
+      return {
+        query: cleanedQuery,
+        resolvedLabel: resolvedLabel,
+        resolvedAddress: intelVenueAddress || suggestionSecondary || "",
+        fieldIntelData: fieldIntelData,
+        suggestionItem: bestSuggestion || null
+      };
+    }
+
     function startNewGuide() {
       lastResults = [];
       lastSourceType = "";
@@ -7105,9 +6991,10 @@ function setupVenueConfirmOverlay() {
       });
     }
 
-    function runGuideWithQuery(query, sourceType) {
+    async function runGuideWithQuery(query, sourceType, options) {
       query = String(query || "").trim();
       sourceType = sourceType || "query";
+      options = options || {};
 
       if (!query) {
         document.getElementById("status").textContent = "Please enter an address or facility name.";
@@ -7132,54 +7019,85 @@ function setupVenueConfirmOverlay() {
       lastResolvedGuideCenter = null;
       startLoadingState();
 
-      lastBuildParams = {
-        query: query,
-        radiusMiles: radius,
-        mode: "core"
-      };
+      var resolvedAnchor = null;
+      try {
+        resolvedAnchor = await resolveQueryToBuildAnchor(query, options.suggestionItem || null);
+      } catch (e) {
+        resolvedAnchor = null;
+      }
 
-      var fieldIntelPromise = loadFieldIntel({ query: query });
+      if (resolvedAnchor && Number.isFinite(resolvedAnchor.lat) && Number.isFinite(resolvedAnchor.lng)) {
+        lastBuildParams = {
+          lat: resolvedAnchor.lat,
+          lng: resolvedAnchor.lng,
+          radiusMiles: radius,
+          mode: "core"
+        };
+      } else {
+        lastBuildParams = {
+          query: query,
+          radiusMiles: radius,
+          mode: "core"
+        };
+      }
 
-      fetchBuildGuide(lastBuildParams)
-        .then(async function(data) {
-          await finishLoadingState();
-          lastResults = Array.isArray(data) ? data : [];
-          lastSourceType = sourceType;
-          lastQueryOrGps = query;
-          hasLoadedFullCategories = false;
-          hasBuiltGuide = true;
-          saveRecentSearch(query);
-          renderRecentSearches();
-          document.getElementById("status").textContent = "Done.";
-          document.body.classList.remove("home-mode");
-          updateGuideButtonVisibility();
-          render(lastResults);
-          fieldIntelPromise
-            .then(function(fieldIntelData) {
-              var weatherQuery = query;
-              if (fieldIntelData) {
-                var venueName = String((fieldIntelData && fieldIntelData.venueName) || "").trim();
-                var venueAddress = String((fieldIntelData && fieldIntelData.venueAddress) || "").trim();
-                var strongerWeatherQuery = [venueName, venueAddress].filter(Boolean).join(" ").trim();
-                if (strongerWeatherQuery) weatherQuery = strongerWeatherQuery;
-              }
-              loadWeather({ query: weatherQuery });
-            })
-            .catch(function() {
+      var fieldIntelPromise = Promise.resolve(
+        (resolvedAnchor && resolvedAnchor.fieldIntelData) || null
+      );
+      if (!(resolvedAnchor && resolvedAnchor.fieldIntelData)) {
+        fieldIntelPromise = loadFieldIntel({ query: query });
+      }
+
+      try {
+        var data = await fetchBuildGuide(lastBuildParams);
+        await finishLoadingState();
+        lastResults = Array.isArray(data) ? data : [];
+        lastSourceType = sourceType;
+        lastQueryOrGps = query;
+        hasLoadedFullCategories = false;
+        hasBuiltGuide = true;
+        saveRecentSearch(query);
+        renderRecentSearches();
+        document.getElementById("status").textContent = "Done.";
+        document.body.classList.remove("home-mode");
+        updateGuideButtonVisibility();
+        render(lastResults);
+
+        fieldIntelPromise
+          .then(function(fieldIntelData) {
+            if (resolvedAnchor && Number.isFinite(resolvedAnchor.lat) && Number.isFinite(resolvedAnchor.lng)) {
+              loadWeather({ lat: resolvedAnchor.lat, lng: resolvedAnchor.lng, query: query });
+              return;
+            }
+
+            var weatherQuery = query;
+            if (fieldIntelData) {
+              var venueName = String((fieldIntelData && fieldIntelData.venueName) || "").trim();
+              var venueAddress = String((fieldIntelData && fieldIntelData.venueAddress) || "").trim();
+              var strongerWeatherQuery = [venueName, venueAddress].filter(Boolean).join(" ").trim();
+              if (strongerWeatherQuery) weatherQuery = strongerWeatherQuery;
+            }
+            loadWeather({ query: weatherQuery });
+          })
+          .catch(function() {
+            if (resolvedAnchor && Number.isFinite(resolvedAnchor.lat) && Number.isFinite(resolvedAnchor.lng)) {
+              loadWeather({ lat: resolvedAnchor.lat, lng: resolvedAnchor.lng, query: query });
+            } else {
               loadWeather({ query: query });
-            });
-          var hadPendingQuickCategory = !!pendingQuickCategory;
-          applyPendingQuickCategory();
-          if (!hadPendingQuickCategory) scrollToGuideResults();
-          trackSuccessfulGuideBuild(sourceType, query, lastResults.length);
-          maybeOfferInstallPrompt(500);
-        })
-        .catch(async function(err) {
-          await finishLoadingState();
-          document.getElementById("status").textContent =
-            "Error: " + (err && err.message ? err.message : JSON.stringify(err));
-          resetLoadMoreState();
-        });
+            }
+          });
+
+        var hadPendingQuickCategory = !!pendingQuickCategory;
+        applyPendingQuickCategory();
+        if (!hadPendingQuickCategory) scrollToGuideResults();
+        trackSuccessfulGuideBuild(sourceType, query, lastResults.length);
+        maybeOfferInstallPrompt(500);
+      } catch (err) {
+        await finishLoadingState();
+        document.getElementById("status").textContent =
+          "Error: " + (err && err.message ? err.message : JSON.stringify(err));
+        resetLoadMoreState();
+      }
     }
 
 
@@ -7348,18 +7266,18 @@ function setupVenueConfirmOverlay() {
       detectedGpsVenue = null;
       pendingGpsBuild = null;
 
-      if (!Number.isFinite(pending.lat) || !Number.isFinite(pending.lng)) {
-        document.getElementById("status").textContent = "Couldn’t confirm your location. Please try again.";
+      if (!venue.query) {
+        if (Number.isFinite(pending.lat) && Number.isFinite(pending.lng)) {
+          startLoadingState();
+          document.getElementById("status").textContent = "";
+          beginGpsGuideBuild({ lat: pending.lat, lng: pending.lng });
+        }
         return;
       }
 
-      if (venue.query) {
-        document.getElementById("address").value = venue.query;
-      }
-
-      startLoadingState();
-      document.getElementById("status").textContent = "";
-      beginGpsGuideBuild({ lat: pending.lat, lng: pending.lng, confirmedVenueName: venue.query || "", confirmedVenueAddress: venue.venueAddress || "" });
+      document.getElementById("address").value = venue.query;
+      document.getElementById("status").textContent = "Building your guide — results will appear below…";
+      beginGpsGuideBuild({ query: venue.query, weatherLat: pending.lat, weatherLng: pending.lng });
     }
 
     function declineDetectedVenue() {
