@@ -3713,24 +3713,6 @@
     const MIN_LOADING_VISIBLE_MS = 1600;
     const LOADING_ROTATE_MS = 2400;
 
-    function getNativeLocationFromUrl() {
-      try {
-        var params = new URLSearchParams(window.location.search || "");
-        var lat = Number(params.get("nativeLat"));
-        var lng = Number(params.get("nativeLng"));
-        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
-        return {
-          lat: lat,
-          lng: lng,
-          sourceType: "gps",
-          provider: params.get("nativeSource") || "native_app",
-          queryOrGps: "GPS:" + lat + "," + lng
-        };
-      } catch (e) {
-        return null;
-      }
-    }
-
     function getResultsContextText() {
       var title = "Near Your Game";
       var source = "";
@@ -4819,6 +4801,11 @@ function buildPlannerBlocks(rows, times) {
         return;
       }
 
+      if (!navigator.geolocation) {
+        setPlannerStatus("This device/browser doesn’t support location.", true);
+        return;
+      }
+
       plannerSourceType = "gps";
       plannerSourceQuery = "";
       plannerSourceLabel = "Finding your location…";
@@ -4827,19 +4814,6 @@ function buildPlannerBlocks(rows, times) {
       setPlannerStatus("Checking your location…");
 
       try {
-        var nativeLocation = getNativeLocationFromUrl();
-        if (nativeLocation) {
-          plannerSourceCoords = { lat: nativeLocation.lat, lng: nativeLocation.lng };
-          plannerSourceLabel = "Using your current location";
-          updatePlannerSourcePill();
-          setPlannerStatus("Location ready. Add times and build your plan.");
-          return;
-        }
-
-        if (!navigator.geolocation) {
-          throw new Error("Location is not supported on this device.");
-        }
-
         var coords = await new Promise(function(resolve, reject) {
           navigator.geolocation.getCurrentPosition(
             function(pos) {
@@ -5226,15 +5200,6 @@ function buildPlannerBlocks(rows, times) {
           rows: await fetchBuildGuide({ lat: source.lat, lng: source.lng, radiusMiles: 10, mode: "core" }),
           sourceType: "gps",
           queryOrGps: "GPS:" + source.lat + "," + source.lng
-        };
-      }
-
-      var nativeLocation = getNativeLocationFromUrl();
-      if (nativeLocation) {
-        return {
-          rows: await fetchBuildGuide({ lat: nativeLocation.lat, lng: nativeLocation.lng, radiusMiles: 10, mode: "core" }),
-          sourceType: "gps",
-          queryOrGps: nativeLocation.queryOrGps
         };
       }
 
@@ -7527,7 +7492,7 @@ function setupVenueConfirmOverlay() {
     }
 
 
-    async function useMyLocation() {
+    function useMyLocation() {
       resetSelectedPlaces();
       resetLoadMoreState();
       document.getElementById("results").innerHTML = "";
@@ -7550,60 +7515,46 @@ function setupVenueConfirmOverlay() {
       startGpsLoadingState(GPS_LOADING_MESSAGES[0]);
       document.getElementById("status").textContent = "";
 
-      try {
-        var nativeLocation = getNativeLocationFromUrl();
-        var coords;
-
-        if (nativeLocation) {
-          coords = { lat: nativeLocation.lat, lng: nativeLocation.lng, queryOrGps: nativeLocation.queryOrGps };
-        } else {
-          if (!navigator.geolocation) {
-            throw new Error("Location is not supported on this device.");
-          }
-
-          coords = await new Promise(function(resolve, reject) {
-            navigator.geolocation.getCurrentPosition(
-              function(pos) {
-                resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, queryOrGps: "GPS:" + pos.coords.latitude + "," + pos.coords.longitude });
-              },
-              function(err) {
-                reject(err || new Error("Location unavailable"));
-              },
-              { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-            );
-          });
-        }
-
-        var lat = coords.lat;
-        var lng = coords.lng;
-
-        try {
-          setLoadingSubtext(GPS_LOADING_MESSAGES[1]);
-          pendingGpsBuild = { lat: lat, lng: lng };
-          var detectedVenue = await detectNearbyVenueFromGps(lat, lng);
-
-          if (detectedVenue && detectedVenue.venueName) {
-            stopLoadingState(true);
-            openVenueConfirmOverlay(detectedVenue);
-            return;
-          }
-
-          setLoadingSubtext(GPS_LOADING_MESSAGES[2]);
-          beginGpsGuideBuild({ lat: lat, lng: lng });
-        } catch (err) {
-          setLoadingSubtext(GPS_LOADING_MESSAGES[2]);
-          beginGpsGuideBuild({ lat: lat, lng: lng });
-        }
-      } catch (err) {
+      if (!navigator.geolocation) {
         stopLoadingState();
-        var msg = "Location blocked. Allow location access and try again.";
-        if (err && err.code === 1) msg = "Location permission denied. Allow it in browser settings.";
-        if (err && err.code === 2) msg = "Location unavailable. Try again outside or with better signal.";
-        if (err && err.code === 3) msg = "Location timed out. Try again.";
-        if (err && err.message === "Location is not supported on this device.") msg = "This device/browser doesn't support location.";
-        document.getElementById("status").textContent = msg;
-        resetLoadMoreState();
+        document.getElementById("status").textContent = "This device/browser doesn't support location.";
+        return;
       }
+
+      navigator.geolocation.getCurrentPosition(
+        async function(pos) {
+          var lat = pos.coords.latitude;
+          var lng = pos.coords.longitude;
+
+          try {
+            setLoadingSubtext(GPS_LOADING_MESSAGES[1]);
+            pendingGpsBuild = { lat: lat, lng: lng };
+            var detectedVenue = await detectNearbyVenueFromGps(lat, lng);
+
+            if (detectedVenue && detectedVenue.venueName) {
+              stopLoadingState(true);
+              openVenueConfirmOverlay(detectedVenue);
+              return;
+            }
+
+            setLoadingSubtext(GPS_LOADING_MESSAGES[2]);
+            beginGpsGuideBuild({ lat: lat, lng: lng });
+          } catch (err) {
+            setLoadingSubtext(GPS_LOADING_MESSAGES[2]);
+            beginGpsGuideBuild({ lat: lat, lng: lng });
+          }
+        },
+        function(err) {
+          stopLoadingState();
+          var msg = "Location blocked. Allow location access and try again.";
+          if (err && err.code === 1) msg = "Location permission denied. Allow it in browser settings.";
+          if (err && err.code === 2) msg = "Location unavailable. Try again outside or with better signal.";
+          if (err && err.code === 3) msg = "Location timed out. Try again.";
+          document.getElementById("status").textContent = msg;
+          resetLoadMoreState();
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+      );
     }
 
 
@@ -9284,5 +9235,7 @@ function setupVenueConfirmOverlay() {
 
 </body>
 </html>
+
+
 
 
