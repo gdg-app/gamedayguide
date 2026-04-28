@@ -3396,7 +3396,7 @@
 
         <input id="address" placeholder='Enter venue name or address' value="" />
         <div class="entry-stack">
-          <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Your Field</button>
+          <button type="button" class="action-btn match-btn" onclick="findMatchingFields()">Find Location</button>
           <button type="button" class="action-btn location-btn" onclick="useMyLocation()">Use My Location</button>
         </div>
 
@@ -3413,7 +3413,7 @@
         </div>
 
         <div id="fieldMatchResults" class="match-results"></div>
-        <div class="helper-text">Enter a field and we’ll build your guide.</div>
+        <div class="helper-text">Enter Venue/Field Name or Address</div>
 
         <div class="quick-row-wrap" id="recentSearchWrap" style="display:none;">
           <div class="quick-row-label">Recent searches</div>
@@ -6601,7 +6601,7 @@ function setupVenueConfirmOverlay() {
         fetch("/api/field-suggestions?query=" + encodeURIComponent(query))
           .then(function(response) { return response.json(); })
           .then(function(result) {
-            if (!result.ok) throw new Error(result.error || "Field suggestions failed.");
+            if (!result.ok) throw new Error(result.error || "Location suggestions failed.");
             var serverSuggestions = Array.isArray(result.data) ? result.data : [];
             var curated = getCuratedSuggestions(query);
             plannerFieldSuggestions = mergeSuggestions(curated, serverSuggestions, query).slice(0, 6);
@@ -6737,23 +6737,50 @@ function setupVenueConfirmOverlay() {
       return cleaned || String(rawQuery || "").trim();
     }
 
+    function looksLikeStreetAddress_(value) {
+      var text = String(value || "").trim();
+      if (!text) return false;
+
+      var lower = text.toLowerCase();
+      var hasLeadingNumber = /^\s*\d{1,6}\s+/.test(text);
+      var hasStreetWord = /\b(st|street|rd|road|ave|avenue|blvd|boulevard|dr|drive|ln|lane|ct|court|cir|circle|way|pl|place|pkwy|parkway|hwy|highway|trl|trail|ter|terrace|loop|sq|square)\b\.?/i.test(text);
+      var hasCityStateOrZip = /,\s*[a-z .'-]+\s*,?\s*[a-z]{2}\b/i.test(text) || /\b\d{5}(?:-\d{4})?\b/.test(text);
+      var hasAddressUnit = /\b(apt|apartment|unit|suite|ste|#)\s*[a-z0-9-]+\b/i.test(text);
+      var likelyBusinessOnly = /\b(complex|park|field|fields|stadium|school|gym|arena|sportsplex|athletic|baseball|softball|soccer|basketball|volleyball)\b/i.test(lower);
+
+      if (hasLeadingNumber && hasStreetWord) return true;
+      if (hasLeadingNumber && hasCityStateOrZip) return true;
+      if (hasLeadingNumber && hasAddressUnit) return true;
+      if (/^\s*\d{5}(?:-\d{4})?\s*$/.test(text)) return true;
+
+      return false && !likelyBusinessOnly;
+    }
+
+    function buildGuideFromTypedLocation_(rawQuery, statusMessage) {
+      var query = String(rawQuery || "").trim();
+      if (!query) return;
+
+      hideFieldMatchResults();
+      document.getElementById("status").textContent = statusMessage || "Building guide near this location…";
+      runGuideWithQuery(query, "query");
+    }
+
     function findMatchingFields() {
       var rawQuery = String(document.getElementById("address").value || "").trim();
       var query = getPreparedFacilityQuery_(rawQuery);
 
       if (!query) {
-        document.getElementById("status").textContent = "Enter a facility name first.";
+        document.getElementById("status").textContent = "Enter a venue, field name, or address first.";
         hideFieldMatchResults();
         return;
       }
 
-      if (/^\d{5}$/.test(rawQuery)) {
-        document.getElementById("status").textContent = "Try field name or address";
-        hideFieldMatchResults();
+      if (looksLikeStreetAddress_(rawQuery)) {
+        buildGuideFromTypedLocation_(rawQuery, "Building guide near this address…");
         return;
       }
 
-      document.getElementById("status").textContent = "Searching for fields…";
+      document.getElementById("status").textContent = "Finding location…";
       hideFieldMatchResults();
 
       fetch("/api/field-suggestions?query=" + encodeURIComponent(query))
@@ -6762,7 +6789,7 @@ function setupVenueConfirmOverlay() {
         })
         .then(function(result) {
           if (!result.ok) {
-            throw new Error(result.error || "Field suggestions failed.");
+            throw new Error(result.error || "Location suggestions failed.");
           }
 
           var serverSuggestions = Array.isArray(result.data) ? result.data : [];
@@ -6776,13 +6803,16 @@ function setupVenueConfirmOverlay() {
             return;
           }
 
+          if (!visibleSuggestions.length) {
+            buildGuideFromTypedLocation_(rawQuery, "No field match found — building guide near this location…");
+            return;
+          }
+
           renderFieldMatchResults(visibleSuggestions);
-          document.getElementById("status").textContent = visibleSuggestions.length ? "Select a field match." : "No matching facilities found.";
+          document.getElementById("status").textContent = "Select a location match.";
         })
         .catch(function(err) {
-          document.getElementById("status").textContent =
-            "Error finding facilities: " + (err && err.message ? err.message : JSON.stringify(err));
-          hideFieldMatchResults();
+          buildGuideFromTypedLocation_(rawQuery, "Location match unavailable — building guide near what you entered…");
         });
     }
 
@@ -7071,7 +7101,7 @@ function setupVenueConfirmOverlay() {
     async function fetchFieldSuggestionsList(query) {
       var response = await fetch("/api/field-suggestions?query=" + encodeURIComponent(query));
       var result = await response.json();
-      if (!result.ok) throw new Error(result.error || "Field suggestions failed.");
+      if (!result.ok) throw new Error(result.error || "Location suggestions failed.");
 
       var serverSuggestions = Array.isArray(result.data) ? result.data : [];
       var curated = getCuratedSuggestions(query);
