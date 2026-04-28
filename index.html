@@ -659,12 +659,12 @@
     .loading-wrap {
       display: none;
       position: fixed;
-      top: calc(env(safe-area-inset-top, 0px) + 10px);
+      top: 46%;
       left: 50%;
-      transform: translateX(-50%);
-      width: min(calc(100% - 20px), 760px);
+      transform: translate(-50%, -50%);
+      width: min(calc(100% - 24px), 760px);
       margin: 0;
-      z-index: 140;
+      z-index: 10010;
       pointer-events: none;
     }
 
@@ -1347,8 +1347,9 @@
       }
 
       .loading-wrap {
-        width: calc(100% - 16px);
-        top: calc(env(safe-area-inset-top, 0px) + 8px);
+        width: calc(100% - 20px);
+        top: 46%;
+        transform: translate(-50%, -50%);
       }
     }
 
