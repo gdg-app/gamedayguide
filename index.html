@@ -3085,6 +3085,67 @@
 }
 
 
+
+
+.calendar-events-wrap {
+  display: none;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #fdfcf9;
+  border: 1px solid #d8dde4;
+  box-shadow: var(--shadow-soft);
+}
+
+.calendar-events-wrap.active {
+  display: block;
+}
+
+.calendar-events-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1c2a35;
+  margin-bottom: 4px;
+}
+
+.calendar-events-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #5f6d79;
+  margin-bottom: 10px;
+}
+
+.calendar-event-list {
+  display: grid;
+  gap: 8px;
+}
+
+.calendar-event-btn {
+  width: 100%;
+  border: 1px solid #dde5ed;
+  background: linear-gradient(180deg, #fff, #f6f8fb);
+  border-radius: 16px;
+  padding: 12px 12px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(10,22,14,0.05);
+}
+
+.calendar-event-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #1c2a35;
+  line-height: 1.25;
+  margin-bottom: 3px;
+}
+
+.calendar-event-meta {
+  font-size: 12px;
+  color: #64717d;
+  line-height: 1.4;
+}
+
+
 .planner-field-wrap {
   display: none;
   margin-top: 10px;
@@ -3351,7 +3412,10 @@
           <div class="planner-source-row">
             <button type="button" class="action-btn location-btn" id="planUseLocationBtn" onclick="selectPlanLocationMode('gps')">📍 Use My Location</button>
             <button type="button" class="action-btn build-btn" id="planUseFieldBtn" onclick="togglePlanFieldEntry()">🔍 Find My Field</button>
+            <button type="button" class="action-btn soft-action-btn" id="planCalendarBtn" onclick="findFromCalendar()">📅 Find Next Game</button>
           </div>
+
+          <div id="calendarEventResults" class="calendar-events-wrap" aria-live="polite"></div>
 
           <div id="planFieldWrap" class="planner-field-wrap">
             <label class="planner-input-label" for="planFieldInput">Venue or complex</label>
@@ -3657,6 +3721,7 @@
     let plannerFieldSuggestTimer = null;
     let plannerModeActive = false;
     let mapChoiceRow = null;
+    let calendarMatchedEvents = [];
 
     const BACKEND_MEDICAL_LABEL = "🏥 Urgent Care / ER";
     const SELECTION_HELPER_SESSION_KEY = "gamedayguide_selection_helper_seen_v1";
@@ -5831,6 +5896,216 @@ function setupVenueConfirmOverlay() {
           declineDetectedVenue();
         }
       });
+    }
+
+
+
+
+    function isRunningInsideNativeApp() {
+      return !!(window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === "function");
+    }
+
+    function clearCalendarEventResults() {
+      calendarMatchedEvents = [];
+      var el = document.getElementById("calendarEventResults");
+      if (!el) return;
+      el.classList.remove("active");
+      el.innerHTML = "";
+    }
+
+    function formatCalendarEventTime(value) {
+      if (!value) return "";
+      var date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      return date.toLocaleString([], {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      });
+    }
+
+    function formatCalendarEventTimeForPlanner(value) {
+      if (!value) return "";
+      var date = new Date(value);
+      if (Number.isNaN(date.getTime())) return "";
+      var hour = date.getHours();
+      var minute = date.getMinutes();
+      var suffix = hour >= 12 ? "PM" : "AM";
+      var hour12 = hour % 12;
+      if (!hour12) hour12 = 12;
+      return hour12 + ":" + String(minute).padStart(2, "0") + " " + suffix;
+    }
+
+    function getCalendarEventLocationText(event) {
+      return String((event && event.location) || "").trim();
+    }
+
+    function renderCalendarEventResults(events) {
+      var el = document.getElementById("calendarEventResults");
+      if (!el) return;
+
+      calendarMatchedEvents = Array.isArray(events) ? events : [];
+
+      if (!calendarMatchedEvents.length) {
+        el.classList.remove("active");
+        el.innerHTML = "";
+        return;
+      }
+
+      var html =
+        "<div class='calendar-events-title'>Possible games found</div>" +
+        "<div class='calendar-events-text'>Choose the event before GDG uses it. Nothing is sent anywhere until you pick one.</div>" +
+        "<div class='calendar-event-list'>";
+
+      calendarMatchedEvents.forEach(function(event, index) {
+        var title = String((event && event.title) || "Calendar Event").trim();
+        var time = formatCalendarEventTime(event && event.startTime);
+        var location = getCalendarEventLocationText(event);
+        var confidence = String((event && event.confidence) || "medium").trim();
+        var metaParts = [];
+        if (time) metaParts.push(time);
+        if (location) metaParts.push(location);
+        metaParts.push(confidence === "strong" ? "Strong match" : "Possible match");
+
+        html +=
+          "<button type='button' class='calendar-event-btn' onclick='selectCalendarEvent(" + index + ")'>" +
+            "<div class='calendar-event-name'>" + esc(title) + "</div>" +
+            "<div class='calendar-event-meta'>" + esc(metaParts.join(" • ")) + "</div>" +
+          "</button>";
+      });
+
+      html += "</div>";
+      el.innerHTML = html;
+      el.classList.add("active");
+    }
+
+    function findFromCalendar() {
+      clearCalendarEventResults();
+
+      if (!isRunningInsideNativeApp()) {
+        setPlannerStatus("Calendar search is available inside the GameDayGuide iPhone app.", true);
+        return;
+      }
+
+      setPlannerStatus("Checking your calendar for likely games…");
+
+      try {
+        window.ReactNativeWebView.postMessage(
+          JSON.stringify({ type: "GDG_CALENDAR_FIND_REQUEST" })
+        );
+
+        trackEvent("calendar_find_requested", {
+          sourceType: "calendar",
+          interactionType: "find_next_game_from_calendar",
+          platform: detectSourceContext()
+        });
+      } catch (err) {
+        setPlannerStatus("Couldn’t start calendar search. Try again.", true);
+      }
+    }
+
+    function selectCalendarEvent(index) {
+      var event = calendarMatchedEvents[index];
+      if (!event) return;
+
+      var title = String(event.title || "Calendar Event").trim();
+      var location = getCalendarEventLocationText(event);
+      var plannerTime = formatCalendarEventTimeForPlanner(event.startTime);
+      var planFieldInput = document.getElementById("planFieldInput");
+      var planTimesInput = document.getElementById("planTimesInput");
+      var planFieldWrap = document.getElementById("planFieldWrap");
+
+      if (plannerTime && planTimesInput) {
+        planTimesInput.value = plannerTime;
+      }
+
+      if (location) {
+        plannerSourceType = "query";
+        plannerSourceQuery = getPreparedFacilityQuery_(location);
+        plannerSourceLabel = location;
+        plannerSourceCoords = null;
+        if (planFieldInput) planFieldInput.value = location;
+        if (planFieldWrap) planFieldWrap.classList.add("active");
+        updatePlannerSourcePill();
+        setPlannerStatus("Calendar event selected. Review the field and time, then build your plan.");
+      } else {
+        plannerSourceType = "";
+        plannerSourceQuery = "";
+        plannerSourceLabel = "";
+        plannerSourceCoords = null;
+        updatePlannerSourcePill();
+        setPlannerStatus("That event has no usable location. Tap Find My Field and choose the field manually.", true);
+        if (planFieldWrap) planFieldWrap.classList.add("active");
+        if (planFieldInput) {
+          planFieldInput.value = "";
+          try { planFieldInput.focus({ preventScroll: true }); } catch (e) { try { planFieldInput.focus(); } catch (err) {} }
+        }
+      }
+
+      clearCalendarEventResults();
+
+      trackEvent("calendar_event_selected", {
+        sourceType: "calendar",
+        interactionType: "select_calendar_event",
+        queryOrGps: location ? location : title,
+        resultRank: index + 1,
+        platform: detectSourceContext()
+      });
+    }
+
+    function handleNativeCalendarMessage(payload) {
+      if (!payload || typeof payload !== "object") return;
+      var type = String(payload.type || "");
+      if (!type || type.indexOf("GDG_CALENDAR_") !== 0) return;
+
+      if (type === "GDG_CALENDAR_EVENTS_FOUND") {
+        renderCalendarEventResults(payload.events || []);
+        setPlannerStatus("Calendar matches found. Pick the right event to continue.");
+        return;
+      }
+
+      if (type === "GDG_CALENDAR_NO_EVENTS_FOUND") {
+        clearCalendarEventResults();
+        setPlannerStatus("No likely games found in the next two weeks. Use My Location or Find My Field instead.", true);
+        return;
+      }
+
+      if (type === "GDG_CALENDAR_PERMISSION_DENIED") {
+        clearCalendarEventResults();
+        setPlannerStatus("Calendar access was not allowed. You can still use location or field search.", true);
+        return;
+      }
+
+      if (type === "GDG_CALENDAR_UNAVAILABLE") {
+        clearCalendarEventResults();
+        setPlannerStatus("Calendar search is currently available in the iPhone app only.", true);
+        return;
+      }
+
+      if (type === "GDG_CALENDAR_ERROR") {
+        clearCalendarEventResults();
+        setPlannerStatus("Couldn’t check calendar events right now. Use location or field search instead.", true);
+      }
+    }
+
+    function setupNativeCalendarBridge() {
+      function receiveNativeMessage(event) {
+        var payload = event && event.data;
+        if (typeof payload === "string") {
+          try {
+            payload = JSON.parse(payload);
+          } catch (err) {
+            return;
+          }
+        }
+        handleNativeCalendarMessage(payload);
+      }
+
+      window.addEventListener("message", receiveNativeMessage);
+      window.addEventListener("gdg-native-message", receiveNativeMessage);
+      document.addEventListener("message", receiveNativeMessage);
     }
 
 
@@ -9218,6 +9493,7 @@ function setupVenueConfirmOverlay() {
       setupAddressKeyActions();
       setupPlannerInputs();
       setupInstallPrompt();
+      setupNativeCalendarBridge();
       setupDecisionModal();
       setupVenueConfirmOverlay();
       stopLoadingState();
@@ -9308,7 +9584,3 @@ function setupVenueConfirmOverlay() {
 
 </body>
 </html>
-
-
-
-
