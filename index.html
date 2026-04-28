@@ -659,12 +659,12 @@
     .loading-wrap {
       display: none;
       position: fixed;
-      top: 46%;
+      top: 42%;
       left: 50%;
       transform: translate(-50%, -50%);
       width: min(calc(100% - 24px), 760px);
       margin: 0;
-      z-index: 10010;
+      z-index: 10080;
       pointer-events: none;
     }
 
@@ -1348,7 +1348,7 @@
 
       .loading-wrap {
         width: calc(100% - 20px);
-        top: 46%;
+        top: 42%;
         transform: translate(-50%, -50%);
       }
     }
@@ -5845,13 +5845,55 @@ function setupVenueConfirmOverlay() {
       });
     }
 
-    function startLoadingState() {
+    function moveLoadingStateToOverlayLayer() {
       var loadingWrap = document.getElementById("loadingState");
+      if (!loadingWrap || !document.body) return loadingWrap;
+
+      if (loadingWrap.parentElement !== document.body) {
+        document.body.appendChild(loadingWrap);
+      }
+
+      return loadingWrap;
+    }
+
+    function positionLoadingStateOverActiveSearch() {
+      var loadingWrap = document.getElementById("loadingState");
+      if (!loadingWrap) return;
+
+      var activePanel = null;
+      var searchPanel = document.getElementById("searchPanel");
+      var plannerPanel = document.getElementById("plannerPanel");
+
+      if (searchPanel && searchPanel.style.display !== "none") {
+        activePanel = searchPanel;
+      } else if (plannerPanel && plannerPanel.style.display !== "none") {
+        activePanel = plannerPanel;
+      }
+
+      var viewportHeight = window.innerHeight || document.documentElement.clientHeight || 720;
+      var topPx = Math.round(viewportHeight * 0.42);
+
+      if (activePanel) {
+        var rect = activePanel.getBoundingClientRect();
+        if (rect && Number.isFinite(rect.top)) {
+          topPx = Math.round(rect.top + 210);
+          topPx = Math.max(170, Math.min(topPx, Math.round(viewportHeight * 0.52)));
+        }
+      }
+
+      loadingWrap.style.top = topPx + "px";
+      loadingWrap.style.left = "50%";
+      loadingWrap.style.transform = "translate(-50%, -50%)";
+    }
+
+    function startLoadingState() {
+      var loadingWrap = moveLoadingStateToOverlayLayer();
       var loadingSubtext = document.getElementById("loadingSubtext");
       var status = document.getElementById("status");
 
       stopLoadingState(true);
       document.body.classList.remove("home-mode");
+      positionLoadingStateOverActiveSearch();
       loadingVisibleAt = Date.now();
       loadingRotateIndex = 0;
 
