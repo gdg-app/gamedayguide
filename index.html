@@ -5956,11 +5956,70 @@ function setupVenueConfirmOverlay() {
       return String((event && event.location) || "").trim();
     }
 
+    function normalizeCalendarEventText(value) {
+      return String(value || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9@]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function scoreCalendarEventForGameIntent(event, index) {
+      var title = String((event && event.title) || "");
+      var location = getCalendarEventLocationText(event);
+      var notes = String((event && (event.notes || event.description)) || "");
+      var confidence = String((event && event.confidence) || "").toLowerCase();
+      var hay = normalizeCalendarEventText([title, location, notes].join(" "));
+      var raw = [title, location, notes].join(" ").toLowerCase();
+      var score = 0;
+
+      if (confidence === "strong") score += 30;
+      if (confidence === "medium") score += 12;
+      if (location) score += 14;
+
+      if (/(game|games|gameday|doubleheader|championship|playoff|playoffs|final|finals)/.test(hay)) score += 75;
+      if (/(tournament|tourneys?|bracket|pool play)/.test(hay)) score += 80;
+      if (/(competition|compete|contest|match|matches)/.test(hay)) score += 70;
+      if (/(vs|versus|v)/.test(hay) || raw.indexOf(" vs ") !== -1 || raw.indexOf("@") !== -1) score += 65;
+
+      if (/(baseball|softball|basketball|soccer|volleyball|lacrosse|football|hockey)/.test(hay)) score += 18;
+      if (/(field|fields|complex|park|diamond|court|gym|stadium|arena)/.test(hay)) score += 10;
+
+      if (/(practice|practices|training|workout|workouts|conditioning|rehearsal)/.test(hay)) score -= 70;
+      if (/(scrimmage|scrimmages)/.test(hay)) score -= 20;
+
+      var startTime = event && event.startTime ? new Date(event.startTime).getTime() : NaN;
+      if (Number.isFinite(startTime)) {
+        score -= Math.min(Math.max((startTime - Date.now()) / 86400000, 0), 14) * 0.25;
+      }
+
+      score -= Number(index || 0) * 0.01;
+      return score;
+    }
+
+    function rankCalendarEventsForDisplay(events) {
+      return (Array.isArray(events) ? events : [])
+        .map(function(event, index) {
+          return {
+            event: event,
+            index: index,
+            score: scoreCalendarEventForGameIntent(event, index),
+            startTime: event && event.startTime ? new Date(event.startTime).getTime() : Infinity
+          };
+        })
+        .sort(function(a, b) {
+          if (b.score !== a.score) return b.score - a.score;
+          if (a.startTime !== b.startTime) return a.startTime - b.startTime;
+          return a.index - b.index;
+        })
+        .map(function(item) { return item.event; });
+    }
+
     function renderCalendarEventResults(events) {
       var el = document.getElementById("calendarEventResults");
       if (!el) return;
 
-      var incomingEvents = Array.isArray(events) ? events : [];
+      var incomingEvents = rankCalendarEventsForDisplay(events);
       calendarMatchedEvents = incomingEvents.slice(0, 2);
 
       if (!calendarMatchedEvents.length) {
