@@ -3145,6 +3145,20 @@
   line-height: 1.4;
 }
 
+.calendar-event-action {
+  margin-top: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: #eef4fb;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+}
+
 
 .planner-field-wrap {
   display: none;
@@ -5946,7 +5960,8 @@ function setupVenueConfirmOverlay() {
       var el = document.getElementById("calendarEventResults");
       if (!el) return;
 
-      calendarMatchedEvents = Array.isArray(events) ? events : [];
+      var incomingEvents = Array.isArray(events) ? events : [];
+      calendarMatchedEvents = incomingEvents.slice(0, 2);
 
       if (!calendarMatchedEvents.length) {
         el.classList.remove("active");
@@ -5954,9 +5969,13 @@ function setupVenueConfirmOverlay() {
         return;
       }
 
+      var titleText = calendarMatchedEvents.length === 1
+        ? "We think this might be your game"
+        : "We found two likely games";
+
       var html =
-        "<div class='calendar-events-title'>Possible games found</div>" +
-        "<div class='calendar-events-text'>Choose the event before GDG uses it. Nothing is sent anywhere until you pick one.</div>" +
+        "<div class='calendar-events-title'>" + esc(titleText) + "</div>" +
+        "<div class='calendar-events-text'>Choose the right event before GDG uses it. Your calendar stays on your phone; GDG only uses the event you pick.</div>" +
         "<div class='calendar-event-list'>";
 
       calendarMatchedEvents.forEach(function(event, index) {
@@ -5973,6 +5992,7 @@ function setupVenueConfirmOverlay() {
           "<button type='button' class='calendar-event-btn' onclick='selectCalendarEvent(" + index + ")'>" +
             "<div class='calendar-event-name'>" + esc(title) + "</div>" +
             "<div class='calendar-event-meta'>" + esc(metaParts.join(" • ")) + "</div>" +
+            "<div class='calendar-event-action'>Use this event</div>" +
           "</button>";
       });
 
