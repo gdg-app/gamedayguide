@@ -6016,12 +6016,70 @@ function setupVenueConfirmOverlay() {
         .map(function(item) { return item.event; });
     }
 
+    function getCalendarEventDayKey(event) {
+      if (!event || !event.startTime) return "";
+      var date = new Date(event.startTime);
+      if (Number.isNaN(date.getTime())) return "";
+      return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+    }
+
+    function getCalendarEventStartMs(event) {
+      if (!event || !event.startTime) return Infinity;
+      var date = new Date(event.startTime);
+      if (Number.isNaN(date.getTime())) return Infinity;
+      return date.getTime();
+    }
+
+    function normalizeCalendarLocationKey(value) {
+      return normalizeForMatch(String(value || ""));
+    }
+
+    function sortCalendarEventsByTime(events) {
+      return (Array.isArray(events) ? events.slice() : []).sort(function(a, b) {
+        var ta = getCalendarEventStartMs(a);
+        var tb = getCalendarEventStartMs(b);
+        if (ta !== tb) return ta - tb;
+        return String((a && a.title) || "").localeCompare(String((b && b.title) || ""));
+      });
+    }
+
+    function getUniqueCalendarPlannerTimes(events) {
+      var seen = {};
+      return sortCalendarEventsByTime(events).map(function(event) {
+        return formatCalendarEventTimeForPlanner(event && event.startTime);
+      }).filter(function(time) {
+        if (!time || seen[time]) return false;
+        seen[time] = true;
+        return true;
+      });
+    }
+
+    function getCalendarLocationSummary(events) {
+      var locations = [];
+      var seen = {};
+
+      (Array.isArray(events) ? events : []).forEach(function(event) {
+        var location = getCalendarEventLocationText(event);
+        var key = normalizeCalendarLocationKey(location);
+        if (!location || !key || seen[key]) return;
+        seen[key] = true;
+        locations.push(location);
+      });
+
+      return {
+        locations: locations,
+        hasLocation: locations.length > 0,
+        hasSingleLocation: locations.length === 1,
+        primaryLocation: locations[0] || ""
+      };
+    }
+
     function renderCalendarEventResults(events) {
       var el = document.getElementById("calendarEventResults");
       if (!el) return;
 
-      var incomingEvents = rankCalendarEventsForDisplay(events);
-      calendarMatchedEvents = incomingEvents.slice(0, 2);
+      var incomingEvents = sortCalendarEventsByTime(rankCalendarEventsForDisplay(events));
+      calendarMatchedEvents = incomingEvents.slice(0, 3);
 
       if (!calendarMatchedEvents.length) {
         el.classList.remove("active");
@@ -6029,14 +6087,34 @@ function setupVenueConfirmOverlay() {
         return;
       }
 
+      var isSameDayGroup = calendarMatchedEvents.length > 1 && calendarMatchedEvents.every(function(event) {
+        return getCalendarEventDayKey(event) === getCalendarEventDayKey(calendarMatchedEvents[0]);
+      });
+
       var titleText = calendarMatchedEvents.length === 1
         ? "We think this might be your game"
-        : "We found two likely games";
+        : (isSameDayGroup ? "We found your game day" : "We found likely games");
+
+      var helperText = calendarMatchedEvents.length === 1
+        ? "Choose the event before GDG uses it. Your calendar stays on your phone; GDG only uses the event you pick."
+        : (isSameDayGroup
+          ? "Use all games to fill your schedule, or pick one event. Your calendar stays on your phone."
+          : "Choose the right event before GDG uses it. Your calendar stays on your phone.");
 
       var html =
         "<div class='calendar-events-title'>" + esc(titleText) + "</div>" +
-        "<div class='calendar-events-text'>Choose the right event before GDG uses it. Your calendar stays on your phone; GDG only uses the event you pick.</div>" +
-        "<div class='calendar-event-list'>";
+        "<div class='calendar-events-text'>" + esc(helperText) + "</div>";
+
+      if (isSameDayGroup) {
+        html +=
+          "<button type='button' class='calendar-event-btn' onclick='selectCalendarGameDay()'>" +
+            "<div class='calendar-event-name'>Use all " + calendarMatchedEvents.length + " games</div>" +
+            "<div class='calendar-event-meta'>" + esc(getUniqueCalendarPlannerTimes(calendarMatchedEvents).join(", ")) + "</div>" +
+            "<div class='calendar-event-action'>Fill my schedule</div>" +
+          "</button>";
+      }
+
+      html += "<div class='calendar-event-list'>";
 
       calendarMatchedEvents.forEach(function(event, index) {
         var title = String((event && event.title) || "Calendar Event").trim();
@@ -6099,45 +6177,81 @@ function setupVenueConfirmOverlay() {
       }
     }
 
-    function selectCalendarEvent(index) {
-      var event = calendarMatchedEvents[index];
-      if (!event) return;
-
-      var title = String(event.title || "Calendar Event").trim();
-      var location = getCalendarEventLocationText(event);
-      var plannerTime = formatCalendarEventTimeForPlanner(event.startTime);
+    function applyCalendarSelectionToPlanner(events, options) {
+      options = options || {};
+      var selectedEvents = Array.isArray(events) ? events.filter(Boolean) : [];
       var planFieldInput = document.getElementById("planFieldInput");
       var planTimesInput = document.getElementById("planTimesInput");
       var planFieldWrap = document.getElementById("planFieldWrap");
+      var times = getUniqueCalendarPlannerTimes(selectedEvents);
+      var locationInfo = getCalendarLocationSummary(selectedEvents);
 
-      if (plannerTime && planTimesInput) {
-        planTimesInput.value = plannerTime;
+      if (times.length && planTimesInput) {
+        planTimesInput.value = times.join(", ");
       }
 
-      if (location) {
+      if (locationInfo.hasSingleLocation) {
         plannerSourceType = "query";
-        plannerSourceQuery = getPreparedFacilityQuery_(location);
-        plannerSourceLabel = location;
+        plannerSourceQuery = getPreparedFacilityQuery_(locationInfo.primaryLocation);
+        plannerSourceLabel = locationInfo.primaryLocation;
         plannerSourceCoords = null;
-        if (planFieldInput) planFieldInput.value = location;
+        if (planFieldInput) planFieldInput.value = locationInfo.primaryLocation;
         if (planFieldWrap) planFieldWrap.classList.add("active");
         updatePlannerSourcePill();
-        setPlannerStatus("Calendar event selected. Review the field and time, then build your plan.");
+        setPlannerStatus(options.multiple
+          ? "Calendar games selected. Review the field and times, then build your plan."
+          : "Calendar event selected. Review the field and time, then build your plan.");
+      } else if (locationInfo.hasLocation) {
+        plannerSourceType = "";
+        plannerSourceQuery = "";
+        plannerSourceLabel = "";
+        plannerSourceCoords = null;
+        updatePlannerSourcePill();
+        if (planFieldWrap) planFieldWrap.classList.add("active");
+        if (planFieldInput) {
+          planFieldInput.value = "";
+          try { planFieldInput.focus({ preventScroll: true }); } catch (e) { try { planFieldInput.focus(); } catch (err) {} }
+        }
+        setPlannerStatus("Multiple game locations found. Times were added — choose the right field before building your plan.", true);
       } else {
         plannerSourceType = "";
         plannerSourceQuery = "";
         plannerSourceLabel = "";
         plannerSourceCoords = null;
         updatePlannerSourcePill();
-        setPlannerStatus("That event has no usable location. Tap Find My Field and choose the field manually.", true);
         if (planFieldWrap) planFieldWrap.classList.add("active");
         if (planFieldInput) {
           planFieldInput.value = "";
           try { planFieldInput.focus({ preventScroll: true }); } catch (e) { try { planFieldInput.focus(); } catch (err) {} }
         }
+        setPlannerStatus("Calendar time added, but no usable location was found. Choose the field manually.", true);
       }
 
       clearCalendarEventResults();
+    }
+
+    function selectCalendarGameDay() {
+      if (!calendarMatchedEvents.length) return;
+
+      var locationInfo = getCalendarLocationSummary(calendarMatchedEvents);
+      applyCalendarSelectionToPlanner(calendarMatchedEvents, { multiple: true });
+
+      trackEvent("calendar_game_day_selected", {
+        sourceType: "calendar",
+        interactionType: locationInfo.hasSingleLocation ? "select_calendar_game_day_same_location" : (locationInfo.hasLocation ? "select_calendar_game_day_mixed_locations" : "select_calendar_game_day_missing_location"),
+        queryOrGps: locationInfo.hasSingleLocation ? "calendar_game_day_with_location" : (locationInfo.hasLocation ? "calendar_game_day_mixed_locations" : "calendar_game_day_missing_location"),
+        searchCategory: "calendar",
+        resultRank: calendarMatchedEvents.length,
+        platform: detectSourceContext()
+      });
+    }
+
+    function selectCalendarEvent(index) {
+      var event = calendarMatchedEvents[index];
+      if (!event) return;
+
+      var location = getCalendarEventLocationText(event);
+      applyCalendarSelectionToPlanner([event], { multiple: false });
 
       trackEvent("calendar_event_selected", {
         sourceType: "calendar",
