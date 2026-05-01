@@ -1,3 +1,4 @@
+<!-- 2026-05-01 Calendar Tracking Update: adds privacy-safe calendar funnel analytics; log-usage.js unchanged. -->
 <!DOCTYPE html>
 <html>
 <head>
@@ -6065,6 +6066,12 @@ function setupVenueConfirmOverlay() {
 
       if (!isRunningInsideNativeApp()) {
         setPlannerStatus("Calendar search is available inside the GameDayGuide iPhone app.", true);
+        trackEvent("calendar_unavailable_context", {
+          sourceType: "calendar",
+          interactionType: "calendar_requested_outside_native_app",
+          queryOrGps: "calendar_unavailable_context",
+          platform: detectSourceContext()
+        });
         return;
       }
 
@@ -6078,10 +6085,17 @@ function setupVenueConfirmOverlay() {
         trackEvent("calendar_find_requested", {
           sourceType: "calendar",
           interactionType: "find_next_game_from_calendar",
+          queryOrGps: "calendar_request_started",
           platform: detectSourceContext()
         });
       } catch (err) {
         setPlannerStatus("Couldn’t start calendar search. Try again.", true);
+        trackEvent("calendar_find_request_error", {
+          sourceType: "calendar",
+          interactionType: "calendar_request_failed_to_start",
+          queryOrGps: "calendar_request_error",
+          platform: detectSourceContext()
+        });
       }
     }
 
@@ -6127,8 +6141,9 @@ function setupVenueConfirmOverlay() {
 
       trackEvent("calendar_event_selected", {
         sourceType: "calendar",
-        interactionType: "select_calendar_event",
-        queryOrGps: location ? location : title,
+        interactionType: location ? "select_calendar_event_with_location" : "select_calendar_event_missing_location",
+        queryOrGps: location ? "calendar_event_with_location" : "calendar_event_missing_location",
+        searchCategory: "calendar",
         resultRank: index + 1,
         platform: detectSourceContext()
       });
@@ -6140,32 +6155,69 @@ function setupVenueConfirmOverlay() {
       if (!type || type.indexOf("GDG_CALENDAR_") !== 0) return;
 
       if (type === "GDG_CALENDAR_EVENTS_FOUND") {
-        renderCalendarEventResults(payload.events || []);
+        var foundEvents = Array.isArray(payload.events) ? payload.events : [];
+        renderCalendarEventResults(foundEvents);
         setPlannerStatus("Calendar matches found. Pick the right event to continue.");
+        trackEvent("calendar_events_found", {
+          sourceType: "calendar",
+          interactionType: "calendar_events_found",
+          queryOrGps: "calendar_events_found_raw_" + foundEvents.length + "_shown_" + calendarMatchedEvents.length,
+          searchCategory: "calendar",
+          resultRank: calendarMatchedEvents.length,
+          platform: detectSourceContext()
+        });
         return;
       }
 
       if (type === "GDG_CALENDAR_NO_EVENTS_FOUND") {
         clearCalendarEventResults();
         setPlannerStatus("No likely games found in the next two weeks. Use My Location or Find My Field instead.", true);
+        trackEvent("calendar_no_events_found", {
+          sourceType: "calendar",
+          interactionType: "calendar_no_events_found",
+          queryOrGps: "calendar_no_events_found",
+          searchCategory: "calendar",
+          platform: detectSourceContext()
+        });
         return;
       }
 
       if (type === "GDG_CALENDAR_PERMISSION_DENIED") {
         clearCalendarEventResults();
         setPlannerStatus("Calendar access was not allowed. You can still use location or field search.", true);
+        trackEvent("calendar_permission_denied", {
+          sourceType: "calendar",
+          interactionType: "calendar_permission_denied",
+          queryOrGps: "calendar_permission_denied",
+          searchCategory: "calendar",
+          platform: detectSourceContext()
+        });
         return;
       }
 
       if (type === "GDG_CALENDAR_UNAVAILABLE") {
         clearCalendarEventResults();
         setPlannerStatus("Calendar search is currently available in the iPhone app only.", true);
+        trackEvent("calendar_unavailable", {
+          sourceType: "calendar",
+          interactionType: "calendar_unavailable_native_response",
+          queryOrGps: "calendar_unavailable",
+          searchCategory: "calendar",
+          platform: detectSourceContext()
+        });
         return;
       }
 
       if (type === "GDG_CALENDAR_ERROR") {
         clearCalendarEventResults();
         setPlannerStatus("Couldn’t check calendar events right now. Use location or field search instead.", true);
+        trackEvent("calendar_error", {
+          sourceType: "calendar",
+          interactionType: "calendar_error_native_response",
+          queryOrGps: "calendar_error",
+          searchCategory: "calendar",
+          platform: detectSourceContext()
+        });
       }
     }
 
